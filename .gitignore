@@ -1,9 +1,11 @@
 # sequelize <--> DB 연결정보 
-config/
+
+!server/config/.gitkeep
+server/config/config.json
+
+.env
 node_modules/
 package-lock.json
-#설정파일 폴더
-!config/.gitkeep
+
 #mac 
 .DS_Store
-.env
