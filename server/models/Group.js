@@ -8,10 +8,13 @@ const Group = (Sequelize, DataTypes) => {
         autoIncrement: true,
       },
       name: DataTypes.STRING,
-      password: DataTypes.STRING,
+      password: {
+        type: DataTypes.INTEGER,
+        defaultValue: null,
+      },
       description: DataTypes.STRING,
       daily_goal_time: DataTypes.INTEGER,
-      maximum_number_member: DataTypes.INTEGER,
+      maximum_number_member: { type: DataTypes.INTEGER, defaultValue: 5 },
       is_camera_on: { type: DataTypes.BOOLEAN, defaultValue: false },
     },
     {
