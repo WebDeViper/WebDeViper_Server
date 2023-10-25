@@ -19,12 +19,16 @@ const SocialLogin = require('./SocialLogin')(sequelize, Sequelize);
 const Timer = require('./Timer')(sequelize, Sequelize);
 const User = require('./User')(sequelize, Sequelize);
 const Todo = require('./Todo')(sequelize, Sequelize);
-
+const Notice = require('./Notice')(sequelize, Sequelize);
 // 모델 관계
 // 한명의 유저는 여러개의 Timer를 가진다
 // 사용자가 삭제되면 해당 사용자와 연결된 모든 타이머 자동 삭제 == onDelete: 'CASCADE'
 User.hasMany(Timer, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 Timer.belongsTo(User, { foreignKey: 'user_id', onDelete: 'CASCADE' });
+
+//한명의 유저(조건:관리자)는 여러개의 NOTICE를 가진다.
+User.hasMany(Notice, { foreignKey: 'manager', onDelete: 'CASCADE' });
+Notice.belongsTo(Notice, { foreignKey: 'manager', onDelete: 'CASCADE' });
 
 // 한명의 유저는 여러개의 소셜 로그인 방식을 가진다
 User.hasMany(SocialLogin, { foreignKey: 'user_id', onDelete: 'CASCADE' });
@@ -60,5 +64,7 @@ db.GroupRequest = GroupRequest;
 db.SocialLogin = SocialLogin;
 db.Timer = Timer;
 db.User = User;
-
+db.Notice = Notice;
+db.Todo = Todo;
+// db.Alarm = Alarm;
 module.exports = db;
