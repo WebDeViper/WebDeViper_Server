@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT } = process.env;
+const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/admin`;
+
 const connect = () => {
   // 개발 환경에서만 몽구스가 생성하는 쿼리내용 확인
   if (process.env.NODE_ENV !== 'production') {
@@ -7,7 +10,7 @@ const connect = () => {
   }
 
   mongoose.connect(
-    'mongodb://root:1234@localhost:27017/admin', // 접속을 시도하는 데이터베이스가 admin임
+    MONGO_URL, // 접속을 시도하는 데이터베이스가 admin임
     {
       dbName: 'tenzoom', // 실제로 사용할 데이터베이스이름
       useNewUrlParser: true, // 별 의미 없음

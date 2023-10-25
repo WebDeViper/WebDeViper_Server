@@ -1,3 +1,6 @@
+const dotenv = require('dotenv');
+dotenv.config();
+const { SOCKET_PORT } = process.env;
 const http = require('http'); // http 모듈을 사용해야 할 수도 있습니다.
 const socketIo = require('socket.io');
 const express = require('express');
@@ -32,7 +35,6 @@ io.on('connection', socket => {
 });
 
 // 서버 시작
-const port = process.env.SOCKET_PORT || 3002; // 필요에 따라 소켓 서버 포트를 정의
-server.listen(port, () => {
-  console.log(`소켓 서버가 포트 ${port}에서 실행 중입니다.`);
+server.listen(SOCKET_PORT || 8002, () => {
+  console.log(`소켓 서버가 포트 ${SOCKET_PORT}에서 실행 중입니다.`);
 });
