@@ -7,8 +7,12 @@ const Group = (Sequelize, DataTypes) => {
         primaryKey: true,
         autoIncrement: true,
       },
-      group_name: DataTypes.STRING,
-      group_type: DataTypes.STRING, // 기본 그룹 또는 커스텀 그룹 구분
+      name: DataTypes.STRING,
+      password: DataTypes.STRING,
+      description: DataTypes.STRING,
+      daily_goal_time: DataTypes.INTEGER,
+      maximum_number_member: DataTypes.INTEGER,
+      is_camera_on: { type: DataTypes.BOOLEAN, defaultValue: false },
     },
     {
       underscored: true,
