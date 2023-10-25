@@ -45,6 +45,18 @@ exports.userCreate = async (req, res) => {
   }
 };
 
+// 유저정보 수정 PATCH
+// api/user/:user_id
+exports.userPatch = async (req, res) => {
+  try {
+    console.log('토큰인증 통과');
+    res.send(req);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+};
+
 // 로그인 시도에 대한 토큰 생성
 // api/user/auth
 exports.tokenCreate = async (req, res) => {
@@ -101,3 +113,6 @@ exports.tokenCreate = async (req, res) => {
     });
   }
 };
+
+// 카카오 로그인 성공 처리
+exports.kakaoLoginTokenCreate = async (req, res) => {};
