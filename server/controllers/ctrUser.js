@@ -1,5 +1,6 @@
 const { User } = require('../models');
 const jwt = require('jsonwebtoken');
+const { generateJwtToken } = require('../utils/jwt');
 
 // 유저 생성
 // api/user
@@ -42,6 +43,18 @@ exports.userCreate = async (req, res) => {
       success: true,
       msg: '서버에러',
     });
+  }
+};
+
+// 유저정보 수정 PATCH
+// api/user/:user_id
+exports.userPatch = async (req, res) => {
+  try {
+    console.log('토큰인증 통과');
+    res.send(req);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
   }
 };
 
@@ -100,4 +113,21 @@ exports.tokenCreate = async (req, res) => {
       msg: '서버에러',
     });
   }
+};
+
+// 카카오 로그인 성공 처리
+exports.kakaoLoginTokenCreate = (req, res) => {
+  // 로그인에 성공했을때
+  // res.redirect('/');
+
+  // 사용자 정보를 사용하여 JWT 토큰 생성
+  const jwtToken = generateJwtToken(req.user);
+
+  // JWT 토큰을 클라이언트에게 반환
+  res.cookie('jwtCookie', jwtToken, {
+    maxAge: 30 * 60000, // 30m
+    httpOnly: true,
+  });
+  res.redirect('/');
+  // res.send({ token: jwtToken });
 };
