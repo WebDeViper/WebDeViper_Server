@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const routerUser = require('./routerUser');
-
-router.use('/api/user', userRouter);
-
+const routerNotice = require('./routerNotice');
+// router.use('/api/user', userRouter);
+router.use('/api', routerNotice);
 module.exports = router;
