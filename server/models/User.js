@@ -15,7 +15,8 @@ const User = (Sequelize, DataTypes) => {
         defaultValue: false, // 나중에 기본이미지 경로로 변경
       },
       status_message: DataTypes.STRING,
-      is_admin: {
+      is_service_admin: {
+        // 우리 서비스 자체의 관리자 계정
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
