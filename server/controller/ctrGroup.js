@@ -30,22 +30,27 @@ exports.postGroupInformation = async (req, res) => {
 exports.patchGroupInformation = async (req, res) => {
   try {
     const { groupId } = req.params;
-    const { name, password, description, category, dailyGoalTime, maximumNumberMember, isCameraOn } = req.body;
+    const { name, password, description, category, imagePath, dailyGoalTime, maximumNumberMember, isCameraOn } =
+      req.body;
     const patchGroup = await Group.update(
       {
         name: name, // 그룹 이름
         password: password, // 비밀번호
         description: description, // 설명
-        category_name: category, // 그룹의 카테고리 이름 (ENUM 값)
+        category_name: category, // 그룹의 카테고리 이름 (User FK 값)
+        group_image_path: imagePath, //그룹 프로필 이미지
         daily_goal_time: dailyGoalTime, // 일일 목표 시간
         maximum_number_member: maximumNumberMember, // 최대 회원 수
         is_camera_on: isCameraOn, // 카메라 상태
       },
       { where: { group_id: groupId } }
     );
-    // console.log(patchGroup);
+    const modifiedGroup = await Group.findOne({
+      where: { group_id: groupId },
+    });
     if (patchGroup) {
-      res.status(200).json(patchGroup);
+      //patchGroup 1이라면, -> 수정 성공시
+      res.status(200).json(modifiedGroup);
     } else {
       res.status(400).json({ error: '상태코드 -> 400' });
     }
