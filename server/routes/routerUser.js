@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { REACT_APP_URL } = process.env;
 const ctrUser = require('../controllers/ctrUser');
 const passport = require('passport');
 const { verifyJwtToken } = require('../middlewares/jwt/jwt');
@@ -31,9 +32,10 @@ router.get('/kakao', passport.authenticate('kakao'));
 router.get(
   '/kakao/callback',
   passport.authenticate('kakao', {
-    session: false,
     // 카카오 로그인 전략 수행 // 카카오 로그인 성공시 내부적으로 req.login()을 호출 // 따라서 콜백을 따로 실행시킬 필요없음
-    failureRedirect: '/', // 로그인에 실패했을때 어디로 이동시킬지 적는다 // res.send로 상태코드를 보낼수도 있나?
+    session: false, // 세션 미사용
+    // failureRedirect: '/', // 로그인에 실패했을때 어디로 이동시킬지 적는다 // res.send로 상태코드를 보낼수도 있나?
+    failureRedirect: `${REACT_APP_URL}`, // 프론트엔드 도메인 메인으로 리다이렉트
   }),
   ctrUser.kakaoLoginTokenCreate // 다음 미들웨어(컨트롤러)
 );

@@ -123,11 +123,12 @@ exports.kakaoLoginTokenCreate = (req, res) => {
   // 사용자 정보를 사용하여 JWT 토큰 생성
   const jwtToken = generateJwtToken(req.user);
 
-  // JWT 토큰을 클라이언트에게 반환
+  // JWT 토큰을 쿠키에 담아 클라이언트에게 반환
   res.cookie('jwtCookie', jwtToken, {
     maxAge: 30 * 60000, // 30m
     httpOnly: true,
   });
-  res.redirect('/');
-  // res.send({ token: jwtToken });
+
+  // 로그인 성공 응답
+  res.send({ success: true });
 };
