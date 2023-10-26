@@ -10,7 +10,6 @@ const db = {};
 
 // config를 이용해서 시퀄라이즈 객체 설정 및 생성
 let sequelize = new Sequelize(config.database, config.username, config.password, config);
-
 const Group = require('./Group')(sequelize, Sequelize);
 const GroupMember = require('./GroupMember')(sequelize, Sequelize);
 const GroupRequest = require('./GroupRequest')(sequelize, Sequelize);
@@ -26,8 +25,8 @@ User.hasMany(Timer, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 Timer.belongsTo(User, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 
 //한명의 유저(조건:관리자)는 여러개의 NOTICE를 가진다.
-User.hasMany(Notice, { foreignKey: 'is_admin', onDelete: 'CASCADE' });
-Notice.belongsTo(User, { foreignKey: 'is_admin', onDelete: 'CASCADE' });
+User.hasMany(Notice, { foreignKey: 'manager', onDelete: 'CASCADE' });
+Notice.belongsTo(Notice, { foreignKey: 'manager', onDelete: 'CASCADE' });
 
 // 한명의 유저는 여러개의 소셜 로그인 방식을 가진다
 User.hasMany(SocialLogin, { foreignKey: 'user_id', onDelete: 'CASCADE' });
@@ -39,8 +38,28 @@ Todo.belongsTo(User, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 
 // GroupMember테이블을 매개로
 // 유저:그룹 의 다대다 관계 설정
-User.belongsToMany(Group, { through: GroupMember });
-Group.belongsToMany(User, { through: GroupMember });
+User.associate = function () {
+  User.belongsToMany(Group, {
+    through: GroupMember,
+    foreignKey: 'user_id',
+  });
+};
+Group.associate = function () {
+  Group.belongsToMany(User, {
+    through: GroupMember,
+    foreignKey: 'group_id',
+  });
+};
+GroupMember.associate = function () {
+  GroupMember.belongsToMany(User, {
+    foreignKey: 'user_id',
+  });
+  GroupMember.belongsToMany(Group, {
+    foreignKey: 'group_id',
+  });
+};
+// User.belongsToMany(Group, { through: GroupMember });
+// Group.belongsToMany(User, { through: GroupMember });
 
 // 하나의 사용자는 여러 그룹에 요청
 // 유저:그룹 의 다대다 관계 설정
