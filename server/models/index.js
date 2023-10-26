@@ -11,7 +11,6 @@ const db = {};
 // config를 이용해서 시퀄라이즈 객체 설정 및 생성
 let sequelize = new Sequelize(config.database, config.username, config.password, config);
 
-const Category = require('./Category')(sequelize, Sequelize);
 const Group = require('./Group')(sequelize, Sequelize);
 const GroupMember = require('./GroupMember')(sequelize, Sequelize);
 const GroupRequest = require('./GroupRequest')(sequelize, Sequelize);
@@ -38,11 +37,6 @@ SocialLogin.belongsTo(User, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 User.hasMany(Todo, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 Todo.belongsTo(User, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 
-// 한명의 유저는 한개의 카테고리만
-// 하나의 그룹은 한개의 카테고리만
-User.belongsTo(Category, { foreignKey: 'category_name' });
-Group.belongsTo(Category, { foreignKey: 'category_name' });
-
 // GroupMember테이블을 매개로
 // 유저:그룹 의 다대다 관계 설정
 User.belongsToMany(Group, { through: GroupMember });
@@ -57,7 +51,6 @@ Group.belongsToMany(User, { through: GroupRequest });
 db.sequelize = sequelize; // DB연결정보를 가진 시퀄라이저
 db.Sequelize = Sequelize; // 시퀄라이저 모듈
 
-db.Category = Category;
 db.Group = Group;
 db.GroupMember = GroupMember;
 db.GroupRequest = GroupRequest;

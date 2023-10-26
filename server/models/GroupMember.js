@@ -9,15 +9,11 @@ const GroupMember = (Sequelize, DataTypes) => {
         autoIncrement: true,
       },
       is_admin: DataTypes.BOOLEAN,
-      max_user: {
-        type: DataTypes.INTEGER,
-        defaultValue: 5,
-      },
-      group_rule: DataTypes.STRING,
-      group_password: {
-        type: DataTypes.INTEGER,
-        defaultValue: null,
-      },
+      // group_rule: DataTypes.TEXT,
+      // group_password: {
+      //   type: DataTypes.INTEGER,
+      //   defaultValue: null,
+      // },
     },
     {
       underscored: true,

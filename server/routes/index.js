@@ -5,6 +5,11 @@ const routerNotice = require('./routerNotice');
 const routerTodo = require('./routerTodo');
 
 
+const groupRouter = require('./routerGroup');
+
+// api/group
+router.use('/api/group', groupRouter);
+
 router.use('/api', routerTodo);
 
 
