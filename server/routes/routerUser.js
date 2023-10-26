@@ -5,29 +5,17 @@ const ctrUser = require('../controllers/ctrUser');
 const passport = require('passport');
 const { verifyJwtToken } = require('../middlewares/jwt/jwt');
 
-// 토큰 검증 미들웨어 테스트(삭제예정)
-// api/user/tokenVerify
-router.get('/tokenVerify', verifyJwtToken, (req, res) => {
-  res.send('토큰 검증 통과함');
+// 카카오 로그인 페이지로 이동
+// api/user/kakao // api/user/google 형식으로 계획
+router.get('/kakao', passport.authenticate('kakao'), (err, user, info) => {
+  if (err) {
+    // 에러 핸들링: 카카오 로그인 전략 실행 중 에러가 발생한 경우
+    console.error(err);
+    return res.status(500).send({ msg: '서버 에러, 카카오 로그인 페이지로 이동 처리' });
+  }
 });
 
-// 유저생성
-// api/user
-router.post('/', ctrUser.userCreate);
-
-// 유저 정보 수정
-// api/user/:user_id
-router.patch('/:user_id', verifyJwtToken, ctrUser.userPatch);
-
-// 로그인
-// api/user/auth
-router.post('/auth', ctrUser.tokenCreate);
-
-// 카카오 로그인 페이지로 이동
-// api/user/kakao
-router.get('/kakao', passport.authenticate('kakao'));
-
-// 카카오로 부터 로그인 성공여부를 응답받을 api
+// 카카오로 부터 로그인 성공여부를 응답받고 에러시 리다이렉트, 성공시 컨트롤러 호출
 // api/user/kakao/callback
 router.get(
   '/kakao/callback',
