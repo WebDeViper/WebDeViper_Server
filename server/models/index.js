@@ -26,8 +26,8 @@ User.hasMany(Timer, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 Timer.belongsTo(User, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 
 //한명의 유저(조건:관리자)는 여러개의 NOTICE를 가진다.
-User.hasMany(Notice, { foreignKey: 'manager', onDelete: 'CASCADE' });
-Notice.belongsTo(Notice, { foreignKey: 'manager', onDelete: 'CASCADE' });
+User.hasMany(Notice, { foreignKey: 'is_admin', onDelete: 'CASCADE' });
+Notice.belongsTo(User, { foreignKey: 'is_admin', onDelete: 'CASCADE' });
 
 // 한명의 유저는 여러개의 소셜 로그인 방식을 가진다
 User.hasMany(SocialLogin, { foreignKey: 'user_id', onDelete: 'CASCADE' });
