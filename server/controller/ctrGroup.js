@@ -108,10 +108,21 @@ exports.postGroupInformation = async (req, res) => {
       is_camera_on: isCameraOn, // 카메라 상태
     });
 
+    const groupManager = await GroupMember.create({
+      group_id: newGroup.dataValues.group_id,
+      //TODO user_id 토큰에서 가져오기
+      user_id: 1,
+      is_admin: true,
+    });
+
     // HTTP 상태 코드 201 (Created)와 함께 새 그룹 정보를 클라이언트에 반환
-    res
-      .status(201)
-      .json({ status: 'success', code: 201, message: '스터디 그룹이 성공적으로 생성되었습니다.', data: newGroup });
+    res.status(201).json({
+      status: 'success',
+      code: 201,
+      message: '스터디 그룹이 성공적으로 생성되었습니다.',
+      groupManager: groupManager.dataValues.user_id, //user_id값으로 들어감
+      data: newGroup,
+    });
   } catch (err) {
     // 오류 발생 시 HTTP 상태 코드 500 (Internal Server Error)와 함께 오류 정보를 클라이언트에 반환
     res.status(500).json(err);
