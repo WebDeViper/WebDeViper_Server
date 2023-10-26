@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { REACT_APP_URL } = process.env;
-const ctrUser = require('../controllers/ctrUser');
+const ctrUser = require('../controller/ctrUser');
 const passport = require('passport');
 const { verifyJwtToken } = require('../middlewares/jwt/jwt');
 

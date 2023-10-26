@@ -26,19 +26,48 @@ exports.getCategoryGroups = async (req, res) => {
       let selectedCategoryGroup;
 
       // 일치하는 그룹이 하나 이상 있는 경우
+      // ...
+
       if (group.length > 0) {
         selectedCategoryGroup = group.map(group => group.dataValues);
-      } else {
-        // 일치하는 그룹이 없는 경우 메시지 설정
-        selectedCategoryGroup = '해당하는 카테고리의 그룹이 없습니다.';
-      }
+        console.log(selectedCategoryGroup);
 
-      // HTTP 상태 코드 200과 선택된 카테고리 그룹 데이터를 JSON 응답으로 반환
-      res.status(200).json({ study_groups: [selectedCategoryGroup] });
-    } else {
-      // 사용자 카테고리를 찾을 수 없는 경우 에러 메시지와 HTTP 상태 코드 404 반환
-      console.log('사용자 카테고리를 찾을 수 없음');
-      res.status(404).json({ error: '사용자 카테고리를 찾을 수 없음' });
+        // Check if selectedCategoryGroup is not empty
+        if (selectedCategoryGroup.length > 0) {
+          // Extract group_ids from selectedCategoryGroup
+          const groupIds = selectedCategoryGroup.map(group => group.group_id);
+
+          // Query the group manager
+          const groupManager = await GroupMember.findOne({
+            where: { group_id: groupIds, is_admin: true },
+            attributes: ['user_id'],
+          });
+
+          if (groupManager) {
+            // Send the HTTP response with group manager's user_id
+            res.status(200).json({
+              study_groups: selectedCategoryGroup,
+              groupManager: groupManager.dataValues.user_id,
+            });
+          } else {
+            // Handle the case when no group manager is found
+            res.status(404).json({
+              error: '그룹 관리자를 찾을 수 없습니다.',
+            });
+          }
+        } else {
+          // Handle the case when selectedCategoryGroup is empty
+          res.status(404).json({
+            error: '해당하는 카테고리의 그룹이 없습니다.',
+          });
+        }
+      } else {
+        // Handle the case when no matching groups are found
+        selectedCategoryGroup = '해당하는 카테고리의 그룹이 없습니다.';
+        res.status(404).json({
+          error: '해당하는 카테고리의 그룹이 없습니다.',
+        });
+      }
     }
   } catch (err) {
     // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
@@ -49,10 +78,8 @@ exports.getCategoryGroups = async (req, res) => {
 
 exports.getCategoryGroupsByUser = async (req, res) => {
   try {
-    // TODO 쿼리로 userId값 받아오기?
-    // 요청 헤더에서 사용자 ID를 가져오거나, undefined인 경우 기본값으로 1을 사용
+    // 요청에서 사용자 ID를 안전하게 추출
     const userId = req.headers.authorization || 1;
-    // const userId = req.headers.authorization || 2; //속한그룹 없는 경우 test
 
     // 사용자의 그룹 ID 목록을 조회
     const userGroupIds = await GroupMember.findAll({
@@ -60,11 +87,10 @@ exports.getCategoryGroupsByUser = async (req, res) => {
       attributes: ['group_id'],
     });
 
-    let userGroupsData;
+    const userGroupsData = [];
 
     // 사용자가 속한 그룹이 하나 이상 있는 경우
     if (userGroupIds.length > 0) {
-      // 그룹 ID 목록을 추출
       const groupIds = userGroupIds.map(member => member.dataValues.group_id);
 
       // 그룹 ID 목록을 사용하여 사용자의 그룹 목록을 조회
@@ -73,17 +99,23 @@ exports.getCategoryGroupsByUser = async (req, res) => {
       });
 
       // 조회된 그룹 데이터를 사용자가 속한 그룹 데이터로 변환
-      userGroupsData = userGroups.map(group => group.dataValues);
-    } else {
-      // 사용자가 속한 그룹이 없는 경우 메시지 설정
-      userGroupsData = '해당 유저가 속한 그룹이 없습니다.';
+      userGroupsData.push(...userGroups.map(group => group.dataValues));
+
+      // 그룹 관리자를 찾아 배열로 초기화
+      const groupManager = await GroupMember.findAll({
+        where: { group_id: groupIds, is_admin: true },
+        attributes: ['user_id'],
+      });
+
+      // 사용자가 속한 그룹 관리자 목록을 추가
+      userGroupsData.push({ groupManager: groupManager.map(manager => manager.dataValues.user_id) });
     }
 
     // HTTP 상태 코드 200과 사용자 그룹 데이터를 JSON 응답으로 반환
     res.status(200).json({ study_groups: userGroupsData });
   } catch (err) {
-    // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
     console.error(err);
+    // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
     res.status(500).json({ error: '서버에서 오류가 발생했습니다.' });
   }
 };
@@ -108,10 +140,21 @@ exports.postGroupInformation = async (req, res) => {
       is_camera_on: isCameraOn, // 카메라 상태
     });
 
+    const groupManager = await GroupMember.create({
+      group_id: newGroup.dataValues.group_id,
+      //TODO user_id 토큰에서 가져오기
+      user_id: 1,
+      is_admin: true,
+    });
+
     // HTTP 상태 코드 201 (Created)와 함께 새 그룹 정보를 클라이언트에 반환
-    res
-      .status(201)
-      .json({ status: 'success', code: 201, message: '스터디 그룹이 성공적으로 생성되었습니다.', data: newGroup });
+    res.status(201).json({
+      status: 'success',
+      code: 201,
+      message: '스터디 그룹이 성공적으로 생성되었습니다.',
+      groupManager: groupManager.dataValues.user_id, //user_id값으로 들어감
+      data: newGroup,
+    });
   } catch (err) {
     // 오류 발생 시 HTTP 상태 코드 500 (Internal Server Error)와 함께 오류 정보를 클라이언트에 반환
     res.status(500).json(err);
