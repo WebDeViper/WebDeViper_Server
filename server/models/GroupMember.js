@@ -3,12 +3,18 @@ const GroupMember = (Sequelize, DataTypes) => {
   const GroupMember = Sequelize.define(
     'group_member',
     {
-      group_member_seq: {
+      group_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        allowNull: false,
+      },
+      user_id: {
+        allowNull: false,
+        primaryKey: true,
+        type: DataTypes.INTEGER,
       },
       is_admin: DataTypes.BOOLEAN,
+
       // group_rule: DataTypes.TEXT,
       // group_password: {
       //   type: DataTypes.INTEGER,
