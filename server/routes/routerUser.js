@@ -4,6 +4,8 @@ const { REACT_APP_URL } = process.env;
 const ctrUser = require('../controller/ctrUser');
 const passport = require('passport');
 const { verifyJwtToken } = require('../middlewares/jwt/jwt');
+const multer = require('multer');
+const { userImgUploader } = require('../middlewares/multer/multerConfig');
 
 // 카카오 로그인 페이지로 이동
 // api/user/kakao // api/user/google 형식으로 계획
@@ -35,6 +37,24 @@ router.patch('/profile', ctrUser.patchUser);
 
 // 유저 프로필 이미지 업로드
 // api/user/profile/img
-// router.patch('/profile/img', ctrUser.imgUpload);
+router.post(
+  '/profile/img',
+  userImgUploader.single('userImgFile'),
+  (req, res, next) => {
+    const err = req.fileValidationError; // Multer가 발생한 오류를 req.fileValidationError에 저장
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        res.status(400).send({ error: '파일 크기가 너무 큽니다. (최대 5MB)' });
+      } else {
+        res.status(400).send({ error: '파일 업로드에 실패했습니다.' });
+      }
+    } else if (err) {
+      res.status(400).send({ error: err.message });
+    } else {
+      next(); // 오류가 없음. 컨트롤러로 전달
+    }
+  },
+  ctrUser.userProfileImgUpload
+);
 
 module.exports = router;

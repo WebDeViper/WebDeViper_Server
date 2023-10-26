@@ -194,3 +194,48 @@ exports.patchUser = async (req, res) => {
     res.status(500).send('SERVER ERROR');
   }
 };
+
+// 유저 프로필 이미지 업로드
+
+exports.userProfileImgUpload = async (req, res) => {
+  try {
+    const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
+
+    // ToDO 미들웨어로 대체
+    if (!currentUserId) {
+      return res.status(401).send({
+        msg: '권한 없는 유저',
+      });
+    }
+
+    // path == 이미지를 받을 수 있는 URL
+    // originalname == 유저가 업로드한 원본 파일 이름(확장자 포함)
+    const { originalname, path } = req.file;
+
+    // 이미지 경로 수정해서 토큰 재생성
+    // 응답값에 전달하고 리액트에서 상태관리 하면 될듯
+
+    // user 테이블에 이미지 경로 저장
+    await User.update(
+      {
+        // userImg: originalname,
+        user_profile_image_path: path,
+      },
+      {
+        where: {
+          user_id: currentUserId,
+        },
+      }
+    );
+
+    // 업로드 성공 응답
+    res.status(200).send({
+      success: true,
+      msg: '파일이 성공적으로 업로드되었습니다.',
+      userProfileImagePath: path,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('SERVER ERROR');
+  }
+};
