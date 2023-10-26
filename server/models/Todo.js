@@ -8,6 +8,7 @@ const Todo = (Sequelize, DataTypes) => {
         autoIncrement: true,
       },
       title: DataTypes.STRING,
+      done: { type: DataTypes.BOOLEAN, defaultValue: false },
     },
     {
       underscored: true,

@@ -47,7 +47,7 @@ exports.postTodo = async (req, res) => {
 exports.patchTodo = async (req, res) => {
   try {
     console.log(req.body.title);
-    const { todo_index, date } = req.query;
+    const { todo_index, date, done } = req.query;
 
     // Todo 모델에서 해당 todo_index와 created_at 값을 가진 Todo를 찾습니다.
     const todoToUpdate = await Todo.findOne({
@@ -59,7 +59,8 @@ exports.patchTodo = async (req, res) => {
     if (todoToUpdate) {
       const updatedTodoData = {
         title: req.body.title,
-        updated_at: new Date(), // updated_at을 업데이트하려면 적절한 값을 제공
+        updated_at: new Date(),
+        done: done, // updated_at을 업데이트하려면 적절한 값을 제공
       };
 
       // Todo를 업데이트
