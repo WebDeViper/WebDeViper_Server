@@ -7,11 +7,11 @@ exports.verifyJwtToken = (req, res, next) => {
   try {
     // res.locals 에 저장한 내용은 다음 미들웨어로 전달된다.
     // verify(요청헤더에 저장된 토큰 , 비밀키)
-    console.log('req.headers.authorization>>>>', req.headers.authorization);
-    // console.log('req.headers.cookie>>>>', req.headers.cookie); // 이건 테스트용
+    // console.log('req.headers.authorization>>>>', req.headers.authorization);
+    console.log('req.headers.cookie>>>>', req.headers.cookie); // 이건 테스트용
 
     res.locals.decoded = jwt.verify(req.headers.authorization, JWT_SECRET);
-    console.log('middleWare >> ', res.locals.decoded);
+    // console.log('middleWare >> ', res.locals.decoded);
     return next();
   } catch (err) {
     // 여기서 검증 실패시 처리

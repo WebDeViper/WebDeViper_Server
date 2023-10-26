@@ -8,8 +8,10 @@ const indexRouter = require('./routes/index');
 const cors = require('cors');
 const passportConfig = require('./middlewares/passport/index');
 
-const app = express();
 passportConfig();
+
+const app = express();
+
 app.use(
   cors({
     origin: ['http://localhost:3000', 'https://localhost:3000'],

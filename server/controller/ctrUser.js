@@ -118,5 +118,79 @@ exports.kakaoLoginTokenCreate = (req, res) => {
   });
 
   // 로그인 성공 응답
-  res.send({ success: true });
+  res.send({
+    success: true,
+    jwtFormat: jwtToken,
+  });
+};
+
+// GET
+// api/user
+exports.getUser = async (req, res) => {
+  try {
+    const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
+
+    // ToDO 미들웨어로 대체
+    if (!currentUserId) {
+      return res.status(401).send({
+        msg: '권한 없는 유저',
+      });
+    }
+
+    const result = await User.findByPk(currentUserId);
+    res.send({
+      success: true,
+      userInfo: {
+        userId: result.user_id,
+        userCategoryName: result.user_category_name,
+        nickName: result.nick_name,
+        userProfileImagePath: result.user_profile_image_path,
+        statusMessage: result.status_message,
+      },
+    });
+  } catch (err) {
+    res.status(500).send({
+      error: err,
+      msg: 'SERVER ERROR',
+    });
+  }
+};
+
+// 유저 정보 수정 ( nickName, category, statusMessage )
+// api/user/profile
+exports.patchUser = async (req, res) => {
+  try {
+    const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
+
+    // ToDO 미들웨어로 대체
+    if (!currentUserId) {
+      return res.status(401).send({
+        msg: '권한 없는 유저',
+      });
+    }
+
+    const { nickName, category, statusMessage } = req.body;
+
+    const user = await User.findByPk(currentUserId);
+
+    if (nickName) {
+      user.nick_name = nickName;
+    }
+    if (category) {
+      user.user_category_name = category;
+    }
+    if (statusMessage) {
+      user.status_message = statusMessage;
+    }
+
+    await user.save();
+
+    res.send({
+      success: true,
+      msg: '유저정보 수정 처리',
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('SERVER ERROR');
+  }
 };
