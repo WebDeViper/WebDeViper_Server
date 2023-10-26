@@ -7,6 +7,7 @@ const User = (Sequelize, DataTypes) => {
         primaryKey: true,
         autoIncrement: true,
       },
+      category_name: DataTypes.STRING,
       nick_name: DataTypes.STRING,
       password: DataTypes.STRING,
       user_profile_image_path: {

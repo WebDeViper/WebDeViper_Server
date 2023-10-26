@@ -4,14 +4,17 @@ const Sequelize = require('sequelize');
 exports.postGroupInformation = async (req, res) => {
   try {
     // 클라이언트에서 요청으로 받은 데이터 추출
-    const { name, password, description, category, dailyGoalTime, maximumNumberMember, isCameraOn } = req.body;
+    const { name, password, description, category, imagePath, dailyGoalTime, maximumNumberMember, isCameraOn } =
+      req.body;
     // TODO: 그룹장 정보 넣기 (그룹장 정보를 어떻게 처리할지에 대한 내용을 추가로 구현해야 함)
+    // TODO: 유저의 카테고리 그룹생성시 default로 박기
     // Sequelize 모델을 사용하여 새 그룹 생성
     const newGroup = await Group.create({
       name: name, // 그룹 이름
       password: password, // 비밀번호
-      description: description, // 설명
-      category_name: category, // 그룹의 카테고리 이름 (ENUM 값)
+      description: description, // 그룹 설명
+      category_name: category, //카테고리
+      group_image_path: imagePath, //그룹 프로필 이미지
       daily_goal_time: dailyGoalTime, // 일일 목표 시간
       maximum_number_member: maximumNumberMember, // 최대 회원 수
       is_camera_on: isCameraOn, // 카메라 상태

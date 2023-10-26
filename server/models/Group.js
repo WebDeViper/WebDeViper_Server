@@ -12,6 +12,7 @@ const Group = (Sequelize, DataTypes) => {
         type: DataTypes.STRING,
         defaultValue: null,
       },
+      group_image_path: DataTypes.STRING,
       description: DataTypes.STRING,
       daily_goal_time: DataTypes.INTEGER,
       maximum_number_member: { type: DataTypes.INTEGER, defaultValue: 5 },
