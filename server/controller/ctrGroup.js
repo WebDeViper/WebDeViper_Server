@@ -13,7 +13,7 @@ exports.postGroupInformation = async (req, res) => {
       name: name, // 그룹 이름
       password: password, // 비밀번호
       description: description, // 그룹 설명
-      category_name: category, //카테고리
+      group_category_name: category, //카테고리
       group_image_path: imagePath, //그룹 프로필 이미지
       daily_goal_time: dailyGoalTime, // 일일 목표 시간
       maximum_number_member: maximumNumberMember, // 최대 회원 수
@@ -37,7 +37,7 @@ exports.patchGroupInformation = async (req, res) => {
         name: name, // 그룹 이름
         password: password, // 비밀번호
         description: description, // 설명
-        category_name: category, // 그룹의 카테고리 이름 (User FK 값)
+        group_category_name: category, // 그룹의 카테고리 이름 (User FK 값)
         group_image_path: imagePath, //그룹 프로필 이미지
         daily_goal_time: dailyGoalTime, // 일일 목표 시간
         maximum_number_member: maximumNumberMember, // 최대 회원 수
@@ -51,6 +51,23 @@ exports.patchGroupInformation = async (req, res) => {
     if (patchGroup) {
       //patchGroup 1이라면, -> 수정 성공시
       res.status(200).json(modifiedGroup);
+    } else {
+      res.status(400).json({ message: '상태코드 -> 400' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err });
+  }
+};
+
+exports.deleteGroup = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const deleteGroup = await Group.destroy({
+      where: { group_id: groupId },
+    });
+    if (deleteGroup) {
+      //deleteGroup 1이라면, -> 삭제 성공시
+      res.status(204).json({ isSuccess: true });
     } else {
       res.status(400).json({ error: '상태코드 -> 400' });
     }

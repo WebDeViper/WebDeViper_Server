@@ -48,9 +48,6 @@ Group.belongsToMany(User, { through: GroupMember });
 User.belongsToMany(Group, { through: GroupRequest }); // User.belongsToMany(Group, { through: GroupRequest, as: 'group_requester' });
 Group.belongsToMany(User, { through: GroupRequest });
 
-//그룹의 카테고리는 유저가 선택한 카테고리
-Group.belongsTo(User, { foreignKey: 'category_name', onUpdate: 'CASCADE' });
-
 db.sequelize = sequelize; // DB연결정보를 가진 시퀄라이저
 db.Sequelize = Sequelize; // 시퀄라이저 모듈
 
