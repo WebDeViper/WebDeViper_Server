@@ -133,6 +133,7 @@ exports.getUser = async (req, res) => {
     // ToDO 미들웨어로 대체
     if (!currentUserId) {
       return res.status(401).send({
+        success: false,
         msg: '권한 없는 유저',
       });
     }
@@ -248,14 +249,14 @@ exports.userProfileImgUpload = async (req, res) => {
 // GET
 // api/user/nick/:nick/duplicateCheck
 exports.userNickDuplicateCheck = async (req, res) => {
-  console.log('>>>', req.params.nick);
+  // console.log('>>>', req.params.nickName);
   try {
     // 로그인 여부 확인
     // .. 생략
 
     // 요청 파라미터에서 중복 확인해야 할 닉네임 꺼내어 중복확인
     const user = await User.findOne({
-      where: { nick_name: req.params.nick },
+      where: { nick_name: req.params.nickName },
     });
     const isDuplicate = user ? true : false;
 

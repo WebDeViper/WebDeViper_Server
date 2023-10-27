@@ -59,6 +59,6 @@ router.post(
 
 // 유저 닉네임 중복 체크
 // api/user/nick/:nick/duplicateCheck
-router.get('/nick/:nick/duplicateCheck', ctrUser.userNickDuplicateCheck);
+router.get('/nick/:nickName/duplicateCheck', ctrUser.userNickDuplicateCheck);
 
 module.exports = router;
