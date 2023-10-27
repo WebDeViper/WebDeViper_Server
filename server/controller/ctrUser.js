@@ -196,7 +196,8 @@ exports.patchUser = async (req, res) => {
 };
 
 // 유저 프로필 이미지 업로드
-
+// POST
+// api/user/profile/img
 exports.userProfileImgUpload = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
@@ -235,7 +236,38 @@ exports.userProfileImgUpload = async (req, res) => {
       userProfileImagePath: path,
     });
   } catch (err) {
-    console.log(err);
-    res.status(500).send('SERVER ERROR');
+    res.status(500).send({
+      success: false,
+      msg: 'SERVER ERROR',
+      error,
+    });
+  }
+};
+
+// 유저 닉네임 중복 체크
+// GET
+// api/user/nick/:nick/duplicateCheck
+exports.userNickDuplicateCheck = async (req, res) => {
+  console.log('>>>', req.params.nick);
+  try {
+    // 로그인 여부 확인
+    // .. 생략
+
+    // 요청 파라미터에서 중복 확인해야 할 닉네임 꺼내어 중복확인
+    const user = await User.findOne({
+      where: { nick_name: req.params.nick },
+    });
+    const isDuplicate = user ? true : false;
+
+    res.send({
+      success: true,
+      isDuplicate,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      msg: 'SERVER ERROR',
+      error,
+    });
   }
 };
