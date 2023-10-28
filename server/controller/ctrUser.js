@@ -1,5 +1,5 @@
 const { User } = require('../models');
-// const jwt = require('jsonwebtoken');
+const { duplicateCheck } = require('../utils/userModelDuplicateCheck');
 const { generateJwtToken, generateLogoutToken } = require('../utils/jwt');
 
 // 카카오유저 로그인 or 회원가입 시키고 로그인
@@ -56,38 +56,30 @@ exports.kakaoAuth = async (req, res) => {
 // 카카오유저 로그아웃 (새로운 JWT를 발급하고, 기존의 JWT를 무효화하는 방식)
 // /api/user/kakao/logout
 exports.kakaoLogout = (req, res) => {
-  const unverifiedToken = generateLogoutToken();
+  const logoutToken = generateLogoutToken();
   res.send({
-    unverifiedToken,
+    logoutToken,
   });
 };
 
 // GET
+// 유저 기본정보 조회
 // api/user
+// http://localhost:8001/api/user
 exports.getUser = async (req, res) => {
   try {
-    const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
-
-    // ToDO 미들웨어로 대체
-    if (!currentUserId) {
-      return res.status(401).send({
-        success: false,
-        msg: '권한 없는 유저',
-      });
-    }
+    const currentUserId = res.locals.decoded.userInfo.id;
 
     const result = await User.findByPk(currentUserId);
-    // console.log(result);
 
-    res.status(200)({
-      isSuccess: true,
-      code: 200,
+    res.status(200).send({
       userInfo: {
-        userId: result.user_id,
-        userCategoryName: result.user_category_name,
+        id: result.user_id,
+        category: result.user_category_name,
         nickName: result.nick_name,
-        userProfileImagePath: result.user_profile_image_path,
-        statusMessage: result.status_message,
+        profileImg: result.user_profile_image_path,
+        email: result.email,
+        statusMsg: result.status_message,
       },
     });
   } catch (err) {
@@ -103,16 +95,9 @@ exports.getUser = async (req, res) => {
 // api/user/profile
 exports.patchUser = async (req, res) => {
   try {
-    const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
+    const currentUserId = res.locals.decoded.userInfo.id;
 
-    // ToDO 미들웨어로 대체
-    // if (!currentUserId) {
-    //   return res.status(401).send({
-    //     msg: '권한 없는 유저',
-    //   });
-    // }
-
-    const { nickName, category, statusMessage } = req.body;
+    const { nickName, category, statusMsg } = req.body;
 
     const user = await User.findByPk(currentUserId);
 
@@ -122,8 +107,8 @@ exports.patchUser = async (req, res) => {
     if (category) {
       user.user_category_name = category;
     }
-    if (statusMessage) {
-      user.status_message = statusMessage;
+    if (statusMsg) {
+      user.status_message = statusMsg;
     }
 
     await user.save();
@@ -147,14 +132,7 @@ exports.patchUser = async (req, res) => {
 // api/user/profile/img
 exports.userProfileImgUpload = async (req, res) => {
   try {
-    const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
-
-    // ToDO 미들웨어로 대체
-    // if (!currentUserId) {
-    //   return res.status(401).send({
-    //     msg: '권한 없는 유저',
-    //   });
-    // }
+    const currentUserId = res.locals.decoded.userInfo.id;
 
     // path == 이미지를 받을 수 있는 URL
     // originalname == 유저가 업로드한 원본 파일 이름(확장자 포함)
@@ -181,7 +159,7 @@ exports.userProfileImgUpload = async (req, res) => {
       isSuccess: true,
       code: 200,
       msg: '파일이 성공적으로 업로드되었습니다.',
-      userProfileImagePath: path,
+      profileImg: path,
     });
   } catch (err) {
     res.status(500).send({
@@ -196,21 +174,11 @@ exports.userProfileImgUpload = async (req, res) => {
 // GET
 // api/user/nick/:nick/duplicateCheck
 exports.userNickDuplicateCheck = async (req, res) => {
-  // console.log('>>>', req.params.nickName);
   try {
-    // 로그인 여부 확인
-    // .. 생략
+    // 닉네임 중복확인
+    const isDuplicate = duplicateCheck(nick_name, req.params.nickName);
 
-    // 요청 파라미터에서 중복 확인해야 할 닉네임 꺼내어 중복확인
-    const user = await User.findOne({
-      where: { nick_name: req.params.nickName },
-    });
-    const isDuplicate = user ? true : false;
-
-    res.send({
-      success: true,
-      isDuplicate,
-    });
+    res.send(isDuplicate);
   } catch (error) {
     res.status(500).send({
       success: false,
@@ -219,3 +187,37 @@ exports.userNickDuplicateCheck = async (req, res) => {
     });
   }
 };
+
+// 일반 회원가입
+exports.localJoin = async (req, res) => {
+  try {
+    const email = req.body || 'test@example.com';
+    const password = req.body || '1234';
+
+    const isDuplicate = duplicateCheck(email, email);
+
+    if (isDuplicate) {
+      return res.status(409).send({ msg: '이메일 중복' });
+    }
+
+    await User.create({ email, password });
+  } catch (err) {
+    res.status(500).send();
+  }
+};
+
+// 일반 회원탈퇴
+exports.localDrop = async (req, res) => {
+  try {
+    const email = req.body || 'test@example.com';
+    const password = req.body || '1234';
+  } catch (err) {
+    res.status(500).send();
+  }
+};
+
+// 일반 로그인
+exports.localAuth = async (req, res) => {};
+
+// 일반 로그아웃(비검증 JWT를 발급해서 보냄)
+exports.localLogout = async (req, res) => {};

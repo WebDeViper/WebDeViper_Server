@@ -1,38 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const { REACT_APP_URL } = process.env;
 const ctrUser = require('../controller/ctrUser');
-const passport = require('passport');
 const { verifyJwtToken } = require('../middlewares/jwt/jwt');
 const multer = require('multer');
 const { userImgUploader } = require('../middlewares/multer/multerConfig');
 
-// 일반 회원가입
-router.patch('/');
-// 일반 회원탈퇴
-router.delete('/');
-// 일반 로그인
-router.get('/auth');
-// 일반 로그아웃(비검증 JWT를 발급해서 보냄)
-router.get('/auth');
+// 유저 기본정보 조회
+// api/user
+router.get('/', verifyJwtToken, ctrUser.getUser);
 
 // 카카오유저 로그인 and 회원가입 시키고 로그인
 // /api/user/kakao
 router.post('/kakao', ctrUser.kakaoAuth);
+
 // 카카오유저 로그아웃 (새로운 JWT를 발급하고, 기존의 JWT를 무효화하는 방식)
 // /api/user/kakao/logout
-router.get('/kakao/logout', ctrUser.kakaoLogout);
-// 유저 기본정보 조회
-// api/user
-router.get('/', verifyJwtToken, ctrUser.getUser);
+router.get('/kakao/logout', verifyJwtToken, ctrUser.kakaoLogout);
+
 // 유저 정보 수정 ( nickName, category, statusMessage )
 // api/user/profile
-router.patch('/profile', ctrUser.patchUser);
+router.patch('/profile', verifyJwtToken, ctrUser.patchUser);
+
+// 유저 닉네임 중복 체크
+// api/user/nick/:nick/duplicateCheck
+router.get('/nick/:nickName/duplicateCheck', verifyJwtToken, ctrUser.userNickDuplicateCheck);
 
 // 유저 프로필 이미지 업로드
 // api/user/profile/img
 router.post(
   '/profile/img',
+  verifyJwtToken,
   userImgUploader.single('userImgFile'),
   (req, res, next) => {
     const err = req.fileValidationError; // Multer가 발생한 오류를 req.fileValidationError에 저장
@@ -53,8 +50,13 @@ router.post(
   ctrUser.userProfileImgUpload
 );
 
-// 유저 닉네임 중복 체크
-// api/user/nick/:nick/duplicateCheck
-router.get('/nick/:nickName/duplicateCheck', ctrUser.userNickDuplicateCheck);
+// 일반 회원가입
+//router.post('/local/join', ctrUser.localJoin);
+// 일반 회원탈퇴
+//router.delete('/local/Drop', ctrUser.localDrop);
+// 일반 로그인
+//router.get('/local/login', ctrUser.localAuth);
+// 일반 로그아웃(비검증 JWT를 발급해서 보냄)
+//router.get('/local/logout', ctrUser.localLogout);
 
 module.exports = router;
