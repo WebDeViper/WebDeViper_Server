@@ -1,107 +1,6 @@
 const { User } = require('../models');
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 const { generateJwtToken } = require('../utils/jwt');
-
-// 유저 생성
-// api/user
-exports.userCreate = async (req, res) => {
-  try {
-    const userEmail = req.body.email || 'testuser';
-    const userPassword = req.body.password || 'testuser';
-
-    const exUser = await User.findOne({ where: { email: userEmail } });
-    if (exUser) {
-      // 이미 존재하는 회원
-      if (userEmail === exUser.email) {
-        res.status(409).send({
-          success: false,
-          msg: '이메일 중복',
-        });
-        return;
-      } else {
-        res.status(409).send({
-          success: false,
-          msg: '패스워드 중복',
-        });
-        return;
-      }
-    } else {
-      const newUser = await User.create({
-        email: userEmail,
-        password: userPassword,
-      });
-
-      res.send({
-        success: true,
-        msg: '회원가입 성공',
-        userData: newUser,
-      });
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({
-      success: true,
-      msg: '서버에러',
-    });
-  }
-};
-
-// 로그인 시도에 대한 토큰 생성
-// api/user/auth
-exports.tokenCreate = async (req, res) => {
-  try {
-    const userEmail = req.body.email || 'testuser';
-    const userPassword = req.body.password || 'testuser';
-
-    //
-    const exUser = await User.findOne({ where: { email: userEmail } });
-    if (exUser) {
-      if (userPassword === exUser.password) {
-        // 정상 로그인 되었을때 JWT 생성 로직
-        // sign({토큰의 내용}, 토큰의 비밀 키, {토큰의 설정})
-        // issuer 는 발급자임.
-        const token = jwt.sign(
-          {
-            userInfo: {
-              email: exUser.email,
-              user_id: exUser.user_id,
-            },
-          },
-          process.env.JWT_SECRET,
-          { expiresIn: '10m', issuer: 'APIServer' }
-        );
-
-        console.log('컨트롤러 >> 토큰발급 성공 ', token);
-
-        // 쿠키에 jwt를 담아서 보내보자
-        res.cookie('jwtToken', token, {
-          maxAge: 30 * 60000,
-          httpOnly: true,
-        });
-
-        res.send({
-          success: true,
-        });
-      } else {
-        res.status(401).send({
-          success: false,
-          msg: 'invalid password',
-        });
-      }
-    } else {
-      res.status(401).send({
-        success: false,
-        msg: 'invalid email',
-      });
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({
-      success: false,
-      msg: '서버에러',
-    });
-  }
-};
 
 // 카카오 로그인 성공 처리
 exports.kakaoLoginTokenCreate = (req, res) => {
@@ -117,11 +16,14 @@ exports.kakaoLoginTokenCreate = (req, res) => {
     httpOnly: true,
   });
 
-  // 로그인 성공 응답
-  res.send({
-    success: true,
-    jwtFormat: jwtToken,
-  });
+  // 로그인 성공 응답 (이경우에는 api서버 본인에게 응답)
+  // res.status(200)({
+  //   isSuccess: true,
+  //   jwtFormat: jwtToken,
+  // });
+
+  // 리액트 서버(프론트)로 리다이렉트
+  res.redirect(`${process.env.REACT_APP_URL}`);
 };
 
 // GET
@@ -131,15 +33,16 @@ exports.getUser = async (req, res) => {
     const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
 
     // ToDO 미들웨어로 대체
-    if (!currentUserId) {
-      return res.status(401).send({
-        msg: '권한 없는 유저',
-      });
-    }
+    // if (!currentUserId) {
+    //   return res.status(401).send({
+    //     msg: '권한 없는 유저',
+    //   });
+    // }
 
     const result = await User.findByPk(currentUserId);
-    res.send({
-      success: true,
+    res.status(200)({
+      isSuccess: true,
+      code: 200,
       userInfo: {
         userId: result.user_id,
         userCategoryName: result.user_category_name,
@@ -150,8 +53,9 @@ exports.getUser = async (req, res) => {
     });
   } catch (err) {
     res.status(500).send({
-      error: err,
+      code: 500,
       msg: 'SERVER ERROR',
+      errorData: err,
     });
   }
 };
@@ -163,11 +67,11 @@ exports.patchUser = async (req, res) => {
     const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
 
     // ToDO 미들웨어로 대체
-    if (!currentUserId) {
-      return res.status(401).send({
-        msg: '권한 없는 유저',
-      });
-    }
+    // if (!currentUserId) {
+    //   return res.status(401).send({
+    //     msg: '권한 없는 유저',
+    //   });
+    // }
 
     const { nickName, category, statusMessage } = req.body;
 
@@ -185,13 +89,17 @@ exports.patchUser = async (req, res) => {
 
     await user.save();
 
-    res.send({
-      success: true,
-      msg: '유저정보 수정 처리',
+    res.status(200)({
+      isSuccess: true,
+      code: 200,
     });
   } catch (err) {
     console.log(err);
-    res.status(500).send('SERVER ERROR');
+    res.status(500).send({
+      isSuccess: false,
+      code: 500,
+      msg: 'SERVER ERROR',
+    });
   }
 };
 
@@ -202,11 +110,11 @@ exports.userProfileImgUpload = async (req, res) => {
     const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
 
     // ToDO 미들웨어로 대체
-    if (!currentUserId) {
-      return res.status(401).send({
-        msg: '권한 없는 유저',
-      });
-    }
+    // if (!currentUserId) {
+    //   return res.status(401).send({
+    //     msg: '권한 없는 유저',
+    //   });
+    // }
 
     // path == 이미지를 받을 수 있는 URL
     // originalname == 유저가 업로드한 원본 파일 이름(확장자 포함)
@@ -230,12 +138,17 @@ exports.userProfileImgUpload = async (req, res) => {
 
     // 업로드 성공 응답
     res.status(200).send({
-      success: true,
+      isSuccess: true,
+      code: 200,
       msg: '파일이 성공적으로 업로드되었습니다.',
       userProfileImagePath: path,
     });
   } catch (err) {
     console.log(err);
-    res.status(500).send('SERVER ERROR');
+    res.status(500).send({
+      isSuccess: false,
+      code: 500,
+      msg: 'SERVER ERROR',
+    });
   }
 };

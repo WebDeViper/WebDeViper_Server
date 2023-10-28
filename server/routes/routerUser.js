@@ -44,12 +44,14 @@ router.post(
     const err = req.fileValidationError; // Multer가 발생한 오류를 req.fileValidationError에 저장
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
-        res.status(400).send({ error: '파일 크기가 너무 큽니다. (최대 5MB)' });
+        return res.status(400).send({ msg: '파일 크기가 너무 큽니다. (최대 5MB)' });
+      } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+        return res.status(400).send({ msg: '예상치 못한 파일이 업로드되었습니다.' });
       } else {
-        res.status(400).send({ error: '파일 업로드에 실패했습니다.' });
+        return res.status(400).send({ msg: '파일 업로드에 실패했습니다.' });
       }
     } else if (err) {
-      res.status(400).send({ error: err.message });
+      return res.status(400).send({ error: err.message });
     } else {
       next(); // 오류가 없음. 컨트롤러로 전달
     }
