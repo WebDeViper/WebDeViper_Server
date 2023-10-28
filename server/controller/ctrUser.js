@@ -65,11 +65,12 @@ exports.getUser = async (req, res) => {
     const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
 
     // ToDO 미들웨어로 대체
-    // if (!currentUserId) {
-    //   return res.status(401).send({
-    //     msg: '권한 없는 유저',
-    //   });
-    // }
+    if (!currentUserId) {
+      return res.status(401).send({
+        success: false,
+        msg: '권한 없는 유저',
+      });
+    }
 
     const result = await User.findByPk(currentUserId);
     // console.log(result);
@@ -138,6 +139,8 @@ exports.patchUser = async (req, res) => {
 };
 
 // 유저 프로필 이미지 업로드
+// POST
+// api/user/profile/img
 exports.userProfileImgUpload = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
@@ -177,11 +180,38 @@ exports.userProfileImgUpload = async (req, res) => {
       userProfileImagePath: path,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).send({
-      isSuccess: false,
-      code: 500,
+      success: false,
       msg: 'SERVER ERROR',
+      error,
+    });
+  }
+};
+
+// 유저 닉네임 중복 체크
+// GET
+// api/user/nick/:nick/duplicateCheck
+exports.userNickDuplicateCheck = async (req, res) => {
+  // console.log('>>>', req.params.nickName);
+  try {
+    // 로그인 여부 확인
+    // .. 생략
+
+    // 요청 파라미터에서 중복 확인해야 할 닉네임 꺼내어 중복확인
+    const user = await User.findOne({
+      where: { nick_name: req.params.nickName },
+    });
+    const isDuplicate = user ? true : false;
+
+    res.send({
+      success: true,
+      isDuplicate,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      msg: 'SERVER ERROR',
+      error,
     });
   }
 };
