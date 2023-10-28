@@ -21,27 +21,31 @@ exports.kakaoAuth = async (req, res) => {
         provider: 'kakao',
       });
 
-      // 로그인 처리
+      // 회원가입 하고 로그인 처리
       const token = generateJwtToken(newUser);
-      const { user_id, user_category_name, user_profile_image_path, status_message } = newUser;
       return res.send({
         token,
-        user_id,
-        user_category_name,
-        user_profile_image_path,
-        status_message,
-      }); // 카테고리 값이 NULL 일것임, 카테고리&닉네임 선택페이지로 넘겨야함
+        userInfo: {
+          id: newUser.user_id,
+          category: newUser.category,
+          nickName: newUser.nick_name,
+          profileImg: newUser.user_profile_image_path,
+          email: newUser.email,
+        },
+      }); // 카테고리 값이 null 일것임, 카테고리&닉네임 선택페이지로 넘겨야함
     }
 
     // 회원가입 이력 있는유저 로그인 처리
     const token = generateJwtToken(exUser);
-    const { user_id, user_category_name, user_profile_image_path, status_message } = exUser;
     return res.send({
       token,
-      user_id,
-      user_category_name,
-      user_profile_image_path,
-      status_message,
+      userInfo: {
+        id: exUser.user_id,
+        category: exUser.category,
+        nickName: exUser.nick_name,
+        profileImg: exUser.user_profile_image_path,
+        email: exUser.email,
+      },
     });
   } catch (err) {
     console.log('err');
