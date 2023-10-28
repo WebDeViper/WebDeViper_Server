@@ -8,9 +8,11 @@ exports.verifyJwtToken = (req, res, next) => {
     // res.locals 에 저장한 내용은 다음 미들웨어로 전달된다.
     // verify(요청헤더에 저장된 토큰 , 비밀키)
     // console.log('req.headers.authorization>>>>', req.headers.authorization);
-    console.log('req.headers.cookie>>>>', req.headers.cookie); // 이건 테스트용
+    // console.log('req.headers>>>>', req.headers);
+    // console.log('req.cookies>>>>>', req.cookies); // 이건 테스트용
 
     res.locals.decoded = jwt.verify(req.headers.authorization, JWT_SECRET);
+    // res.locals.decoded = jwt.verify(req.cookies.jwtToken, JWT_SECRET);
     // console.log('middleWare >> ', res.locals.decoded);
     return next();
   } catch (err) {
@@ -25,3 +27,11 @@ exports.verifyJwtToken = (req, res, next) => {
     });
   }
 };
+
+// exports.setReqJwt = (req, res, next) => {
+//   // 요청 헤더에서 jwt 토큰을 꺼내 저장 (검증하지 않음)
+//   // res.locals 에 저장한 내용은 다음 미들웨어로 전달된다.
+//   res.locals.receivedToken = req.headers.authorization;
+//   console.log(res.locals.receivedToken);
+//   return next();
+// };

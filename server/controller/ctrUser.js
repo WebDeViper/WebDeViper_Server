@@ -1,126 +1,60 @@
 const { User } = require('../models');
-const jwt = require('jsonwebtoken');
-const { generateJwtToken } = require('../utils/jwt');
+// const jwt = require('jsonwebtoken');
+const { generateJwtToken, generateLogoutToken } = require('../utils/jwt');
 
-// 유저 생성
-// api/user
-exports.userCreate = async (req, res) => {
+// 카카오유저 로그인 or 회원가입 시키고 로그인
+// /api/user/kakao
+exports.kakaoAuth = async (req, res) => {
   try {
-    const userEmail = req.body.email || 'testuser';
-    const userPassword = req.body.password || 'testuser';
+    const profile = req.body;
+    console.log('/api/user/kakao >>>', profile);
 
-    const exUser = await User.findOne({ where: { email: userEmail } });
-    if (exUser) {
-      // 이미 존재하는 회원
-      if (userEmail === exUser.email) {
-        res.status(409).send({
-          success: false,
-          msg: '이메일 중복',
-        });
-        return;
-      } else {
-        res.status(409).send({
-          success: false,
-          msg: '패스워드 중복',
-        });
-        return;
-      }
-    } else {
+    const exUser = await User.findOne({
+      where: { sns_id: profile.id, provider: 'kakao' },
+    });
+
+    if (!exUser) {
+      // 가입이력이 없으니 회원가입 처리
       const newUser = await User.create({
-        email: userEmail,
-        password: userPassword,
+        email: profile._json?.kakao_account?.email, // profile.email이 undefined 일수도 있음. 중간에 어떤 속성이 존재하지 않는 경우에도 코드는 오류를 발생시키지 않고 undefined를 반환
+        sns_id: profile.id,
+        provider: 'kakao',
       });
 
-      res.send({
-        success: true,
-        msg: '회원가입 성공',
-        userData: newUser,
-      });
+      // 로그인 처리
+      const token = generateJwtToken(newUser);
+      const { user_id, user_category_name, user_profile_image_path, status_message } = newUser;
+      return res.send({
+        token,
+        user_id,
+        user_category_name,
+        user_profile_image_path,
+        status_message,
+      }); // 카테고리 값이 NULL 일것임, 카테고리&닉네임 선택페이지로 넘겨야함
     }
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({
-      success: true,
-      msg: '서버에러',
+
+    // 회원가입 이력 있는유저 로그인 처리
+    const token = generateJwtToken(exUser);
+    const { user_id, user_category_name, user_profile_image_path, status_message } = exUser;
+    return res.send({
+      token,
+      user_id,
+      user_category_name,
+      user_profile_image_path,
+      status_message,
     });
+  } catch (err) {
+    console.log('err');
+    res.status(500).send(err);
   }
 };
 
-// 로그인 시도에 대한 토큰 생성
-// api/user/auth
-exports.tokenCreate = async (req, res) => {
-  try {
-    const userEmail = req.body.email || 'testuser';
-    const userPassword = req.body.password || 'testuser';
-
-    //
-    const exUser = await User.findOne({ where: { email: userEmail } });
-    if (exUser) {
-      if (userPassword === exUser.password) {
-        // 정상 로그인 되었을때 JWT 생성 로직
-        // sign({토큰의 내용}, 토큰의 비밀 키, {토큰의 설정})
-        // issuer 는 발급자임.
-        const token = jwt.sign(
-          {
-            userInfo: {
-              email: exUser.email,
-              user_id: exUser.user_id,
-            },
-          },
-          process.env.JWT_SECRET,
-          { expiresIn: '10m', issuer: 'APIServer' }
-        );
-
-        console.log('컨트롤러 >> 토큰발급 성공 ', token);
-
-        // 쿠키에 jwt를 담아서 보내보자
-        res.cookie('jwtToken', token, {
-          maxAge: 30 * 60000,
-          httpOnly: true,
-        });
-
-        res.send({
-          success: true,
-        });
-      } else {
-        res.status(401).send({
-          success: false,
-          msg: 'invalid password',
-        });
-      }
-    } else {
-      res.status(401).send({
-        success: false,
-        msg: 'invalid email',
-      });
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({
-      success: false,
-      msg: '서버에러',
-    });
-  }
-};
-
-// 카카오 로그인 성공 처리
-exports.kakaoLoginTokenCreate = (req, res) => {
-  // 로그인에 성공했을때
-  // res.redirect('/');
-
-  // 사용자 정보를 사용하여 JWT 토큰 생성
-  const jwtToken = generateJwtToken(req.user);
-
-  // JWT 토큰을 쿠키에 담아 클라이언트에게 반환
-  res.cookie('jwtCookie', jwtToken, {
-    maxAge: 30 * 60000, // 30m
-    httpOnly: true,
-  });
-
-  // 로그인 성공 응답
+// 카카오유저 로그아웃 (새로운 JWT를 발급하고, 기존의 JWT를 무효화하는 방식)
+// /api/user/kakao/logout
+exports.kakaoLogout = (req, res) => {
+  const unverifiedToken = generateLogoutToken();
   res.send({
-    success: true,
-    jwtFormat: jwtToken,
+    unverifiedToken,
   });
 };
 
@@ -139,8 +73,11 @@ exports.getUser = async (req, res) => {
     }
 
     const result = await User.findByPk(currentUserId);
-    res.send({
-      success: true,
+    // console.log(result);
+
+    res.status(200)({
+      isSuccess: true,
+      code: 200,
       userInfo: {
         userId: result.user_id,
         userCategoryName: result.user_category_name,
@@ -151,8 +88,9 @@ exports.getUser = async (req, res) => {
     });
   } catch (err) {
     res.status(500).send({
-      error: err,
+      code: 500,
       msg: 'SERVER ERROR',
+      errorData: err,
     });
   }
 };
@@ -164,11 +102,11 @@ exports.patchUser = async (req, res) => {
     const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
 
     // ToDO 미들웨어로 대체
-    if (!currentUserId) {
-      return res.status(401).send({
-        msg: '권한 없는 유저',
-      });
-    }
+    // if (!currentUserId) {
+    //   return res.status(401).send({
+    //     msg: '권한 없는 유저',
+    //   });
+    // }
 
     const { nickName, category, statusMessage } = req.body;
 
@@ -186,13 +124,17 @@ exports.patchUser = async (req, res) => {
 
     await user.save();
 
-    res.send({
-      success: true,
-      msg: '유저정보 수정 처리',
+    res.status(200)({
+      isSuccess: true,
+      code: 200,
     });
   } catch (err) {
     console.log(err);
-    res.status(500).send('SERVER ERROR');
+    res.status(500).send({
+      isSuccess: false,
+      code: 500,
+      msg: 'SERVER ERROR',
+    });
   }
 };
 
@@ -204,11 +146,11 @@ exports.userProfileImgUpload = async (req, res) => {
     const currentUserId = res.locals.decoded?.userInfo?.user_id || 1;
 
     // ToDO 미들웨어로 대체
-    if (!currentUserId) {
-      return res.status(401).send({
-        msg: '권한 없는 유저',
-      });
-    }
+    // if (!currentUserId) {
+    //   return res.status(401).send({
+    //     msg: '권한 없는 유저',
+    //   });
+    // }
 
     // path == 이미지를 받을 수 있는 URL
     // originalname == 유저가 업로드한 원본 파일 이름(확장자 포함)
@@ -232,7 +174,8 @@ exports.userProfileImgUpload = async (req, res) => {
 
     // 업로드 성공 응답
     res.status(200).send({
-      success: true,
+      isSuccess: true,
+      code: 200,
       msg: '파일이 성공적으로 업로드되었습니다.',
       userProfileImagePath: path,
     });

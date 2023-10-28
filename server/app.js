@@ -6,20 +6,18 @@ const { sequelize } = require('./models/index');
 const cookieParser = require('cookie-parser');
 const indexRouter = require('./routes/index');
 const cors = require('cors');
-const passportConfig = require('./middlewares/passport/index');
-
-passportConfig();
 
 const app = express();
 
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'https://localhost:3000'],
+    origin: ['http://localhost:3000', 'https://localhost:3000'], // 허용할 도메인
+    credentials: true, // 쿠키를 사용하려면 true로 설정
   })
 );
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cookieParser()); // cookie-parser 미들웨어를 사용하여 쿠키를 파싱합니다. // 쿠키에 JWT를 넣어서 보내보려고
+app.use(cookieParser()); // 서버에서 클라이언트로 응답을 보낼 때, 쿠키를 설정하려면 Express 응답 객체(res.cookie())를 사용할 수 있도
 
 //삭제 예정
 app.set('view engine', 'ejs');
