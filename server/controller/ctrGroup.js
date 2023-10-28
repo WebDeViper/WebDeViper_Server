@@ -1,9 +1,9 @@
 const { Group, User, GroupMember } = require('../models');
 const Sequelize = require('sequelize');
 
+// 카테고리에 따른 그룹 목록을 반환하는 함수
 exports.getCategoryGroups = async (req, res) => {
   try {
-    //TODO 토큰값 다시 받아서 넣기
     // 사용자 토큰을 요청 헤더에서 가져오거나, 기본값으로 1 사용
     const userId = req.headers.authorization || 1; // undefined라면 1
 
@@ -26,45 +26,48 @@ exports.getCategoryGroups = async (req, res) => {
       let selectedCategoryGroup;
 
       // 일치하는 그룹이 하나 이상 있는 경우
-      // ...
-
       if (group.length > 0) {
         selectedCategoryGroup = group.map(group => group.dataValues);
-        console.log(selectedCategoryGroup);
-
-        // Check if selectedCategoryGroup is not empty
+        // 선택한 카테고리에 속하는 그룹이 하나 이상 있는 경우
         if (selectedCategoryGroup.length > 0) {
-          // Extract group_ids from selectedCategoryGroup
           const groupIds = selectedCategoryGroup.map(group => group.group_id);
 
-          // Query the group manager
           const groupManager = await GroupMember.findOne({
             where: { group_id: groupIds, is_admin: true },
             attributes: ['user_id'],
           });
 
           if (groupManager) {
-            // Send the HTTP response with group manager's user_id
-            res.status(200).json({
+            // 그룹 관리자가 존재할 때
+            res.status(200).send({
+              isSuccess: true,
+              code: 200,
               study_groups: selectedCategoryGroup,
               groupManager: groupManager.dataValues.user_id,
             });
           } else {
-            // Handle the case when no group manager is found
-            res.status(404).json({
+            // 그룹관리자가 존재하지 않을 때
+            res.status(404).send({
+              isSuccess: false,
+              code: 404,
               error: '그룹 관리자를 찾을 수 없습니다.',
             });
           }
         } else {
-          // Handle the case when selectedCategoryGroup is empty
-          res.status(404).json({
+          // 해당 카테고리의 스터디 그룹이 존재하지 않을 때
+          res.status(204).send({
+            isSuccess: false,
+            code: 204,
             error: '해당하는 카테고리의 그룹이 없습니다.',
           });
         }
       } else {
-        // Handle the case when no matching groups are found
+        // 해당 카테고리의 스터디 그룹이 존재하지 않을 때
         selectedCategoryGroup = '해당하는 카테고리의 그룹이 없습니다.';
-        res.status(404).json({
+        res.status(204).send({
+          isSuccess: false,
+          code: 204,
+          study_groups: selectedCategoryGroup,
           error: '해당하는 카테고리의 그룹이 없습니다.',
         });
       }
@@ -72,14 +75,15 @@ exports.getCategoryGroups = async (req, res) => {
   } catch (err) {
     // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
     console.error(err);
-    res.status(500).json({ error: err });
+    res.status(500).send({ isSuccess: false, code: 500, error: err });
   }
 };
 
+// 사용자별 그룹 목록을 반환하는 함수
 exports.getCategoryGroupsByUser = async (req, res) => {
   try {
     // 요청에서 사용자 ID를 안전하게 추출
-    const userId = req.headers.authorization || 1;
+    const userId = req.headers.authorization || 2;
 
     // 사용자의 그룹 ID 목록을 조회
     const userGroupIds = await GroupMember.findAll({
@@ -112,14 +116,15 @@ exports.getCategoryGroupsByUser = async (req, res) => {
     }
 
     // HTTP 상태 코드 200과 사용자 그룹 데이터를 JSON 응답으로 반환
-    res.status(200).json({ study_groups: userGroupsData });
+    res.status(200).send({ isSuccess: true, code: 200, study_groups: userGroupsData });
   } catch (err) {
     console.error(err);
     // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
-    res.status(500).json({ error: '서버에서 오류가 발생했습니다.' });
+    res.status(500).send({ isSuccess: false, code: 500, error: '서버에서 오류가 발생했습니다.' });
   }
 };
 
+// 새 그룹 생성하는 함수
 exports.postGroupInformation = async (req, res) => {
   try {
     // 클라이언트에서 요청으로 받은 데이터 추출
@@ -148,8 +153,8 @@ exports.postGroupInformation = async (req, res) => {
     });
 
     // HTTP 상태 코드 201 (Created)와 함께 새 그룹 정보를 클라이언트에 반환
-    res.status(201).json({
-      status: 'success',
+    res.status(201).send({
+      isSuccess: true,
       code: 201,
       message: '스터디 그룹이 성공적으로 생성되었습니다.',
       groupManager: groupManager.dataValues.user_id, //user_id값으로 들어감
@@ -157,7 +162,7 @@ exports.postGroupInformation = async (req, res) => {
     });
   } catch (err) {
     // 오류 발생 시 HTTP 상태 코드 500 (Internal Server Error)와 함께 오류 정보를 클라이언트에 반환
-    res.status(500).json(err);
+    res.status(500).send({ isSuccess: false, code: 500, err });
   }
 };
 
@@ -200,14 +205,14 @@ exports.patchGroupInformation = async (req, res) => {
 
     if (patchGroup) {
       // 업데이트가 성공했을 경우
-      res.status(200).json(modifiedGroup);
+      res.status(200).send({ isSuccess: true, code: 200, data: modifiedGroup });
     } else {
       // 업데이트에 실패했을 경우 (상태코드 400과 메시지 반환)
-      res.status(400).json({ message: '상태코드 -> 400' });
+      res.status(400).send({ isSuccess: false, code: 400, error: '업데이트에 실패했습니다.' });
     }
   } catch (err) {
     // 서버 오류가 발생한 경우 (상태코드 500과 에러 메시지 반환)
-    res.status(500).json({ error: err });
+    res.status(500).send({ isSuccess: false, code: 500, error: err });
   }
 };
 
@@ -223,13 +228,13 @@ exports.deleteGroup = async (req, res) => {
 
     if (deleteGroup) {
       // 삭제가 성공했을 경우
-      res.status(204).json({ isSuccess: true });
+      res.status(204).send({ isSuccess: true, code: 204, msg: '스터디 그룹을 삭제했습니다.' });
     } else {
       // 삭제에 실패했을 경우 (상태코드 400과 에러 메시지 반환)
-      res.status(400).json({ error: '상태코드 -> 400' });
+      res.status(400).send({ isSuccess: false, code: 400, error: error });
     }
   } catch (err) {
     // 서버 오류가 발생한 경우 (상태코드 500과 에러 메시지 반환)
-    res.status(500).json({ error: err });
+    res.status(500).send({ isSuccess: false, code: 500, error: err });
   }
 };
