@@ -55,11 +55,13 @@
           // location.href = location.href;
         })
         .catch(err => {
-          if (err.response.status) {
-            alert('err.response.data.error');
-          } else {
-            alert('지원하지 않는 파일 형식입니다.');
-          }
+          console.log(err);
+          // if (err.response.msg) {
+          //   console.log(err);
+          //   alert('err.response.data.error');
+          // } else {
+          //   alert('지원하지 않는 파일 형식입니다.');
+          // }
         });
     }
   </script>

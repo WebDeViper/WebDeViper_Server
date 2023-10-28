@@ -21,7 +21,12 @@ const userImgFileFilter = (req, file, cb) => {
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true); // 허용
   } else {
-    cb(new Error('지원하지 않는 파일 형식입니다.'), false); // 거부
+    const error = new Error('지원하지 않는 파일 형식입니다.');
+    error.status = 411; // HTTP 상태 코드 설정
+    error.code = 'UNSUPPORTED_FORMAT'; // 오류 코드 설정
+    error.msg = '지원하지 않는 파일 형식입니다.'; // 오류 메시지 설정
+    cb(error, false); // 에러 처리 미들웨어로 전달
+    // cb(new Error('지원하지 않는 파일 형식입니다.'), false); // 거부
   }
 };
 
