@@ -16,7 +16,7 @@ exports.kakaoAuth = async (req, res) => {
     if (!exUser) {
       // 가입이력이 없으니 회원가입 처리
       const newUser = await User.create({
-        email: profile._json?.kakao_account?.email, // profile.email이 undefined 일수도 있음. 중간에 어떤 속성이 존재하지 않는 경우에도 코드는 오류를 발생시키지 않고 undefined를 반환
+        email: profile.kakao_account?.email, // profile.email이 undefined 일수도 있음. 중간에 어떤 속성이 존재하지 않는 경우에도 코드는 오류를 발생시키지 않고 undefined를 반환
         sns_id: profile.id,
         provider: 'kakao',
       });
