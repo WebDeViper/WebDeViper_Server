@@ -10,8 +10,9 @@ exports.verifyJwtToken = (req, res, next) => {
     // console.log('req.headers.authorization>>>>', req.headers.authorization);
     // console.log('req.headers>>>>', req.headers);
     // console.log('req.cookies>>>>>', req.cookies); // 이건 테스트용
+    // console.log(req.headers.authorization);
+    res.locals.decoded = jwt.verify(req.headers.authorization.split(' ')[1], JWT_SECRET);
 
-    res.locals.decoded = jwt.verify(req.headers.authorization, JWT_SECRET);
     // res.locals.decoded = jwt.verify(req.cookies.jwtToken, JWT_SECRET);
     // console.log('middleWare >> ', res.locals.decoded);
     return next();
