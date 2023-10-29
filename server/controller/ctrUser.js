@@ -12,43 +12,54 @@ exports.kakaoAuth = async (req, res) => {
     const exUser = await User.findOne({
       where: { sns_id: profile.id, provider: 'kakao' },
     });
+    console.log(exUser);
+    // 응답값으로 보낼 userInfo 초기화
+    let userInfo = {
+      id: null,
+      category: null,
+      nickName: null,
+      profileImg: null,
+      email: null,
+    };
+    // 응답값을 보낼 jwt 초기화
+    let token = {};
 
-    if (!exUser) {
-      // 가입이력이 없으니 회원가입 처리
-      const newUser = await User.create({
-        email: profile.kakao_account?.email, // profile.email이 undefined 일수도 있음. 중간에 어떤 속성이 존재하지 않는 경우에도 코드는 오류를 발생시키지 않고 undefined를 반환
-        sns_id: profile.id,
-        provider: 'kakao',
-      });
-
-      // 회원가입 하고 로그인 처리
-      const token = generateJwtToken(newUser);
-      return res.send({
-        token,
-        userInfo: {
-          id: newUser.user_id,
-          category: newUser.category,
-          nickName: newUser.nick_name,
-          profileImg: newUser.user_profile_image_path,
-          email: newUser.email,
-        },
-      }); // 카테고리 값이 null 일것임, 카테고리&닉네임 선택페이지로 넘겨야함
-    }
-
-    // 회원가입 이력 있는유저 로그인 처리
-    const token = generateJwtToken(exUser);
-    return res.send({
-      token,
-      userInfo: {
+    // 회원가입 여부에 따라 userInfo 세팅
+    if (exUser) {
+      // 이미 회원가입이 되어있으니 그걸로 userInfo 세팅
+      userInfo = {
         id: exUser.user_id,
-        category: exUser.category,
+        category: exUser.user_category_name,
         nickName: exUser.nick_name,
         profileImg: exUser.user_profile_image_path,
         email: exUser.email,
-      },
+      };
+    } else {
+      // 가입이력이 없으니 회원가입 처리 하기 위해 DB에 저장하고 그걸로 userInfo 세팅
+      const newUser = await User.create({
+        sns_id: profile.id,
+        provider: 'kakao',
+        email: profile.kakao_account?.email, // profile에 kakao_account 가 없어도 에러가 나지 않음
+      });
+
+      // userInfo 세팅
+      userInfo = {
+        id: newUser.user_id,
+        category: newUser.user_category_name,
+        nickName: newUser.nick_name,
+        profileImg: newUser.user_profile_image_path,
+        email: newUser.email,
+      };
+    }
+
+    // 로그인 처리를 하기위해 jwt 발급
+    token = generateJwtToken(userInfo);
+    return res.send({
+      token,
+      userInfo,
     });
   } catch (err) {
-    console.log('err');
+    console.log(err);
     res.status(500).send(err);
   }
 };
