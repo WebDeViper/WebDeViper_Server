@@ -1,3 +1,6 @@
 const express = require('express');
 const router = express.Router();
-module.exports = router;
+const controller = require('../controller/ctrTimer.js');
+
+router.get('/timer', controller.getTimer);
+router.module.exports = router;
