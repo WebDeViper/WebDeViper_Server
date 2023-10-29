@@ -12,7 +12,7 @@ const connect = () => {
   mongoose.connect(
     MONGO_URL, // 접속을 시도하는 데이터베이스가 admin임
     {
-      dbName: 'tenzoom', // 실제로 사용할 데이터베이스이름
+      dbName: 'viper', // 실제로 사용할 데이터베이스이름
       useNewUrlParser: true, // 별 의미 없음
     }
   );

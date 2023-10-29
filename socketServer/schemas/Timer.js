@@ -3,6 +3,7 @@ const { Schema } = mongoose;
 
 const timerSchema = new Schema({
   _id: {
+    group_id: { type: String, required: true },
     nickname: { type: String, required: true, unique: true },
     daily: {
       date: { type: Date },
