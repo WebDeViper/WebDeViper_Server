@@ -17,6 +17,10 @@ router.post('/kakao', ctrUser.kakaoAuth);
 // /api/user/kakao/logout
 router.get('/kakao/logout', verifyJwtToken, ctrUser.kakaoLogout);
 
+// 카카오유저 회원탈퇴 (클라에서 유저-카카오 연결을 끊은 다음 해당라우터로 요청하여 DB에 데에터도 삭제)
+// /api/user/kakao/remove
+router.get('/kakao/remove', verifyJwtToken, ctrUser.deleteKakaoUser);
+
 // 유저 정보 수정 ( nickName, category, statusMessage )
 // api/user/profile
 router.patch('/profile', verifyJwtToken, ctrUser.patchUser);
