@@ -73,6 +73,35 @@ exports.kakaoLogout = (req, res) => {
   });
 };
 
+// 카카오 유저 회원 탈퇴
+// /api/user/kakao/remove
+exports.deleteKakaoUser = async (req, res) => {
+  // 클라이언트에서 유저<-->카카오 간의 연결을 끊은 다음(로그아웃 개념아님) 수행될 로직. 확인 없이 삭제처리만 하면됨
+
+  try {
+    const currentUserId = res.locals.decoded.userInfo.id;
+
+    // 반환 값은 삭제된 레코드의 수
+    const result = await User.destroy({
+      where: { user_id: currentUserId },
+    });
+
+    if (result) {
+      // 정상적으로 회원탈퇴
+      const logoutToken = generateLogoutToken();
+      return res.send({
+        logoutToken,
+      });
+    } else {
+      return res.status(409).send({
+        msg: '데이터베이스에 삭제된 데이터 없음',
+      });
+    }
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
 // GET
 // 유저 기본정보 조회
 // api/user

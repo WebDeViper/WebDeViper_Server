@@ -5,7 +5,7 @@ const sanitizeFilename = require('sanitize-filename');
 // 유저 프로필 이미지 업로드된 파일을 저장할 디렉터리 및 파일명 설정
 const userImgStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'static/profileImg'); // 파일을 저장할 디렉터리
+    cb(null, path.join(__dirname, '../../static/profileImg')); // 파일을 저장할 디렉터리
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
