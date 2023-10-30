@@ -6,4 +6,5 @@ router.get('/notices', controller.getNotice);
 router.post('/notice', controller.postNotice);
 router.patch('/notice', controller.patchNotice);
 router.delete('/notice', controller.deleteNotice);
+router.get('/notice/:notice_id', controller.getNoticeDetail);
 module.exports = router;

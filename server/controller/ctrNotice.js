@@ -62,3 +62,16 @@ exports.deleteNotice = async (req, res) => {
   }
 };
 
+exports.getNoticeDetail = async (req, res) => {
+  try {
+    console.log(req.params);
+    const result = await Notice.findOne({ where: { notice_id: req.params.notice_id } });
+    if (result) {
+      res.status(200).send({ result, message: '공지사항 찾기 성공!' });
+    } else {
+      res.status(400).send({ message: '존재하지 않는 공지사항입니다.' });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
