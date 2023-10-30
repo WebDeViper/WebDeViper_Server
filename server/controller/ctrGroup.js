@@ -4,8 +4,9 @@ const Sequelize = require('sequelize');
 // 카테고리에 따른 그룹 목록을 반환하는 함수
 exports.getCategoryGroups = async (req, res) => {
   try {
-    // 사용자 토큰을 요청 헤더에서 가져오거나, 기본값으로 1 사용
-    const userId = req.headers.authorization || 1; // undefined라면 1
+    // 태균
+    // 토큰에서 현재유저 user_id 가져오기
+    const userId = res.locals.decoded.userInfo.id;
 
     // 사용자의 카테고리를 조회
     const userCategory = await User.findOne({
@@ -82,8 +83,9 @@ exports.getCategoryGroups = async (req, res) => {
 // 사용자별 그룹 목록을 반환하는 함수
 exports.getCategoryGroupsByUser = async (req, res) => {
   try {
-    // 요청에서 사용자 ID를 안전하게 추출
-    const userId = req.headers.authorization || 2;
+    // 태균
+    // 토큰에서 현재유저 user_id 가져오기
+    const userId = res.locals.decoded.userInfo.id;
 
     // 사용자의 그룹 ID 목록을 조회
     const userGroupIds = await GroupMember.findAll({

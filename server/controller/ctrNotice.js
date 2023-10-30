@@ -61,7 +61,6 @@ exports.deleteNotice = async (req, res) => {
     console.log(err);
   }
 };
-
 exports.getNoticeDetail = async (req, res) => {
   try {
     console.log(req.params);
