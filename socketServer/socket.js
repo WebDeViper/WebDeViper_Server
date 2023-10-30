@@ -55,6 +55,7 @@ io.on('connection', socket => {
     io.emit('chat message', msg);
   });
 });
+//밑에 테스트용 코드 주석처리해도 관계 x
 app.get('/api/company', (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
 
