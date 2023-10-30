@@ -74,3 +74,4 @@ exports.getNoticeDetail = async (req, res) => {
     console.log(err);
   }
 };
+
