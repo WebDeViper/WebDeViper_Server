@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 dotenv.config();
 const { PORT } = process.env;
+const path = require('path');
 const express = require('express');
 const { sequelize } = require('./models/index');
 const cookieParser = require('cookie-parser');
@@ -22,8 +23,9 @@ app.use(cookieParser()); // 서버에서 클라이언트로 응답을 보낼 때
 //삭제 예정
 app.set('view engine', 'ejs');
 app.use('/views', express.static(__dirname + '/views'));
-app.use('/static', express.static(__dirname + '/static'));
 /////////
+// 정적 파일 서빙
+app.use('/api/static', express.static(path.join(__dirname, 'static')));
 
 app.use('/', indexRouter);
 
