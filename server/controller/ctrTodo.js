@@ -2,8 +2,12 @@ const { Todo, Sequelize } = require('../models');
 
 exports.getTodoList = async (req, res) => {
   try {
+    // 태균
+    // 토큰값에서 user_id 가져옴
+    const currentUserId = res.locals.decoded.userInfo.id;
+
     if (req.params) {
-      console.log('params>>', req.params); // user_id
+      // console.log('params>>', req.params); // user_id
       console.log('query>>', req.query); // month, year
 
       const year = req.query.year; // 예: '2023' 형식으로 전달된다고 가정
@@ -11,7 +15,8 @@ exports.getTodoList = async (req, res) => {
 
       const result = await Todo.findAll({
         where: {
-          user_id: req.params.user_id, // req.params에 있는 user_id 사용
+          // user_id: req.params.user_id, // req.params에 있는 user_id 사용
+          user_id: currentUserId, // 태균
           [Sequelize.Op.and]: [
             Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('created_at')), year),
             Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('created_at')), month),
@@ -31,11 +36,15 @@ exports.getTodoList = async (req, res) => {
   }
 };
 exports.postTodo = async (req, res) => {
-  console.log(req.params);
+  // console.log(req.params);
   console.log(req.body);
   try {
+    // 태균
+    // 토큰값에서 user_id 가져옴
+    const currentUserId = res.locals.decoded.userInfo.id;
+
     const result = await Todo.create({
-      user_id: req.params.user_id,
+      user_id: currentUserId,
       title: req.body.title,
     });
     res.status(200).send({ result, message: '할 일이 성공적으로 등록되었습니다!' });
@@ -78,11 +87,16 @@ exports.patchTodo = async (req, res) => {
 };
 exports.deleteTodo = async (req, res) => {
   try {
-    console.log(req.params.user_id);
+    // 태균
+    // 토큰값에서 user_id 가져옴
+    const currentUserId = res.locals.decoded.userInfo.id;
+
+    // console.log(req.params.user_id);
     console.log(req.query.todo_index);
     const result = await Todo.destroy({
       where: {
-        user_id: req.params.user_id,
+        // user_id: req.params.user_id,
+        user_id: currentUserId,
         todo_id: req.query.todo_index,
       },
     });
