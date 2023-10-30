@@ -1,6 +1,6 @@
 const { User } = require('../models');
 const { duplicateCheck } = require('../utils/userModelDuplicateCheck');
-const { generateJwtToken, generateLogoutToken } = require('../utils/jwt');
+const { generateJwtToken } = require('../utils/jwt');
 
 // 카카오유저 로그인 or 회원가입 시키고 로그인
 // /api/user/kakao
@@ -62,15 +62,6 @@ exports.kakaoAuth = async (req, res) => {
     console.log(err);
     res.status(500).send(err);
   }
-};
-
-// 카카오유저 로그아웃 (새로운 JWT를 발급하고, 기존의 JWT를 무효화하는 방식)
-// /api/user/kakao/logout
-exports.kakaoLogout = (req, res) => {
-  const logoutToken = generateLogoutToken();
-  res.send({
-    logoutToken,
-  });
 };
 
 // 카카오 유저 회원 탈퇴
@@ -151,11 +142,23 @@ exports.patchUser = async (req, res) => {
       user.status_message = statusMsg;
     }
 
-    await user.save();
+    const result = await user.save();
 
+    const userInfo = {
+      id: result.user_id,
+      category: result.user_category_name,
+      nickName: result.nick_name,
+      profileImg: result.user_profile_image_path,
+      email: result.email,
+    };
+
+    // 변경된 userInfo로 jwt 재생성
+    const token = generateJwtToken(userInfo);
+
+    // 토큰과 함께 변경된 유저정보 전달
     res.status(200)({
-      isSuccess: true,
-      code: 200,
+      token,
+      userInfo,
     });
   } catch (err) {
     console.log(err);

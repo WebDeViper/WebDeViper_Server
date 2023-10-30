@@ -11,11 +11,3 @@ exports.generateJwtToken = userInfo => {
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '30m', issuer: 'APIServer' });
   return token;
 };
-
-exports.generateLogoutToken = () => {
-  const payload = {
-    status: 'Logged Out',
-  };
-  const token = jwt.sign(payload, 'unverified', { expiresIn: '1m', issuer: 'APIServer' });
-  return token;
-};

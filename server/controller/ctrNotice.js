@@ -61,4 +61,3 @@ exports.deleteNotice = async (req, res) => {
     console.log(err);
   }
 };
-
