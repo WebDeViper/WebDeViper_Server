@@ -4,13 +4,11 @@ const {
   Types: { ObjectId },
 } = Schema;
 const chatSchema = new Schema({
-  _id: {
-    group_id: { type: String, required: true, unique: true }, // 그룹 식별자
-    message: { type: String, required: true }, // 채팅 메시지
-    sender: { type: String, required: true }, // 발신자 식별자
-    receiver: { type: String, required: true }, // 수신자 식별자 (추가)(귓속말 기능 위해서)
-    sendAt: { type: Date, required: true },
-  }, // 메시지 전송 시간
+  group_id: { type: String, required: true }, // 그룹 식별자
+  message: { type: String, required: true }, // 채팅 메시지
+  sender: { type: String, required: true }, // 발신자 식별자
+  receiver: { type: String, required: true }, // 수신자 식별자 (추가)(귓속말 기능 위해서)
+  sendAt: { type: String, required: true }, // 메시지 전송 시간
 });
 chatSchema.add({
   _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
