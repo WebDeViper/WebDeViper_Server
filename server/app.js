@@ -31,7 +31,10 @@ app.use('/', indexRouter);
 
 // 에러처리 하는 미들웨어를 사용하는걸로 업그레이드 해보기..
 app.get('*', (req, res) => {
-  res.send('404미들웨어');
+  res.status(404).send({
+    reqURL: req.url,
+    msg: '요청경로를 찾을 수 없습니다.',
+  });
 });
 
 sequelize.sync({ force: false }).then(() => {
