@@ -1,11 +1,13 @@
 const userController = require('../controller/ctrChat');
-
+const User = require('../schemas/User');
 module.exports = function (io) {
+  let name;
   io.on('connection', async socket => {
     console.log('client is connected', socket.id);
     // 유저관련
     socket.on('login', async (userName, cb) => {
       try {
+        name = userName;
         const user = await userController.saveUser(userName, socket.id);
         const welcomeMessage = {
           chat: `${user.nick_name}님이 입장하셨습니다.`,
@@ -45,8 +47,11 @@ module.exports = function (io) {
       }
     });
 
-    socket.on('disconnect', () => {
-      console.log('user is disconnected');
+    socket.on('disconnect', async () => {
+      const user = await User.findOne({ nick_name: name });
+      user.online = false;
+      await user.save();
+      console.log('user is disconnected', user);
     });
   });
 };
