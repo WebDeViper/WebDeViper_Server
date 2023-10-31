@@ -150,13 +150,14 @@ exports.patchUser = async (req, res) => {
       nickName: result.nick_name,
       profileImg: result.user_profile_image_path,
       email: result.email,
+      statusMsg: result.status_message,
     };
 
     // 변경된 userInfo로 jwt 재생성
     const token = generateJwtToken(userInfo);
 
     // 토큰과 함께 변경된 유저정보 전달
-    res.status(200)({
+    res.status(200).send({
       token,
       userInfo,
     });
