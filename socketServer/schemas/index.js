@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT } = process.env;
-const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/admin`;
+// const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/admin`;
+const MONGO_URL = `mongodb+srv://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}/admin`;
 const mysql = require('mysql');
 const { MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE } = process.env;
 const User = require('../schemas/User');
@@ -14,10 +15,10 @@ const connect = () => {
   }
 
   mongoose.connect(
-    'mongodb://localhost:27017/minyeong',
-    // MONGO_URL, // 접속을 시도하는 데이터베이스가 admin임
+    // 'mongodb://localhost:27017/minyeong',
+    MONGO_URL, // 접속을 시도하는 데이터베이스가 admin임
     {
-      // dbName: 'viper', // 실제로 사용할 데이터베이스이름
+      dbName: 'min0', // 실제로 사용할 데이터베이스이름
       useNewUrlParser: true, // 별 의미 없음
     }
   );
