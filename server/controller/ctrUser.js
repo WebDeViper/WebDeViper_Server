@@ -7,12 +7,12 @@ const { generateJwtToken } = require('../utils/jwt');
 exports.kakaoAuth = async (req, res) => {
   try {
     const profile = req.body;
-    console.log('/api/user/kakao >>>', profile);
+    // console.log('/api/user/kakao >>>', profile);
 
     const exUser = await User.findOne({
       where: { sns_id: profile.id, provider: 'kakao' },
     });
-    console.log(exUser);
+    // console.log(exUser);
     // 응답값으로 보낼 userInfo 초기화
     let userInfo = {
       id: null,
@@ -21,8 +21,6 @@ exports.kakaoAuth = async (req, res) => {
       profileImg: null,
       email: null,
     };
-    // 응답값을 보낼 jwt 초기화
-    let token = {};
 
     // 회원가입 여부에 따라 userInfo 세팅
     if (exUser) {
@@ -53,7 +51,7 @@ exports.kakaoAuth = async (req, res) => {
     }
 
     // 로그인 처리를 하기위해 jwt 발급
-    token = generateJwtToken(userInfo);
+    const token = generateJwtToken(userInfo);
     return res.send({
       token,
       userInfo,
@@ -220,7 +218,7 @@ exports.userProfileImgUpload = async (req, res) => {
 exports.userNickDuplicateCheck = async (req, res) => {
   try {
     // 닉네임 중복확인
-    const isDuplicate = duplicateCheck(nick_name, req.params.nickName);
+    const isDuplicate = await duplicateCheck(User, 'nick_name', req.params.nickName);
 
     res.send(isDuplicate);
   } catch (error) {
@@ -238,7 +236,7 @@ exports.localJoin = async (req, res) => {
     const email = req.body || 'test@example.com';
     const password = req.body || '1234';
 
-    const isDuplicate = duplicateCheck(email, email);
+    const isDuplicate = duplicateCheck(User, email, email);
 
     if (isDuplicate) {
       return res.status(409).send({ msg: '이메일 중복' });
