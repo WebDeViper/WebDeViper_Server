@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT } = process.env;
-// const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/admin`;
-const MONGO_URL = `mongodb+srv://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}/admin`;
+const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/admin`;
+// const MONGO_URL = `mongodb+srv://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}/admin`;
 const mysql = require('mysql');
 const { MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE } = process.env;
 const User = require('../schemas/User');
@@ -50,19 +50,17 @@ const connect = () => {
     // console.log(extractedValues);
 
     extractedValues.map(async row => {
-      const existingUser = await User.findOne({ 'user.user_id': row.user_id });
+      const existingUser = await User.findOne({ user_id: row.user_id });
       // console.log(existingUser);
       if (existingUser) {
         // 이미 존재하는 사용자 업데이트
-        existingUser.user.nick_name = row.nick_name;
+        existingUser.nick_name = row.nick_name;
         await existingUser.save();
         console.log('사용자가 성공적으로 업데이트되었습니다:', existingUser);
       } else {
         const newUser = new User({
-          user: {
-            user_id: row.user_id,
-            nick_name: row.nick_name,
-          },
+          user_id: row.user_id,
+          nick_name: row.nick_name,
         });
         // 사용자 저장
         await newUser.save();

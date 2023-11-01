@@ -1,74 +1,106 @@
 const User = require('../schemas/User');
 const Chat = require('../schemas/Chat');
-const { now } = require('mongoose');
+const Room = require('../schemas/Room');
 
-let user;
-let message;
+// 사용자 정보를 저장하거나 업데이트하는 함수
 exports.saveUser = async (userName, socketid) => {
-  console.log('유저정보 등록 ');
-  try {
-    // const users = await User.find({});
-    console.log('모든 사용자:', User);
-  } catch (err) {
-    console.error('데이터베이스에서 데이터를 조회하는 중 오류 발생:', err);
+  // 이미 있는 사용자인지 확인
+  const user = await User.findOne({ nick_name: userName });
+
+  // 사용자가 존재하지 않으면 새 사용자 정보를 생성
+  if (!user) {
+    return user;
   }
 
-  // 이미 있는 유저인지 확인
-  user = await User.findOne({ 'user.nick_name': userName });
-  // 없다면 새로 유저 정보 만들기
-  console.log('user는', user);
+  // 이미 존재하는 사용자의 연결 정보 (token)를 업데이트하고 온라인 상태로 설정
+  user.token = socketid;
+  user.online = true;
+
+  await user.save();
   return user;
 };
-exports.saveChatLog = async (message, userName) => {
-  // 새로운 채팅 생성
-  // console.log('userName값은 ', userName);
+
+// 사용자의 토큰 (연결 정보)을 검사하고 해당 사용자를 반환
+exports.checkUser = async socketid => {
+  const user = await User.findOne({ token: socketid });
+  if (!user) throw new Error('사용자를 찾을 수 없음');
+  console.log(user);
+  return user;
+};
+
+// 메시지를 저장하는 함수
+exports.saveChat = async (message, user) => {
+  // 현재 시각을 UTC 시간대로 얻어옴.
   const utcDate = new Date();
 
   // 한국 표준시(KST)의 시간대 오프셋
   const koreaTimeOffset = 9 * 60; // 9시간을 분으로 표시
 
-  // UTC 시간에 한국 시간대 오프셋을 더하기
+  // UTC 시간에 한국 시간대 오프셋을 더함.
   utcDate.setMinutes(utcDate.getMinutes() + koreaTimeOffset);
 
-  // 날짜 및 시간 추출
+  // 날짜 및 시간 정보 추출
   const hours = utcDate.getUTCHours();
   const minutes = utcDate.getUTCMinutes();
   const day = utcDate.getUTCDate();
   const month = utcDate.getUTCMonth() + 1; // getUTCMonth()는 0부터 시작하므로 1을 더함
   const year = utcDate.getUTCFullYear() % 100; // 두 자리 연도
 
-  // 문자열로 조합
+  // 메시지의 전송 시간을 문자열로 조합
   const formattedDate = `${hours}:${minutes} [${year}/${month}/${day}]`;
-  console.log(formattedDate);
-  const newChatMessage = {
-    group_id: 'group1', // 그룹 식별자
-    message: message, // 채팅 메시지
-    sender: userName, // 발신자 식별자
-    receiver: 'user2', // 수신자 식별자
-    sendAt: formattedDate, // 메시지 전송 시간
-  };
 
-  // Chat 모델을 사용하여 새로운 채팅 메시지 생성
-  const newChat = new Chat(newChatMessage);
-  try {
-    const chat = await newChat.save();
-    console.log('채팅이 성공적으로 저장되었습니다:', chat);
-    return chat;
-  } catch (error) {
-    console.error('채팅 저장 중 오류 발생:', error);
-    throw error;
-  }
+  // Chat 모델을 사용하여 새로운 메시지를 생성하고 저장
+  const newMessage = new Chat({
+    chat: message,
+    sendAt: formattedDate,
+    user: {
+      id: user._id,
+      nick_name: user.nick_name,
+    },
+    room: user.room,
+  });
+  await newMessage.save();
+  return newMessage;
 };
 
-exports.getChatLog = async userName => {
+// 이전 채팅 로그를 검색하는 함수
+exports.getChatLog = async rid => {
   try {
-    // const chats = await Chat.find({ 'user.name': { $ne: userName } });
-    const chats = await Chat.find({});
-    // const chats = await Chat.find();
-    console.log('이전채팅기록 ->', chats);
+    const chats = await Chat.find({ room: rid });
+    console.log('이전 채팅 기록 ->', chats);
     return chats;
   } catch (error) {
     console.error('채팅 로그 검색 중 오류 발생:', error);
     throw error;
   }
+};
+
+// 모든 채팅방의 목록을 반환하는 함수
+exports.getAllRooms = async () => {
+  const roomList = await Room.find({});
+  return roomList;
+};
+
+// 사용자가 채팅방을 나가는 함수
+exports.leaveRoom = async user => {
+  const room = await Room.findById(user.room);
+  if (!room) {
+    throw new Error('채팅방을 찾을 수 없음');
+  }
+  room.members.remove(user._id);
+  await room.save();
+};
+
+// 사용자가 채팅방에 참여하는 함수
+exports.joinRoom = async (roomId, user) => {
+  const room = await Room.findById(roomId);
+  if (!room) {
+    throw new Error('해당 방이 없습니다.');
+  }
+  if (!room.members.includes(user._id)) {
+    room.members.push(user._id);
+    await room.save();
+  }
+  user.room = roomId;
+  await user.save();
 };
