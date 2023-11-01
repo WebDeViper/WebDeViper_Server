@@ -16,6 +16,10 @@ const chatSchema = new mongoose.Schema(
       },
       nick_name: String,
     },
+    room: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Room',
+    },
   },
   { timestamp: true }
 );

@@ -1,5 +1,6 @@
 const User = require('../schemas/User');
 const Chat = require('../schemas/Chat');
+const Room = require('../schemas/Room');
 
 // 사용자 정보를 저장하거나 업데이트하는 함수
 exports.saveUser = async (userName, socketid) => {
@@ -23,6 +24,7 @@ exports.saveUser = async (userName, socketid) => {
 exports.checkUser = async socketid => {
   const user = await User.findOne({ token: socketid });
   if (!user) throw new Error('user not found');
+  console.log(user);
   return user;
 };
 
@@ -55,6 +57,7 @@ exports.saveChat = async (message, user) => {
       id: user._id,
       nick_name: user.nick_name,
     },
+    room: user.room,
   });
   await newMessage.save();
   return newMessage;
@@ -70,4 +73,31 @@ exports.getChatLog = async () => {
     console.error('채팅 로그 검색 중 오류 발생:', error);
     throw error;
   }
+};
+
+exports.getAllRooms = async () => {
+  const roomList = await Room.find({});
+  return roomList;
+};
+
+exports.leaveRoom = async user => {
+  const room = await Room.findById(user.room);
+  if (!room) {
+    throw new Error('Room not found');
+  }
+  room.members.remove(user._id);
+  await room.save();
+};
+
+exports.joinRoom = async (roomId, user) => {
+  const room = await Room.findById(roomId);
+  if (!room) {
+    throw new Error('해당 방이 없습니다.');
+  }
+  if (!room.members.includes(user._id)) {
+    room.members.push(user._id);
+    await room.save();
+  }
+  user.room = roomId;
+  await user.save();
 };
