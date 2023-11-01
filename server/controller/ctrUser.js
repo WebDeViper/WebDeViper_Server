@@ -182,10 +182,12 @@ exports.patchUser = async (req, res) => {
 exports.userProfileImgUpload = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
+    // const currentUserId = 2;
 
+    // 서버에 저장된 파일 이름
+    const { filename } = req.file;
     // path == 이미지를 받을 수 있는 URL
-    // originalname == 유저가 업로드한 원본 파일 이름(확장자 포함)
-    const { originalname, path } = req.file;
+    const path = `/api/static/profileImg/${filename}`;
 
     // 이미지 경로 수정해서 토큰 재생성
     // 응답값에 전달하고 리액트에서 상태관리 하면 될듯
@@ -205,8 +207,6 @@ exports.userProfileImgUpload = async (req, res) => {
 
     // 업로드 성공 응답
     res.status(200).send({
-      isSuccess: true,
-      code: 200,
       msg: '파일이 성공적으로 업로드되었습니다.',
       profileImg: path,
     });
@@ -214,7 +214,7 @@ exports.userProfileImgUpload = async (req, res) => {
     res.status(500).send({
       success: false,
       msg: 'SERVER ERROR',
-      error,
+      err,
     });
   }
 };
