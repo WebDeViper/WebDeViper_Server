@@ -132,7 +132,7 @@ exports.patchUser = async (req, res) => {
 
     if (nickName) {
       // 닉네임 중복검사
-      const isDuplicate = duplicateCheck(User, 'nick_name', nickName);
+      const isDuplicate = await duplicateCheck(User, 'nick_name', nickName);
       if (isDuplicate) {
         return res.status(409).send({
           msg: '닉네임이 이미 존재합니다.',
