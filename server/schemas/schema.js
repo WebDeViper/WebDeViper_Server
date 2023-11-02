@@ -26,6 +26,7 @@ const userSchema = new Schema({
 
 // Group 스키마
 const groupSchema = new Schema({
+  group_leader: { type: Schema.Types.ObjectId, ref: 'User' }, // 그룹장(User)의 ObjectId
   group_name: String, // 그룹의 이름
   group_category: String, // 그룹의 카테고리
   group_password: String, // 그룹 패스워드
@@ -33,6 +34,7 @@ const groupSchema = new Schema({
   group_image_path: { type: String, default: '/api/notyet' },
   group_maximum_member: { type: Number, default: 5 }, // 그룹의 최대 수용인원
   daily_goal_time: String, // 그룹의 목표 공부시간
+  is_camera_on: Boolean,
   members: [{ type: Schema.Types.ObjectId, ref: 'User' }], // 그룹에 속한 사용자 리스트(배열)
   join_requests: [
     // 그룹에 가입 요청한 사용자 리스트(배열)
