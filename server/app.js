@@ -44,9 +44,11 @@ app.get('*', (req, res) => {
     msg: '요청경로를 찾을 수 없습니다.',
   });
 });
-
-sequelize.sync({ force: false }).then(() => {
-  app.listen(PORT, () => {
-    console.log(`server open on port ${PORT}`);
-  });
+app.listen(PORT, () => {
+  console.log(`server open on port ${PORT}`);
 });
+// sequelize.sync({ force: false }).then(() => {
+//   app.listen(PORT, () => {
+//     console.log(`server open on port ${PORT}`);
+//   });
+// });

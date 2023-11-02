@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { User, Group } = require('./schema');
 const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT } = process.env;
 const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}`;
 
@@ -9,7 +10,8 @@ const connect = () => {
   }
 
   mongoose.connect(MONGO_URL, {
-    dbName: 'viper_local',
+    // dbName: 'viper_local',
+    dbName: 'min0_test',
     // useNewUrlParser: true, // 별 의미 없음
   });
 
@@ -17,6 +19,17 @@ const connect = () => {
   mongoose.connection.on('connected', () => {
     console.log('몽고디비 연결되었습니다.');
   });
+  // 데이터 강제로 입력
+  // const newUser = new User({
+  //   user_category_name: '공무원',
+  //   nick_name: '민영',
+  // });
+  // newUser.save();
+  // const newGroup = new Group({
+  //   group_category: '공무원',
+  //   group_name: '너 내 도도도독',
+  // });
+  // newGroup.save();
 
   // 몽고 연결시 에러발생 이벤트 리스너
   mongoose.connection.on('error', error => {
