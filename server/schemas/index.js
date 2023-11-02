@@ -1,0 +1,33 @@
+const mongoose = require('mongoose');
+const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT } = process.env;
+const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}`;
+
+const connect = () => {
+  // 개발 환경에서만 몽구스가 생성하는 쿼리내용 확인
+  if (process.env.NODE_ENV !== 'production') {
+    mongoose.set('debug', true);
+  }
+
+  mongoose.connect(MONGO_URL, {
+    dbName: 'viper_local',
+    // useNewUrlParser: true, // 별 의미 없음
+  });
+
+  // 몽고디비 연결시 이벤트 리스너
+  mongoose.connection.on('connected', () => {
+    console.log('몽고디비 연결되었습니다.');
+  });
+
+  // 몽고 연결시 에러발생 이벤트 리스너
+  mongoose.connection.on('error', error => {
+    console.error('몽고디비 연결 에러', error);
+  });
+
+  // 몽고 연결 종료시 이벤트 리스너
+  mongoose.connection.on('disconnected', () => {
+    console.error('몽고디비 연결이 끊겼습니다. 재연결 시도');
+    connect();
+  });
+};
+
+module.exports = connect;
