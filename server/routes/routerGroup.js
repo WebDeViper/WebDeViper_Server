@@ -21,14 +21,14 @@ const { verifyJwtToken } = require('../middlewares/jwt/jwt');
 //현재 로그인한 유저의 카테고리내에서 그룹조회
 router.get('/studyGroups/test', test.getCategoryGroups);
 // 현재 로그인한 유저가 속한 스터디 그룹을 조회
-// router.get('/studyGroups/users/test', verifyJwtToken, test.getCategoryGroupsByUser);
-// //그룹 요청 기능
-// router.post('/studyGroup/:groupId/join/test', verifyJwtToken, test.joinGroupRequest);
+router.get('/studyGroups/users/test', test.getCategoryGroupsByUser);
+//그룹 요청 기능
+router.post('/studyGroup/:groupId/join/test', test.joinGroupRequest);
 // //그룹 생성 기능
-// router.post('/studyGroup/test', verifyJwtToken, test.postGroupInformation);
-// //그룹 옵션 수정 기능
-// router.patch('/studyGroup/:groupId/test', verifyJwtToken, test.patchGroupInformation);
+router.post('/studyGroup/test', test.postGroupInformation);
+//그룹 옵션 수정 기능
+router.patch('/studyGroup/:groupId/test', test.patchGroupInformation);
 // //그룹 삭제 기능
-// router.delete('/studyGroup/:groupId/test', verifyJwtToken, test.deleteGroup);
+router.delete('/studyGroup/:groupId/test', test.deleteGroup);
 
 module.exports = router;
