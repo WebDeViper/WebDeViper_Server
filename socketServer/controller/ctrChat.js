@@ -94,6 +94,7 @@ exports.leaveRoom = async user => {
 // 사용자가 채팅방에 참여하는 함수
 exports.joinRoom = async (roomId, user) => {
   const room = await Room.findById(roomId);
+  // console.log('해당하는 방 리스트 findById', room);
   if (!room) {
     throw new Error('해당 방이 없습니다.');
   }

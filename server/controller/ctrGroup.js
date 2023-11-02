@@ -1,4 +1,7 @@
 const { Group, User, GroupMember } = require('../models');
+const User = require('../schemas/User');
+const Group = require('../schemas/User');
+
 const Sequelize = require('sequelize');
 
 // 카테고리에 따른 그룹 목록을 반환하는 함수
@@ -123,6 +126,58 @@ exports.getCategoryGroupsByUser = async (req, res) => {
     console.error(err);
     // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
     res.status(500).send({ isSuccess: false, code: 500, error: '서버에서 오류가 발생했습니다.' });
+  }
+};
+//그룹을 요청하는 함수
+exports.joinGroupRequest = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const userId = res.locals.decoded.userInfo.id; // 유저 objectId
+    const { groupId } = req.params;
+
+    const updatedUserData = {
+      pending_groups: [
+        {
+          group: groupId, // groupId는 해당 그룹의 ObjectId
+        },
+      ],
+    };
+
+    const updatedGroupData = {
+      join_requests: [
+        {
+          user_id: userId, // userId는 그룹을 요청한 유저의 objectId
+        },
+      ],
+    };
+
+    // 사용자 및 그룹 업데이트
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $push: { pending_groups: updatedUserData } },
+      { new: true }
+    ).session(session);
+    const updatedGroup = await Group.findByIdAndUpdate(
+      groupId,
+      { $push: { join_requests: updatedGroupData } },
+      { new: true }
+    ).session(session);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    console.log('사용자가 업데이트되었습니다.');
+    console.log(updatedUser);
+    console.log('그룹이 업데이트되었습니다.');
+    console.log(updatedGroup);
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+
+    console.error(err);
+    // 에러 응답 보내거나 다른 작업 수행
   }
 };
 
