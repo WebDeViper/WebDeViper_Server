@@ -4,12 +4,16 @@ const { PORT } = process.env;
 const path = require('path');
 const express = require('express');
 const { sequelize } = require('./models/index');
+const connect = require('./schemas/index');
 const cookieParser = require('cookie-parser');
 const indexRouter = require('./routes/index');
 const cors = require('cors');
-
 const app = express();
 
+// 몽고 DB 연결
+connect();
+
+// cors 미들웨어
 app.use(
   cors({
     // origin: '*',
@@ -26,9 +30,11 @@ app.use(cookieParser()); // 서버에서 클라이언트로 응답을 보낼 때
 app.set('view engine', 'ejs');
 app.use('/views', express.static(__dirname + '/views'));
 /////////
+
 // 정적 파일 서빙
 app.use('/api/static', express.static(path.join(__dirname, 'static')));
 
+// 라우터
 app.use('/', indexRouter);
 
 // 에러처리 하는 미들웨어를 사용하는걸로 업그레이드 해보기..
