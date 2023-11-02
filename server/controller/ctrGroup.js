@@ -1,6 +1,4 @@
 const { Group, User, GroupMember } = require('../models');
-const User = require('../schemas/User');
-const Group = require('../schemas/User');
 
 const Sequelize = require('sequelize');
 
@@ -185,11 +183,15 @@ exports.joinGroupRequest = async (req, res) => {
 exports.postGroupInformation = async (req, res) => {
   try {
     // 클라이언트에서 요청으로 받은 데이터 추출
-    const { name, password, description, category, imagePath, dailyGoalTime, maximumNumberMember, isCameraOn } =
-      req.body;
+    const { name, password, description, category, dailyGoalTime, maximumNumberMember, isCameraOn } = req.body;
     // TODO: 그룹장 정보 넣기 (그룹장 정보를 어떻게 처리할지에 대한 내용을 추가로 구현해야 함)
     // TODO: 유저의 카테고리 그룹생성시 default로 박기
     // TODO: multer file path -> client와 붙이면서 확인
+    // 서버에 저장된 파일 이름
+    const { filename } = req.file;
+    // path == 이미지를 받을 수 있는 URL
+    const imagePath = `/api/static/profileImg/${filename}`;
+
     // Sequelize 모델을 사용하여 새 그룹 생성
     const newGroup = await Group.create({
       name: name, // 그룹 이름
