@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controller/ctrGroup');
 const { verifyJwtToken } = require('../middlewares/jwt/jwt');
+const multer = require('multer');
+const { groupImgUploader } = require('../middlewares/multer/multerConfig'); // 그룹이미지 업로드임
 
 //현재 로그인한 유저의 카테고리내에서 그룹조회
 router.get('/studyGroups', verifyJwtToken, controller.getCategoryGroups);
@@ -10,7 +12,28 @@ router.get('/studyGroups/users', verifyJwtToken, controller.getCategoryGroupsByU
 //그룹 요청 기능
 router.post('/studyGroup/:groupId/join', verifyJwtToken, controller.joinGroupRequest);
 //그룹 생성 기능
-router.post('/studyGroup', verifyJwtToken, controller.postGroupInformation);
+router.post(
+  '/studyGroup',
+  verifyJwtToken,
+  groupImgUploader.single('groupImgFile'),
+  (req, res, next) => {
+    const err = req.fileValidationError; // Multer가 발생한 오류를 req.fileValidationError에 저장
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).send({ msg: '파일 크기가 너무 큽니다. (최대 5MB)' });
+      } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+        return res.status(400).send({ msg: '예상치 못한 파일이 업로드되었습니다.' });
+      } else {
+        return res.status(400).send({ msg: '파일 업로드에 실패했습니다.' });
+      }
+    } else if (err) {
+      return res.status(400).send({ error: err.message });
+    } else {
+      next(); // 오류가 없음. 컨트롤러로 전달
+    }
+  },
+  controller.postGroupInformation
+);
 //그룹 옵션 수정 기능
 router.patch('/studyGroup/:groupId', verifyJwtToken, controller.patchGroupInformation);
 //그룹 삭제 기능

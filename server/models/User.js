@@ -18,7 +18,7 @@ const User = (Sequelize, DataTypes) => {
       password: DataTypes.STRING,
       user_profile_image_path: {
         type: DataTypes.STRING,
-        defaultValue: '/api/static/profileImg/defaultProfile.jpeg', // 나중에 기본이미지 경로로 변경
+        defaultValue: '/api/static/profileImg/defaultProfile.jpeg',
       },
       status_message: {
         type: DataTypes.STRING,
