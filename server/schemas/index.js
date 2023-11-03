@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const { User, Group } = require('./schema');
-const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT } = process.env;
+const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DBNAME } = process.env;
 const MONGO_URL = `mongodb+srv://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}`;
-
 
 const connect = () => {
   // 개발 환경에서만 몽구스가 생성하는 쿼리내용 확인
@@ -11,14 +10,12 @@ const connect = () => {
   }
 
   mongoose.connect(MONGO_URL, {
-    // dbName: 'viper_local',
-    dbName: 'seeun_apiserver_test',
-    // useNewUrlParser: true, // 별 의미 없음
+    dbName: MONGO_DBNAME,
   });
 
   // 몽고디비 연결시 이벤트 리스너
   mongoose.connection.on('connected', () => {
-    console.log('몽고디비 연결되었습니다.');
+    console.log(`${MONGO_HOST} 몽고디비 연결되었습니다.`);
   });
   // 데이터 강제로 입력
   // const newUser = new User({
