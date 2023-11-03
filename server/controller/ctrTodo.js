@@ -4,14 +4,14 @@ const mongoose = require('mongoose');
 exports.getTodoList = async (req, res) => {
   try {
     // 토큰값에서 user_id 가져옴
-    const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '6544d9eeaabd61b4d1cf4bc5';
+    // const currentUserId = res.locals.decoded.userInfo.id;
+    const currentUserId = '6544d9eeaabd61b4d1cf4bc5';
 
     if (req.query) {
-      console.log('query>>', req.query); // month, year
+      // console.log('query>>', req.query); // month, year
 
-      const year = req.query.year; // 예: '2023' 형식으로 전달된다고 가정
-      const month = req.query.month; // 예: '08' 형식으로 전달된다고 가정
+      // const year = req.query.year; // 예: '2023' 형식으로 전달된다고 가정
+      // const month = req.query.month; // 예: '08' 형식으로 전달된다고 가정
 
       const result = await Todo.find({
         user_id: currentUserId,
