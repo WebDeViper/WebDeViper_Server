@@ -8,7 +8,7 @@ exports.getNotice = async (req, res) => {
     res.status(200).send(result);
   } catch (err) {
     console.log(err);
-    res.status(500).json('SERVER ERROR');
+    res.status(500).send('SERVER ERROR');
   }
 };
 
@@ -24,7 +24,7 @@ exports.postNotice = async (req, res) => {
     res.send({ result: notice, message: '공지사항이 성공적으로 생성되었습니다.' });
   } catch (err) {
     console.log(err);
-    res.status(500).json('SERVER ERROR');
+    res.status(500).send('SERVER ERROR');
   }
 };
 
@@ -55,17 +55,17 @@ exports.patchNotice = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json('SERVER ERROR');
+    res.status(500).send('SERVER ERROR');
   }
 };
 
 exports.deleteNotice = async (req, res) => {
   try {
-    console.log(req.query.notice_id);
+    // console.log(req.query.notice_id);
     if (req.query.notice_id) {
       const result = await Notice.deleteOne({ _id: req.query.notice_id });
-      console.log(result);
-      console.log(typeof result.deletedCount);
+      // console.log(result);
+      // console.log(typeof result.deletedCount);
       // 공지사항이 존재하는 경우
       // { acknowledged: true, deletedCount: 1 }
       // 공지사항이 존재하지 않는 경우
@@ -81,13 +81,13 @@ exports.deleteNotice = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json('SERVER ERROR');
+    res.status(500).send('SERVER ERROR');
   }
 };
 
 exports.getNoticeDetail = async (req, res) => {
   try {
-    console.log(req.params.notice_id);
+    // console.log(req.params.notice_id);
     const result = await Notice.findById(req.params.notice_id);
     if (result) {
       res.status(200).send({ result, message: '공지사항 찾기 성공!' });
@@ -96,6 +96,6 @@ exports.getNoticeDetail = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json('SERVER ERROR');
+    res.status(500).send('SERVER ERROR');
   }
 };

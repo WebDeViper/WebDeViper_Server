@@ -3,12 +3,12 @@ const { Schema } = mongoose;
 
 // User 스키마
 const userSchema = new Schema({
-  user_category_name: { type: String, required: true }, // 유저의 카테고리
-  nick_name: String, // 유저의 닉네임
-  user_profile_image_path: String, // 유저 프로필 이미지 경로
-  status_message: String, // 유저의 상태메세지(카톡 같은)
-  is_service_admin: Boolean, // 서비스 관리자 여부
-  email: String, // 카카오한테 받은 유저 이메일
+  user_category_name: { type: String, default: null }, // 유저의 카테고리
+  nick_name: { type: String, default: null }, // 유저의 닉네임
+  user_profile_image_path: { type: String, default: '/api/static/profileImg/defaultProfile.jpeg' }, // 유저 프로필 이미지 경로
+  status_message: { type: String, default: null }, // 유저의 상태메세지(카톡 같은)
+  is_service_admin: { type: Boolean, default: false }, // 서비스 관리자 여부
+  email: { type: String, default: null }, // 카카오한테 받은 유저 이메일
   provider: String, // 소셜로그인 제공업체
   sns_id: String, // 소셜로그인 제공업체로부터 받은 유저 식별값 (구글/카카오/네이버 전부 다를 수 있음)
   groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }], // 유저가 속한 그룹 리스트(배열)
@@ -73,7 +73,7 @@ const timerSchema = new Schema({
 
 // Todo 스키마
 const todoSchema = new Schema({
-  user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 투두 작성자의 _id
+  user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // 투두 작성자의 _id
   title: String,
   content: String,
   start_time: { type: Date },

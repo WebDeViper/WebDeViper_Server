@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
-const { User, Group } = require('./schema');
-const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT } = process.env;
-const MONGO_URL = `mongodb+srv://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}`;
+
+
+const { Todo, User, Group } = require('./schema');
+const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DBNAME } = process.env;
+// const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}`;
+const MONGO_URL = `mongodb://localhost:27017`;
+
 
 const connect = () => {
   // 개발 환경에서만 몽구스가 생성하는 쿼리내용 확인
@@ -10,26 +14,32 @@ const connect = () => {
   }
 
   mongoose.connect(MONGO_URL, {
-    dbName: 'min0_test',
-    // dbName: 'seeun_apiserver_test',
-    // useNewUrlParser: true, // 별 의미 없음
+
+    dbName: MONGO_DBNAME,
+
   });
 
   // 몽고디비 연결시 이벤트 리스너
   mongoose.connection.on('connected', () => {
-    console.log('몽고디비 연결되었습니다.');
+    console.log(`${MONGO_HOST} 몽고디비 연결되었습니다.`);
   });
   // 데이터 강제로 입력
-  // const newUser = new User({
-  //   user_category_name: '고등학생',
-  //   nick_name: '민영',
-  // });
+
   // newUser.save();
-  // const newGroup = new Group({
-  //   group_category: '공무원',
-  //   group_name: '너 내 도도도독',
-  // });
+  const newGroup = new Group({
+    group_category: '공무원',
+    group_name: '너 내 도도도독',
+  });
   // newGroup.save();
+  const todoDocument = new Todo({
+    user_id: '6544d9eeaabd61b4d1cf4bc5', // 실제 User ObjectId로 대체
+    title: '밥먹기',
+    content: 'Milk, eggs, and bread',
+    start_time: new Date('2023-11-05T10:00:00Z'), // 시작 시간 설정 (실제 값으로 변경)
+    end_time: new Date('2023-11-05T12:00:00Z'), // 종료 시간 설정 (실제 값으로 변경)
+    done: false,
+  });
+  todoDocument.save();
 
   // 몽고 연결시 에러발생 이벤트 리스너
   mongoose.connection.on('error', error => {

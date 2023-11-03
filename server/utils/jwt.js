@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = 'jwtSecret';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // 유저정보 객체를 전달받아 JWT를 생성 한다.
 exports.generateJwtToken = userInfo => {

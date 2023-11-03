@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = 'jwtSecret';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // 토큰 검증 미들웨어
 // 요청 헤더에서 토큰값을 확인 한후 비밀키로 검증한다.
 exports.verifyJwtToken = (req, res, next) => {
   try {
+    console.log(req.headers.authorization);
     // res.locals 에 저장한 내용은 다음 미들웨어로 전달된다.
     // verify(요청헤더에 저장된 토큰 , 비밀키)
     // console.log('req.headers.authorization>>>>', req.headers.authorization);
