@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { User, Group } = require('./schema');
-const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT } = process.env;
+const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DBNAME } = process.env;
 const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}`;
 
 const connect = () => {
@@ -10,14 +10,13 @@ const connect = () => {
   }
 
   mongoose.connect(MONGO_URL, {
-    // dbName: 'viper_local',
-    dbName: 'min0_test',
+    dbName: MONGO_DBNAME,
     // useNewUrlParser: true, // 별 의미 없음
   });
 
   // 몽고디비 연결시 이벤트 리스너
   mongoose.connection.on('connected', () => {
-    console.log('몽고디비 연결되었습니다.');
+    console.log(`${MONGO_HOST} 몽고디비 연결되었습니다.`);
   });
   // 데이터 강제로 입력
   // const newUser = new User({
