@@ -40,24 +40,21 @@ exports.getCategoryGroups = async (req, res) => {
 // 사용자별 그룹 목록을 반환하는 함수
 exports.getCategoryGroupsByUser = async (req, res) => {
   try {
-    // 토큰에서 현재유저 user_id 가져오기
+    // 토큰에서 현재 유저 user_id 가져오기
     // const userId = res.locals.decoded.userInfo.id;
-    const userId = '654389417313b02c2dd34db6';
+    const userId = '6544c1dca28767bd46ee53f4';
+
     // 사용자의 그룹 ID 목록 조회
-    // const userGroupIds = await .find({ user_id: userId }).select('group_id');
-    // 사용자의 `groups` 필드를 조회
     const userGroup = await User.findById(userId).select('groups');
+    let groups = []; // 변수 선언 및 초기화
+    console.log('userGroup은 ', userGroup);
     if (userGroup) {
       console.log('사용자의 그룹 ID 목록:', userGroup.groups);
+
       // 그룹 ID 목록을 사용하여 그룹 정보 조회 (비동기 처리)
-      try {
-        const groups = await Group.find({ _id: { $in: userGroup.groups } });
-        console.log('조회된 그룹 정보:', groups);
-        // 여기서 groups에 조회된 그룹 정보가 배열로 포함됩니다.
-      } catch (err) {
-        console.error(err);
-        // 오류 처리
-      }
+      groups = await Group.find({ _id: { $in: userGroup.groups } });
+      console.log('조회된 그룹 정보:', groups);
+      // 여기서 groups에 조회된 그룹 정보가 배열로 포함됩니다.
     } else {
       console.log('사용자를 찾을 수 없습니다.');
       // 사용자를 찾지 못한 경우에 대한 처리
@@ -69,6 +66,7 @@ exports.getCategoryGroupsByUser = async (req, res) => {
     res.status(500).send({ isSuccess: false, code: 500, error: '서버에서 오류가 발생했습니다.' });
   }
 };
+
 //그룹을 요청하는 함수
 exports.joinGroupRequest = async (req, res) => {
   try {
@@ -88,10 +86,6 @@ exports.joinGroupRequest = async (req, res) => {
       group.join_requests.push({ user_id: userId });
       await group.save();
     }
-
-    console.log('유저는', user);
-    console.log('그룹은', group);
-
     res.status(200).send({
       isSuccess: true,
       message: '그룹 가입 요청이 성공적으로 처리되었습니다.',
@@ -195,7 +189,7 @@ exports.postGroupInformation = async (req, res) => {
     // const userId = res.locals.decoded.userInfo.id;
     const userId = '6544c1dca28767bd46ee53f4';
     // 클라이언트에서 요청으로 받은 데이터 추출
-    const { name, password, description, category, dailyGoalTime, maximumNumberMember, isCameraOn } = req.body;
+    const { name, description, category, dailyGoalTime, maximumNumberMember, isCameraOn } = req.body;
     // TODO: 유저의 카테고리 그룹생성시 default로 박기??
     // TODO: multer file path -> client와 붙이면서 확인
     // const { filename } = req.file;
@@ -204,7 +198,6 @@ exports.postGroupInformation = async (req, res) => {
     const newGroup = new Group({
       group_leader: userId, //그룹장의 user objectId
       group_name: name, // 그룹 이름
-      group_password: password, // 비밀번호
       group_description: description, // 그룹 설명
       group_category: category, //카테고리
       // group_image_path: imagePath, //그룹 프로필 이미지
@@ -246,7 +239,6 @@ exports.patchGroupInformation = async (req, res) => {
     // 요청 본문에서 그룹 정보 업데이트를 위한 필드들을 가져옴
     const {
       name, // 그룹 이름
-      password, // 비밀번호
       description, // 그룹 설명
       category, // 그룹의 카테고리 이름 (User FK 값)
       imagePath, // 그룹 프로필 이미지 경로
@@ -258,7 +250,6 @@ exports.patchGroupInformation = async (req, res) => {
     // 그룹 정보 업데이트 수행
     const updatedFields = {
       group_name: name,
-      group_password: password,
       group_description: description,
       group_category: category,
       group_image_path: imagePath,

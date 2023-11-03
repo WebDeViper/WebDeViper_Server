@@ -19,7 +19,6 @@ const userSchema = new Schema({
     // 가입에 대한 승인 대기중인 그룹 리스트 배열
     {
       group: { type: Schema.Types.ObjectId, ref: 'Group' }, // 가입 신청한 그룹의 ID
-      is_approved: { type: Boolean, default: false }, // 가입 승인 여부
     },
   ],
 });
@@ -29,7 +28,6 @@ const groupSchema = new Schema({
   group_leader: { type: Schema.Types.ObjectId, ref: 'User' }, // 그룹장(User)의 ObjectId
   group_name: String, // 그룹의 이름
   group_category: String, // 그룹의 카테고리
-  group_password: String, // 그룹 패스워드
   group_description: String, // 그룹에 대한 설명
   group_image_path: { type: String, default: '/api/notyet' },
   group_maximum_member: { type: Number, default: 5 }, // 그룹의 최대 수용인원
@@ -40,7 +38,6 @@ const groupSchema = new Schema({
     // 그룹에 가입 요청한 사용자 리스트(배열)
     {
       user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 가입 신청한 유저의 _id
-      is_approved: { type: Boolean, default: false }, // 가입 승인 여부
     },
   ],
 });

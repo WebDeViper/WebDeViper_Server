@@ -49,9 +49,9 @@ router.get('/studyGroups/users/test', test.getCategoryGroupsByUser);
 //그룹 요청 기능
 router.post('/studyGroup/:groupId/join/test', test.joinGroupRequest);
 //그룹 요청 수락 기능
-router.post('/studyGroup/:groupId/membership/requests/accept/test', test.acceptGroupMembershipRequest);
+router.post('/studyGroup/:groupId/requests/accept/test', test.acceptGroupMembershipRequest);
 //그룹 요청 거절 기능
-router.post('/studyGroup/:groupId/membership/requests/reject/test', test.rejectGroupMembershipRequest);
+router.post('/studyGroup/:groupId/requests/reject/test', test.rejectGroupMembershipRequest);
 
 //그룹 생성 기능
 router.post('/studyGroup/test', test.postGroupInformation);
