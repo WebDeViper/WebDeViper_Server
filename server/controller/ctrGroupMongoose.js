@@ -107,7 +107,17 @@ exports.joinGroupRequest = async (req, res) => {
 };
 
 //그룹 요청 수락 기능 함수
-exports.acceptGroupMembershipRequest = async (req, res) => {};
+exports.acceptGroupMembershipRequest = async (req, res) => {
+  const userId = '6544a655af5774c2be0deba0';
+  const { groupId, requestId } = req.params;
+  const group = await Group.findById(groupId);
+  const user = await User.findById(userId);
+  //group.join_requests
+  await Group.updateOne({ _id: groupId }, { $pull: { join_requests: requestId } });
+  group.members.push(userId);
+  await User.updateOne({ _id: userId }, { $pull: { pending_groups: requestId } });
+  user.groups.push(groupId);
+};
 // 새 그룹 생성하는 함수
 exports.postGroupInformation = async (req, res) => {
   try {
