@@ -62,11 +62,11 @@ exports.getCategoryGroupsByUser = async (req, res) => {
       console.log('사용자를 찾을 수 없습니다.');
       // 사용자를 찾지 못한 경우에 대한 처리
     }
-    res.status(200).json({ isSuccess: true, code: 200, study_groups: groups });
+    res.status(200).send({ isSuccess: true, code: 200, study_groups: groups });
   } catch (err) {
     console.error(err);
     // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
-    res.status(500).json({ isSuccess: false, code: 500, error: '서버에서 오류가 발생했습니다.' });
+    res.status(500).send({ isSuccess: false, code: 500, error: '서버에서 오류가 발생했습니다.' });
   }
 };
 //그룹을 요청하는 함수
@@ -92,14 +92,14 @@ exports.joinGroupRequest = async (req, res) => {
     console.log('유저는', user);
     console.log('그룹은', group);
 
-    res.status(200).json({
+    res.status(200).send({
       isSuccess: true,
       message: '그룹 가입 요청이 성공적으로 처리되었습니다.',
     });
   } catch (err) {
     console.error(err);
 
-    res.status(500).json({
+    res.status(500).send({
       isSuccess: false,
       error: '서버 오류가 발생했습니다.',
     });
@@ -116,7 +116,7 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
     const user = await User.findById(userId);
 
     if (!group || !user) {
-      return res.status(404).json({
+      return res.status(404).send({
         isSuccess: false,
         error: '그룹 또는 사용자를 찾을 수 없습니다.',
       });
@@ -137,14 +137,14 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
     await group.save();
     await user.save();
 
-    return res.status(200).json({
+    return res.status(200).send({
       isSuccess: true,
       message: '그룹 멤버십 요청을 성공적으로 수락했습니다.',
     });
   } catch (err) {
     console.error(err);
 
-    return res.status(500).json({
+    return res.status(500).send({
       isSuccess: false,
       error: '서버 오류가 발생했습니다.',
     });
@@ -160,7 +160,7 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
     const user = await User.findById(userId);
 
     if (!group || !user) {
-      return res.status(404).json({
+      return res.status(404).send({
         isSuccess: false,
         error: '그룹 또는 사용자를 찾을 수 없습니다.',
       });
@@ -175,14 +175,14 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
     await group.save();
     await user.save();
 
-    return res.status(200).json({
+    return res.status(200).send({
       isSuccess: true,
       message: '그룹 멤버십 요청을 성공적으로 거절했습니다.',
     });
   } catch (err) {
     console.error(err);
 
-    return res.status(500).json({
+    return res.status(500).send({
       isSuccess: false,
       error: '서버 오류가 발생했습니다.',
     });
