@@ -62,63 +62,130 @@ exports.getCategoryGroupsByUser = async (req, res) => {
       console.log('사용자를 찾을 수 없습니다.');
       // 사용자를 찾지 못한 경우에 대한 처리
     }
-    res.status(200).json({ isSuccess: true, code: 200, study_groups: groups });
+    res.status(200).send({ isSuccess: true, code: 200, study_groups: groups });
   } catch (err) {
     console.error(err);
     // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
-    res.status(500).json({ isSuccess: false, code: 500, error: '서버에서 오류가 발생했습니다.' });
+    res.status(500).send({ isSuccess: false, code: 500, error: '서버에서 오류가 발생했습니다.' });
   }
 };
 //그룹을 요청하는 함수
 exports.joinGroupRequest = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  try {
+    const userId = '6544c1c66a2fc789f82393cf'; // 다른 사용자
+    const { groupId } = req.params; // 가입하려는 group의 object Id
+
+    // 사용자 업데이트
+    const user = await User.findById(userId);
+    if (user) {
+      user.pending_groups.push({ group: groupId });
+      await user.save();
+    }
+
+    // 그룹 업데이트
+    const group = await Group.findById(groupId);
+    if (group) {
+      group.join_requests.push({ user_id: userId });
+      await group.save();
+    }
+
+    console.log('유저는', user);
+    console.log('그룹은', group);
+
+    res.status(200).send({
+      isSuccess: true,
+      message: '그룹 가입 요청이 성공적으로 처리되었습니다.',
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).send({
+      isSuccess: false,
+      error: '서버 오류가 발생했습니다.',
+    });
+  }
+};
+
+//그룹 요청 수락 기능 함수
+exports.acceptGroupMembershipRequest = async (req, res) => {
+  const userId = '6544c1c66a2fc789f82393cf';
+  const { groupId } = req.params;
 
   try {
-    const userId = res.locals.decoded.userInfo.id; // 유저 objectId
-    const { groupId } = req.params;
+    const group = await Group.findById(groupId);
+    const user = await User.findById(userId);
 
-    const updatedUserData = {
-      pending_groups: [
-        {
-          group: groupId, // groupId는 해당 그룹의 ObjectId
-        },
-      ],
-    };
+    if (!group || !user) {
+      return res.status(404).send({
+        isSuccess: false,
+        error: '그룹 또는 사용자를 찾을 수 없습니다.',
+      });
+    }
 
-    const updatedGroupData = {
-      join_requests: [
-        {
-          user_id: userId, // userId는 그룹을 요청한 유저의 objectId
-        },
-      ],
-    };
+    // 그룹의 join_requests에서 requestId에 해당하는 문서를 찾아서 삭제
+    group.join_requests = group.join_requests.filter(request => request.user_id.toString() !== userId);
 
-    // 사용자 및 그룹 업데이트
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $push: { pending_groups: updatedUserData } },
-      { new: true }
-    ).session(session);
-    const updatedGroup = await Group.findByIdAndUpdate(
-      groupId,
-      { $push: { join_requests: updatedGroupData } },
-      { new: true }
-    ).session(session);
+    // 그룹의 멤버로 사용자 추가
+    group.members.push(userId);
 
-    await session.commitTransaction();
-    session.endSession();
+    // 사용자의 pending_groups에서 groupId에 해당하는 문서를 찾아서 삭제
+    user.pending_groups = user.pending_groups.filter(groupRequest => groupRequest.group.toString() !== groupId);
 
-    console.log('사용자가 업데이트되었습니다.');
-    console.log(updatedUser);
-    console.log('그룹이 업데이트되었습니다.');
-    console.log(updatedGroup);
+    // 사용자의 그룹 목록에 groupId 추가
+    user.groups.push(groupId);
+
+    await group.save();
+    await user.save();
+
+    return res.status(200).send({
+      isSuccess: true,
+      message: '그룹 멤버십 요청을 성공적으로 수락했습니다.',
+    });
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
-
     console.error(err);
-    // 에러 응답 보내거나 다른 작업 수행
+
+    return res.status(500).send({
+      isSuccess: false,
+      error: '서버 오류가 발생했습니다.',
+    });
+  }
+};
+// 그룹 요청 거절 기능 함수
+exports.rejectGroupMembershipRequest = async (req, res) => {
+  const userId = '6544c1c66a2fc789f82393cf';
+  const { groupId } = req.params;
+
+  try {
+    const group = await Group.findById(groupId);
+    const user = await User.findById(userId);
+
+    if (!group || !user) {
+      return res.status(404).send({
+        isSuccess: false,
+        error: '그룹 또는 사용자를 찾을 수 없습니다.',
+      });
+    }
+
+    // 그룹의 join_requests에서 requestId에 해당하는 문서를 찾아서 삭제
+    group.join_requests = group.join_requests.filter(request => request.user_id.toString() !== userId);
+
+    // 사용자의 pending_groups에서 groupId에 해당하는 문서를 찾아서 삭제
+    user.pending_groups = user.pending_groups.filter(groupRequest => groupRequest.group.toString() !== groupId);
+
+    await group.save();
+    await user.save();
+
+    return res.status(200).send({
+      isSuccess: true,
+      message: '그룹 멤버십 요청을 성공적으로 거절했습니다.',
+    });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).send({
+      isSuccess: false,
+      error: '서버 오류가 발생했습니다.',
+    });
   }
 };
 // 새 그룹 생성하는 함수
@@ -126,19 +193,21 @@ exports.postGroupInformation = async (req, res) => {
   try {
     //그룹을 생성하는 유저의 아이디 -> 그룹장
     // const userId = res.locals.decoded.userInfo.id;
-    const userId = '654389417313b02c2dd34db6';
+    const userId = '6544c1dca28767bd46ee53f4';
     // 클라이언트에서 요청으로 받은 데이터 추출
-    const { name, password, description, category, imagePath, dailyGoalTime, maximumNumberMember, isCameraOn } =
-      req.body;
+    const { name, password, description, category, dailyGoalTime, maximumNumberMember, isCameraOn } = req.body;
     // TODO: 유저의 카테고리 그룹생성시 default로 박기??
     // TODO: multer file path -> client와 붙이면서 확인
+    // const { filename } = req.file;
+    // path == 이미지를 받을 수 있는 URL
+    // const imagePath = `/api/static/profileImg/${filename}`;
     const newGroup = new Group({
       group_leader: userId, //그룹장의 user objectId
       group_name: name, // 그룹 이름
       group_password: password, // 비밀번호
       group_description: description, // 그룹 설명
       group_category: category, //카테고리
-      group_image_path: imagePath, //그룹 프로필 이미지
+      // group_image_path: imagePath, //그룹 프로필 이미지
       daily_goal_time: dailyGoalTime, // 일일 목표 시간
       group_maximum_member: maximumNumberMember, // 최대 회원 수
       is_camera_on: isCameraOn, // 카메라 상태
@@ -214,32 +283,57 @@ exports.patchGroupInformation = async (req, res) => {
     res.status(500).send({ isSuccess: false, code: 500, error: err });
   }
 };
-
+//유저 개인이 그룹에서 나올때 (그룹 탈퇴)
 exports.deleteGroup = async (req, res) => {
   try {
     console.log('실행');
-    const userId = '654389417313b02c2dd34db6';
+    const userId = '6544c1c66a2fc789f82393cf';
     // 요청 파라미터에서 그룹 ID를 가져옴
     const { groupId } = req.params;
 
     // 그룹 삭제 수행
-    const deletedGroup = await Group.findByIdAndDelete(groupId);
+    const deletedGroup = await Group.findById(groupId);
 
     if (deletedGroup) {
-      // 그룹이 성공적으로 삭제되었을 경우
-      console.log('그룹 삭제 성공:', deletedGroup);
-      // 그룹을 삭제한 후에 사용자의 groups 필드에서도 삭제해야 합니다.
+      // 사용자의 groups 필드에서도 삭제해야 합니다.
       await User.updateOne({ _id: userId }, { $pull: { groups: groupId } });
+      await Group.updateOne({ _id: groupId }, { $pull: { members: userId } });
 
-      res.status(204).send({ isSuccess: true, code: 204, msg: '스터디 그룹을 삭제했습니다.' });
+      res.status(200).send({ isSuccess: true, code: 204, msg: '해당 스터디 그룹에서 탈퇴했습니다.' });
     } else {
       // 그룹을 찾지 못한 경우 또는 삭제 실패한 경우
-      console.log('그룹을 찾을 수 없거나 삭제 실패:', deletedGroup);
-      res.status(400).send({ isSuccess: false, code: 400, error: '그룹 삭제에 실패했습니다.' });
+      console.log('그룹을 찾을 수 없음:', deletedGroup);
+      res.status(400).send({ isSuccess: false, code: 400, error: '그룹 탈퇴에 실패했습니다.' });
     }
   } catch (err) {
     console.error(err);
     // 서버 오류가 발생한 경우 (상태코드 500과 에러 메시지 반환)
     res.status(500).send({ isSuccess: false, code: 500, error: '서버 오류가 발생했습니다.' });
+  }
+};
+//그룹장이 그룹 삭제
+exports.removeAllMembersFromGroup = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    // 그룹의 members 배열을 비움
+    const updatedGroup = await Group.findByIdAndUpdate(groupId, { $set: { members: [] } });
+
+    if (!updatedGroup) {
+      return res.status(404).send({ isSuccess: false, error: '그룹을 찾을 수 없습니다.' });
+    }
+
+    // 그룹의 members 배열에서 각 멤버를 가져와서 해당 그룹을 삭제
+    const groupMembers = updatedGroup.members;
+    for (const memberId of groupMembers) {
+      // 멤버의 groups 배열에서 해당 그룹을 삭제
+      await User.findByIdAndUpdate(memberId, { $pull: { groups: groupId } });
+    }
+    // 그룹 스키마의 다큐먼트 삭제
+    await Group.findByIdAndDelete(groupId);
+    res.status(200).send({ isSuccess: true, message: '그룹에서 모든 멤버를 삭제했습니다.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ isSuccess: false, error: '서버 오류가 발생했습니다.' });
   }
 };

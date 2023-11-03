@@ -15,6 +15,8 @@ router.use('/api/user', routerUser);
 
 router.use('/api', routerNotice);
 
+// 공지사항 라우터
+
 // 테스트 페이지 렌더링
 router.use('/test', (req, res) => {
   res.render('index');

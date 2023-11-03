@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { User, Group } = require('./schema');
 const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DBNAME } = process.env;
-const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}`;
+const MONGO_URL = `mongodb+srv://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}`;
 
 const connect = () => {
   // 개발 환경에서만 몽구스가 생성하는 쿼리내용 확인
@@ -11,7 +11,6 @@ const connect = () => {
 
   mongoose.connect(MONGO_URL, {
     dbName: MONGO_DBNAME,
-    // useNewUrlParser: true, // 별 의미 없음
   });
 
   // 몽고디비 연결시 이벤트 리스너
@@ -20,7 +19,7 @@ const connect = () => {
   });
   // 데이터 강제로 입력
   // const newUser = new User({
-  //   user_category_name: '공무원',
+  //   user_category_name: '고등학생',
   //   nick_name: '민영',
   // });
   // newUser.save();

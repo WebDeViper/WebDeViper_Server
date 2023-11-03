@@ -67,8 +67,8 @@ const timerSchema = new Schema({
     date: String, // 오늘 날짜
     data: [
       {
-        title: String, // 과목
-        timer: { type: Number, default: 0 }, // 초 단위로 공부한 시간
+        title: { type: String }, // 과목
+        timer: { type: Number }, // 초 단위로 공부한 시간
       },
     ],
   },
@@ -88,7 +88,8 @@ const todoSchema = new Schema({
 const noticeSchema = new Schema({
   title: String, // 공지사항 제목
   content: String, // 공지사항 내용
-  created_at: { type: Date, default: Date.now },
+  created_at: { type: Date, default: Date.now }, //등록날짜
+  updated_at: { type: Date, default: Date.now }, //수정날짜
 });
 
 const User = mongoose.model('User', userSchema, 'user');
