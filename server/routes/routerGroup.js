@@ -48,11 +48,18 @@ router.get('/studyGroups/test', test.getCategoryGroups);
 router.get('/studyGroups/users/test', test.getCategoryGroupsByUser);
 //그룹 요청 기능
 router.post('/studyGroup/:groupId/join/test', test.joinGroupRequest);
-// //그룹 생성 기능
+//그룹 요청 수락/거절 기능
+// /api/groups/{group_id}/membership/requests/{request_id}/accept
+// /api/groups/{group_id}/membership/requests/{request_id}/reject
+router.post('/studyGroup/:groupId//membership/requests/{request_id}/accept/test', test.acceptGroupMembershipRequest);
+
+//그룹 생성 기능
 router.post('/studyGroup/test', test.postGroupInformation);
 //그룹 옵션 수정 기능
 router.patch('/studyGroup/:groupId/test', test.patchGroupInformation);
-// //그룹 삭제 기능
+//그룹 탈퇴 기능
 router.delete('/studyGroup/:groupId/test', test.deleteGroup);
+//그룹장이 그룹을 삭제했을 때
+router.delete('/studyGroup/:groupId/members/test', test.removeAllMembersFromGroup);
 
 module.exports = router;

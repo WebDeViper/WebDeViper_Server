@@ -21,8 +21,8 @@ const connect = () => {
   });
   // 데이터 강제로 입력
   // const newUser = new User({
-  //   user_category_name: '공무원',
-  //   nick_name: '민영',
+  //   user_category_name: '고등학생',
+  //   nick_name: '미녕',
   // });
   // newUser.save();
   // const newGroup = new Group({
