@@ -76,7 +76,7 @@ const timerSchema = new Schema({
 
 // Todo 스키마
 const todoSchema = new Schema({
-  user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 투두 작성자의 _id
+  user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // 투두 작성자의 _id
   title: String,
   content: String,
   start_time: { type: Date },
