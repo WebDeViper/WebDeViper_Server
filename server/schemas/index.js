@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const { User, Group } = require('./schema');
 const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT } = process.env;
-const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}`;
+// const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}`;
+const MONGO_URL = `mongodb://localhost:27017`;
 
 const connect = () => {
   // 개발 환경에서만 몽구스가 생성하는 쿼리내용 확인
@@ -11,7 +12,7 @@ const connect = () => {
 
   mongoose.connect(MONGO_URL, {
     // dbName: 'viper_local',
-    dbName: 'min0_test',
+    dbName: 'seeun_apiserver_test',
     // useNewUrlParser: true, // 별 의미 없음
   });
 
