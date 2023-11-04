@@ -1,5 +1,4 @@
-const { Notice, User } = require('../schemas/schema');
-const mongoose = require('mongoose');
+const { Notice, User, mongoose } = require('../schemas/schema');
 
 exports.getNotice = async (req, res) => {
   try {

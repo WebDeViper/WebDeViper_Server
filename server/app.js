@@ -3,7 +3,6 @@ dotenv.config();
 const { PORT } = process.env;
 const path = require('path');
 const express = require('express');
-const { sequelize } = require('./models/index');
 const connect = require('./schemas/index');
 const cookieParser = require('cookie-parser');
 const indexRouter = require('./routes/index');
@@ -26,11 +25,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser()); // 서버에서 클라이언트로 응답을 보낼 때, 쿠키를 설정하려면 Express 응답 객체(res.cookie())를 사용할 수 있도
 
-//삭제 예정
-app.set('view engine', 'ejs');
-app.use('/views', express.static(__dirname + '/views'));
-/////////
-
 // 정적 파일 서빙
 app.use('/api/static', express.static(path.join(__dirname, 'static')));
 
@@ -44,11 +38,7 @@ app.get('*', (req, res) => {
     msg: '요청경로를 찾을 수 없습니다.',
   });
 });
+
 app.listen(PORT, () => {
   console.log(`server open on port ${PORT}`);
 });
-// sequelize.sync({ force: false }).then(() => {
-//   app.listen(PORT, () => {
-//     console.log(`server open on port ${PORT}`);
-//   });
-// });

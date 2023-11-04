@@ -1,5 +1,4 @@
-const { User, Group } = require('../schemas/schema');
-const mongoose = require('mongoose');
+const { User, Group, mongoose } = require('../schemas/schema');
 
 // 카테고리에 따른 그룹 목록을 반환하는 함수
 exports.getCategoryGroups = async (req, res) => {
