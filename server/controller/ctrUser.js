@@ -48,6 +48,8 @@ exports.kakaoAuth = async (req, res) => {
       nickName: null,
       profileImg: null,
       email: null,
+      statusMsg: null,
+      isServiceAdmin: null,
     };
 
     // 회원가입 여부에 따라 userInfo 세팅
@@ -59,6 +61,8 @@ exports.kakaoAuth = async (req, res) => {
         nickName: exUser.nick_name,
         profileImg: exUser.user_profile_image_path,
         email: exUser.email,
+        statusMsg: exUser.status_message,
+        isServiceAdmin: exUser.is_service_admin,
       };
     } else {
       // 가입이력이 없으니 회원가입 처리 하기 위해 DB에 저장하고 그걸로 userInfo 세팅
@@ -75,6 +79,8 @@ exports.kakaoAuth = async (req, res) => {
         nickName: newUser.nick_name,
         profileImg: newUser.user_profile_image_path,
         email: newUser.email,
+        statusMsg: newUser.status_message,
+        isServiceAdmin: newUser.is_service_admin,
       };
     }
 
@@ -131,6 +137,7 @@ exports.patchUser = async (req, res) => {
       profileImg: result.user_profile_image_path,
       email: result.email,
       statusMsg: result.status_message,
+      isServiceAdmin: result.is_service_admin,
     };
 
     // 변경된 userInfo로 jwt 재생성
