@@ -3,7 +3,6 @@ dotenv.config();
 const { PORT } = process.env;
 const path = require('path');
 const express = require('express');
-const { sequelize } = require('./models/index');
 const connect = require('./schemas/index');
 const cookieParser = require('cookie-parser');
 const indexRouter = require('./routes/index');
@@ -16,20 +15,12 @@ connect();
 // cors 미들웨어
 app.use(
   cors({
-    // origin: '*',
-    origin: true, // 요청을 보내온 origin이 Access-Control-Allow-Origin의 값으로 설정된다
-    // origin: ['http://localhost:3000', 'https://localhost:3000'], // 허용할 오리진
-    // credentials: true, // 쿠키를 사용하려면 true로 설정
+    origin: process.env.NODE_ENV !== 'production' ? true : ['http://13.124.233.17', 'https://13.124.233.17'],
   })
 );
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser()); // 서버에서 클라이언트로 응답을 보낼 때, 쿠키를 설정하려면 Express 응답 객체(res.cookie())를 사용할 수 있도
-
-//삭제 예정
-app.set('view engine', 'ejs');
-app.use('/views', express.static(__dirname + '/views'));
-/////////
 
 // 정적 파일 서빙
 app.use('/api/static', express.static(path.join(__dirname, 'static')));
@@ -44,11 +35,7 @@ app.get('*', (req, res) => {
     msg: '요청경로를 찾을 수 없습니다.',
   });
 });
+
 app.listen(PORT, () => {
   console.log(`server open on port ${PORT}`);
 });
-// sequelize.sync({ force: false }).then(() => {
-//   app.listen(PORT, () => {
-//     console.log(`server open on port ${PORT}`);
-//   });
-// });
