@@ -103,7 +103,7 @@ exports.getAllRooms = async () => {
 
 // // 사용자가 채팅방을 나가는 함수
 // exports.leaveRoom = async user => {
-//   const room = await Room.findById(user.room);
+//   const room = await Room.findById(user.rooms);
 //   if (!room) {
 //     throw new Error('채팅방을 찾을 수 없음');
 //   }

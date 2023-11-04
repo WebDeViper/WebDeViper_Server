@@ -73,23 +73,23 @@ module.exports = function (io) {
       }
     });
 
-    // // 사용자가 채팅방을 나가는 것을 처리합니다.
-    // socket.on('leaveRoom', async (_, cb) => {
-    //   try {
-    //     const user = await userController.checkUser(socket.id);
-    //     await userController.leaveRoom(user);
-    //     const leaveMessage = {
-    //       chat: `${user.nick_name}님이 나가셨습니다.`,
-    //       user: { id: null, name: 'system' },
-    //     };
-    //     socket.broadcast.to(user.room.toString()).emit('message', leaveMessage);
-    //     io.emit('rooms', await userController.getAllRooms());
-    //     socket.leave(user.room.toString());
-    //     cb({ ok: true });
-    //   } catch (error) {
-    //     cb({ ok: false, message: error.message });
-    //   }
-    // });
+    // 사용자가 채팅방을 나가는 것을 처리합니다.
+    socket.on('leaveRoom', async (_, cb) => {
+      try {
+        const user = await userController.checkUser(socket.id);
+        // await userController.leaveRoom(user);
+        const leaveMessage = {
+          chat: `${user.nick_name}님이 나가셨습니다.`,
+          user: { id: null, name: 'system' },
+        };
+        socket.broadcast.to(user.rooms.toString()).emit('message', leaveMessage);
+        io.emit('rooms', await userController.getAllRooms());
+        socket.leave(user.rooms.toString());
+        cb({ ok: true });
+      } catch (error) {
+        cb({ ok: false, message: error.message });
+      }
+    });
 
     // // 특정 채팅방의 채팅 로그를 가져오는 것을 처리합니다.
     // socket.on('getChatLog', async (rid, cb) => {
