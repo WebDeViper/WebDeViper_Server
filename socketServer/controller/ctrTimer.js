@@ -1,4 +1,4 @@
-const { Timer } = require('../schemas/viper_beta');
+const { Timer, User } = require('../schemas/viper_beta');
 const moment = require('moment-timezone');
 
 const getKoreaDate = () => {
@@ -10,10 +10,11 @@ const getKoreaDate = () => {
 // Now you can use getKoreaDate() to get the start of the current day in the Asia/Seoul timezone
 
 exports.getUserGroups = async userId => {
-  const timer = await Timer.findOne({ user_id: userId }).populate('user_id', 'groups').exec();
-
-  console.log('**********', timer.user_id.groups);
-  return timer.user_id.groups;
+  // const timer = await Timer.findOne({ user_id: userId }).populate('user_id', 'groups').exec();
+  //이렇게 하면 오늘 공부 처음 시작한 경우에는 찾아올 수 없어서 undefined 뜸
+  const user = await User.findById(userId);
+  console.log('###########', user.groups, '#############');
+  return user.groups; //유저가 속한 그룹을 가져옵니다. 배열 형태로...
 };
 
 exports.hasDateSubjectTimer = async (userId, subject) => {
