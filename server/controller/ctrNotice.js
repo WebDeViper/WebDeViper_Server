@@ -3,9 +3,15 @@ const mongoose = require('mongoose');
 
 exports.getNotice = async (req, res) => {
   try {
+    const currentUserId = res.locals.decoded.userInfo.id;
+    // const currentUserId = '6544c9106ec46b098ac68132';
+    const isAdmin = await User.findById(currentUserId);
+    // console.log(userInfo);
     const result = await Notice.find();
     console.log(result);
+
     res.status(200).send({ notices: result });
+
   } catch (err) {
     console.log(err);
     res.status(500).send('SERVER ERROR');
@@ -110,7 +116,7 @@ exports.getNoticeDetail = async (req, res) => {
   try {
     const result = await Notice.findById(req.params.notice_id);
     if (result) {
-      res.status(200).send({ result, message: '공지사항 찾기 성공!' });
+      res.status(200).send({ result, message: '공지사항 찾기 성공!', isAdmin: user.is_service_admin });
     } else {
       res.status(400).send({ message: '존재하지 않는 공지사항입니다.' });
     }
