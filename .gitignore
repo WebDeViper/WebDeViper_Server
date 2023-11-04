@@ -6,6 +6,6 @@
 .env
 node_modules/
 package-lock.json
-client/
+# client/
 #mac 
 .DS_Store

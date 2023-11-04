@@ -12,4 +12,4 @@ const roomSchema = new mongoose.Schema(
   },
   { timestamp: true }
 );
-module.exports = mongoose.model('Room', roomSchema);
+// module.exports = mongoose.model('Room', roomSchema);

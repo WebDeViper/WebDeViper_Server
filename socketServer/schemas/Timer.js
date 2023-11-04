@@ -46,4 +46,4 @@ timerSchema.add({
 //   .catch(err => {
 //     console.error('데이터 추가 중 오류 발생: ', err);
 //   });
-module.exports = mongoose.model('timer', timerSchema);
+// module.exports = mongoose.model('timer', timerSchema);
