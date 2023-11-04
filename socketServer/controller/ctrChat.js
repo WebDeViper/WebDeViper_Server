@@ -1,7 +1,7 @@
 // const User = require('../schemas/User');
 // const Chat = require('../schemas/Chat');
 // const Room = require('../schemas/Room');
-const { User, Group } = require('../schemas/viper_beta');
+const { User, Group, Room } = require('../schemas/viper_beta');
 
 // 사용자 정보를 저장하거나 업데이트하는 함수
 exports.saveUser = async (userName, socketid) => {
@@ -29,6 +29,25 @@ exports.checkUser = async socketid => {
   return user;
 };
 
+// 사용자가 채팅방에 참여하는 함수
+exports.joinRoom = async (roomId, user) => {
+  const room = await Room.findById(roomId);
+  if (!room) {
+    throw new Error('해당 방이 없습니다.');
+  }
+
+  if (!room.members.includes(user._id)) {
+    console.log('해당 그룹의 유저가 아닙니다.');
+  }
+
+  if (!user.rooms.includes(roomId)) {
+    user.rooms.push(roomId);
+    await user.save();
+    console.log('룸 아이디 추가 완료');
+  } else {
+    console.log('이미 룸 아이디가 존재합니다.');
+  }
+};
 // // 메시지를 저장하는 함수
 // exports.saveChat = async (message, user) => {
 //   // 현재 시각을 UTC 시간대로 얻어옴.
@@ -76,11 +95,11 @@ exports.checkUser = async socketid => {
 //   }
 // };
 
-// // 모든 채팅방의 목록을 반환하는 함수
-// exports.getAllRooms = async () => {
-//   const roomList = await Room.find({});
-//   return roomList;
-// };
+// 모든 채팅방의 목록을 반환하는 함수
+exports.getAllRooms = async () => {
+  const roomList = await Room.find({});
+  return roomList;
+};
 
 // // 사용자가 채팅방을 나가는 함수
 // exports.leaveRoom = async user => {
@@ -90,19 +109,4 @@ exports.checkUser = async socketid => {
 //   }
 //   room.members.remove(user._id);
 //   await room.save();
-// };
-
-// // 사용자가 채팅방에 참여하는 함수
-// exports.joinRoom = async (roomId, user) => {
-//   const room = await Room.findById(roomId);
-//   // console.log('해당하는 방 리스트 findById', room);
-//   if (!room) {
-//     throw new Error('해당 방이 없습니다.');
-//   }
-//   if (!room.members.includes(user._id)) {
-//     room.members.push(user._id);
-//     await room.save();
-//   }
-//   user.room = roomId;
-//   await user.save();
 // };

@@ -25,22 +25,6 @@ module.exports = function (io) {
       }
     });
 
-    // 채팅방이 존재하지 않는 경우, 기본 채팅방을 생성합니다.
-    // Group.find({
-    //   $or: [{ room: '공무원' }, { room: '취준생' }, { room: '연습생' }],
-    // }).then(rooms => {
-    //   if (rooms.length === 0) {
-    //     // 방이 없는 경우, 기본 채팅방을 세 개 생성합니다.
-    //     Room.insertMany([
-    //       { room: '공무원', members: [] },
-    //       { room: '취준생', members: [] },
-    //       { room: '연습생', members: [] },
-    //     ])
-    //       .then(() => console.log('기본 채팅방이 생성되었습니다.'))
-    //       .catch(error => console.error(error));
-    //   }
-    // });
-
     // 사용자 로그인을 처리합니다.
     socket.on('login', async (userName, cb) => {
       try {
@@ -60,27 +44,34 @@ module.exports = function (io) {
       }
     });
 
-    // // 연결된 클라이언트에 채팅방 목록을 보냅니다.
-    // socket.emit('rooms', await userController.getAllRooms());
+    // 연결된 클라이언트에 채팅방 목록을 보냅니다.
+    socket.emit('rooms', await userController.getAllRooms());
 
-    // // 사용자가 채팅방에 참여하는 것을 처리합니다.
-    // socket.on('joinRoom', async (joinUser, rid, cb) => {
-    //   try {
-    //     await userController.saveUser(joinUser.nick_name, socket.id);
-    //     const user = await userController.checkUser(socket.id);
-    //     await userController.joinRoom(rid, user);
-    //     socket.join(user.room.toString());
-    //     const welcomeMessage = {
-    //       chat: `${user.nick_name}님이 입장하셨습니다.`,
-    //       user: { id: null, name: 'system' },
-    //     };
-    //     io.to(user.room.toString()).emit('message', welcomeMessage);
-    //     io.emit('rooms', await userController.getAllRooms());
-    //     cb({ ok: true, data: user });
-    //   } catch (error) {
-    //     cb({ ok: false, error: error.message });
-    //   }
-    // });
+    // 사용자가 채팅방에 참여하는 것을 처리합니다.
+    socket.on('joinRoom', async (joinUser, rid, cb) => {
+      try {
+        await userController.saveUser(joinUser.nick_name, socket.id);
+        const user = await userController.checkUser(socket.id);
+
+        // user.rooms 초기화
+        user.rooms = [];
+
+        await userController.joinRoom(rid, user);
+
+        // 'user.rooms' 값이 설정된 이후에 'socket.join' 호출
+        socket.join(user.rooms.toString());
+
+        const welcomeMessage = {
+          chat: `${user.nick_name}님이 입장하셨습니다.`,
+          user: { id: null, name: 'system' },
+        };
+        io.to(user.rooms.toString()).emit('message', welcomeMessage);
+        io.emit('rooms', await userController.getAllRooms());
+        cb({ ok: true, data: user });
+      } catch (error) {
+        cb({ ok: false, error: error.message });
+      }
+    });
 
     // // 사용자가 채팅방을 나가는 것을 처리합니다.
     // socket.on('leaveRoom', async (_, cb) => {
