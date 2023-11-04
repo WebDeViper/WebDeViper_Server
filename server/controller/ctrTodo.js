@@ -1,11 +1,10 @@
-const { Todo } = require('../schemas/schema');
-const mongoose = require('mongoose');
+const { Todo, mongoose } = require('../schemas/schema');
 
 exports.getTodoList = async (req, res) => {
   try {
     // 토큰값에서 user_id 가져옴
-    // const currentUserId = res.locals.decoded.userInfo.id;
-    const currentUserId = '6544d9eeaabd61b4d1cf4bc5';
+    const currentUserId = res.locals.decoded.userInfo.id;
+    // const currentUserId = '6544d9eeaabd61b4d1cf4bc5';
 
     if (req.query) {
       // console.log('query>>', req.query); // month, year
