@@ -31,13 +31,10 @@ exports.getTodoList = async (req, res) => {
 exports.postTodo = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '6544cc034f18de981a274777';
 
+    // 시간 설정
     const startTime = new Date(req.body.start_time);
-    startTime.setHours(startTime.getHours() + 9);
-
-    const endTime = new Date(req.body.start_time);
-    endTime.setHours(endTime.getHours() + 9);
+    const endTime = new Date(req.body.end_time);
 
     const newTodo = new Todo({
       user_id: currentUserId,
@@ -63,17 +60,14 @@ exports.patchTodo = async (req, res) => {
     const { done, start_time, end_time, content, title } = req.body;
 
     const startTime = new Date(req.body.start_time);
-    startTime.setHours(startTime.getHours() + 9);
-
-    const endTime = new Date(req.body.start_time);
-    endTime.setHours(endTime.getHours() + 9);
+    const endTime = new Date(req.body.end_time);
 
     const updatedTodoData = {
       title,
       start_time: startTime,
       content,
       end_time: endTime,
-      updated_at: new Date().setHours(new Date().getHours() + 9),
+      updated_at: new Date(),
       // done: done,
     };
 

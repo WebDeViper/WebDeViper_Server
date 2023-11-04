@@ -78,6 +78,7 @@ const todoSchema = new Schema({
   content: String,
   start_time: { type: Date },
   end_time: { type: Date },
+  updated_at: { type: Date },
   // done: Boolean,
 });
 
@@ -87,13 +88,11 @@ const noticeSchema = new Schema({
   content: String, // 공지사항 내용
   created_at: {
     type: Date,
-    default: new Date().setHours(new Date().getHours() + 9),
-    // 9시간을 밀리초로 변환하여 더함 최초값만 그렇고 이후에는 데이터 생성/수정 시에 변환된 숫자를 넣어야함
+    default: Date.now,
   }, //등록날짜
   updated_at: {
     type: Date,
-    default: new Date().setHours(new Date().getHours() + 9),
-    // 9시간을 밀리초로 변환하여 더함 최초값만 그렇고 이후에는 데이터 생성/수정 시에 변환된 숫자를 넣어야함
+    default: Date.now,
   },
 });
 
