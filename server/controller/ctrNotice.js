@@ -9,7 +9,9 @@ exports.getNotice = async (req, res) => {
     // console.log(userInfo);
     const result = await Notice.find();
     console.log(result);
-    res.status(200).send({ notices: result, isAdmin: isAdmin.is_service_admin });
+
+    res.status(200).send({ notices: result });
+
   } catch (err) {
     console.log(err);
     res.status(500).send('SERVER ERROR');
@@ -22,13 +24,17 @@ exports.postNotice = async (req, res) => {
     // const currentUserId = '6544c9106ec46b098ac68132';
     const isAdmin = await User.findById(currentUserId);
     console.log(req.body);
-    const notice = new Notice({
-      title: req.body.title,
-      content: req.body.content,
-    });
-    await notice.save();
-    console.log('result', notice);
-    res.send({ result: notice, message: '공지사항이 성공적으로 생성되었습니다.' });
+    if (isAdmin.is_service_admin) {
+      const notice = new Notice({
+        title: req.body.title,
+        content: req.body.content,
+      });
+      await notice.save();
+      console.log('result', notice);
+      res.send({ result: notice, message: '공지사항이 성공적으로 생성되었습니다.' });
+    } else {
+      res.status(400).send({ message: '공지사항 등록 권한이 없습니다.' });
+    }
   } catch (err) {
     console.log(err);
     res.status(500).send('SERVER ERROR');
@@ -108,9 +114,6 @@ exports.deleteNotice = async (req, res) => {
 
 exports.getNoticeDetail = async (req, res) => {
   try {
-    const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '6544c9106ec46b098ac68132';
-    const user = await User.findById(currentUserId);
     const result = await Notice.findById(req.params.notice_id);
     if (result) {
       res.status(200).send({ result, message: '공지사항 찾기 성공!', isAdmin: user.is_service_admin });
