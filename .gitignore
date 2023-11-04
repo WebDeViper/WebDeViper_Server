@@ -1,7 +1,7 @@
 # sequelize <--> DB 연결정보 
 
-!server/config/.gitkeep
-server/config/config.json
+# !server/config/.gitkeep
+# server/config/config.json
 
 .env
 node_modules/
