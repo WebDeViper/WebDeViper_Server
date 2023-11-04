@@ -62,7 +62,7 @@ exports.patchTodo = async (req, res) => {
       content,
       end_time,
       updated_at: new Date(),
-      done: done,
+      // done: done,
     };
 
     const result = await Todo.updateOne(

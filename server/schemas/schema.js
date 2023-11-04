@@ -78,7 +78,7 @@ const todoSchema = new Schema({
   content: String,
   start_time: { type: Date },
   end_time: { type: Date },
-  done: Boolean,
+  // done: Boolean,
 });
 
 // Notice 스키마
