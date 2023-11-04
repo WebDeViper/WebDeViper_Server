@@ -60,7 +60,8 @@ const chatSchema = new Schema({
 
 // Timer 스키마
 const timerSchema = new Schema({
-  user_id: { type: Schema.Types.ObjectId, ref: 'User' },
+  user_id: { type: String, ref: 'User' },
+  total_time: { type: Number },
   daily: {
     date: String, // 오늘 날짜
     data: [
