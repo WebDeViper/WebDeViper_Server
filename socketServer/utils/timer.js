@@ -2,12 +2,15 @@ const timerController = require('../controller/ctrTimer');
 const { User, Timer } = require('../schemas/viper_beta.js');
 
 module.exports = function (io) {
-  io.on('connection', async socket => {
+  const timerSpace = io.of('/stopwatch'); //timer 네임스페이스 지정정
+  timerSpace.on('connection', async socket => {
     console.log('client is connected!', socket.id);
     socket.on('start_watch', async data => {
       // 여기서 data 안에 userNickname 및 roomNickname이 포함되어 있다고 가정
       const { userId, subject } = data;
 
+      const user_groups = await timerController.getUserGroups(userId);
+      console.log('과연 유저의 그룹을 가져왔을까!!!', user_groups);
       // 이제 userNickname 및 roomNickname 변수를 사용할 수 있음
       console.log(userId, subject);
       try {
@@ -16,7 +19,7 @@ module.exports = function (io) {
 
         if (has_date_subject_timer) {
           // pause->start인경우
-          io.emit('myStopwatchStart-to-Other', {
+          timerSpace.emit('myStopwatchStart-to-Other', {
             userId,
             // roomNickname,
             subject,
@@ -26,7 +29,7 @@ module.exports = function (io) {
         } else {
           //그냥 start인 경우
           const timer = await timerController.saveStartWatch(userId, subject);
-          io.emit('myStopwatchStart-to-Other', {
+          timerSpace.emit('myStopwatchStart-to-Other', {
             userId,
             // roomNickname,
             subject,
@@ -56,7 +59,7 @@ module.exports = function (io) {
       console.log('pauseevent!!!', userId, subject, time);
       try {
         const timer = await timerController.updateStopWatch(userId, subject, time);
-        io.emit('myStopwatchPause-to-Other', {
+        timerSpace.emit('myStopwatchPause-to-Other', {
           userId,
           // roomNickname,
           subject,
@@ -72,7 +75,7 @@ module.exports = function (io) {
       try {
         const time = 0;
         const timer = await timerController.updateStopWatch(userId, subject, time);
-        io.emit('myStopwatchPause-to-Other', {
+        timerSpace.emit('myStopwatchPause-to-Other', {
           userId,
           // roomNickname,
           subject,

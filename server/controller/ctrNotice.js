@@ -18,11 +18,6 @@ exports.getNotice = async (req, res) => {
 
 exports.postNotice = async (req, res) => {
   try {
-    // const currentUserId = res.locals.decoded.userInfo.id;
-    // // const currentUserId = '6544c9106ec46b098ac68132';
-    // const isAdmin = await User.findById(currentUserId);
-    console.log(req.body);
-
     const notice = new Notice({
       title: req.body.title,
       content: req.body.content,
@@ -38,12 +33,13 @@ exports.postNotice = async (req, res) => {
 
 exports.patchNotice = async (req, res) => {
   try {
-    // const currentUserId = res.locals.decoded.userInfo.id;
+    const currentUserId = res.locals.decoded.userInfo.id;
     // const currentUserId = '6544c9106ec46b098ac68132';
     // const user = await User.findById(currentUserId);
     // if (user.is_service_admin) {
     console.log(req.query.notice_id);
     console.log(req.body);
+
     if (req.query.notice_id) {
       const result = await Notice.findByIdAndUpdate(
         req.query.notice_id,

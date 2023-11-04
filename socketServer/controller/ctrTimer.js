@@ -9,6 +9,13 @@ const getKoreaDate = () => {
 };
 // Now you can use getKoreaDate() to get the start of the current day in the Asia/Seoul timezone
 
+exports.getUserGroups = async userId => {
+  const timer = await Timer.findOne({ user_id: userId }).populate('user_id', 'groups').exec();
+
+  console.log('**********', timer.user_id.groups);
+  return timer.user_id.groups;
+};
+
 exports.hasDateSubjectTimer = async (userId, subject) => {
   const koreaDate = getKoreaDate();
 
@@ -43,11 +50,11 @@ exports.hasDateSubjectTimer = async (userId, subject) => {
   }
 };
 
-const updateTimerData = async (user_id, subject, time) => {
+const updateTimerData = async (userId, subject, time) => {
   const koreaDate = getKoreaDate();
 
   const result = await Timer.findOne({
-    user_id,
+    user_id: userId,
     'daily.date': koreaDate,
   });
 
@@ -67,7 +74,7 @@ const updateTimerData = async (user_id, subject, time) => {
     console.log('Data has been updated:', result);
   } else {
     const newTimer = new Timer({
-      user_id,
+      user_id: userId,
       daily: {
         date: koreaDate,
         data: [

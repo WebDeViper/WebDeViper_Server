@@ -45,23 +45,29 @@ const groupSchema = new Schema({
 
 // Room 스키마
 const roomSchema = new Schema({
+  group: { type: Schema.Types.ObjectId, ref: 'Group' },
+  room: { type: String },
   members: [{ type: Schema.Types.ObjectId, ref: 'User' }], // User 모델을 참조  created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });
 
 // Chat 스키마
 const chatSchema = new Schema({
-  sendAt: { type: Date, default: Date.now },
-  user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 사용자 id
+  chat: { type: String },
+  sender: { type: String },
+  send_at: { type: Date, default: Date.now },
+  user: {
+    user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 사용자 id
+    name: { type: String },
+  },
   room_id: { type: Schema.Types.ObjectId, ref: 'Room' },
-  created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now },
 });
 
 // Timer 스키마
+
 const timerSchema = new Schema({
   user_id: { type: String, ref: 'User' },
-  total_time: { type: Number },
+  total_time: { type: Number, default: 0 },
   daily: {
     date: String, // 오늘 날짜
     data: [
@@ -98,4 +104,4 @@ const Timer = mongoose.model('Timer', timerSchema, 'timer');
 const Todo = mongoose.model('Todo', todoSchema, 'todo');
 const Notice = mongoose.model('Notice', noticeSchema, 'notice');
 
-module.exports = { User, Room, Chat, Group, Timer, Todo, Notice, mongoose };
+module.exports = { User, Room, Chat, Timer, Group, Todo, Notice, mongoose };

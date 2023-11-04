@@ -1,26 +1,27 @@
 const userController = require('../controller/ctrChat'); // 사용자 컨트롤러를 가져옵니다.
-const User = require('../schemas/User'); // User 스키마를 가져옵니다.
-const Room = require('../schemas/Room'); // Room 스키마를 가져옵니다.
+const { User, Group, Room, mongoose } = require('../schemas/viper_beta');
 
 module.exports = function (io) {
+  const chatSpace = io.of('/chat');
   let name; // 사용자의 이름을 저장하는 변수
-
-  io.on('connection', async socket => {
+  chatSpace.on('connection', async socket => {
     console.log('client is connected', socket.id);
+    // 모든 그룹을 조회
+    const groups = await Group.find({}).exec();
 
-    // 채팅방이 존재하지 않는 경우, 기본 채팅방을 생성합니다.
-    Room.find({
-      $or: [{ room: '공무원' }, { room: '취준생' }, { room: '연습생' }],
-    }).then(rooms => {
-      if (rooms.length === 0) {
-        // 방이 없는 경우, 기본 채팅방을 세 개 생성합니다.
-        Room.insertMany([
-          { room: '공무원', members: [] },
-          { room: '취준생', members: [] },
-          { room: '연습생', members: [] },
-        ])
-          .then(() => console.log('기본 채팅방이 생성되었습니다.'))
-          .catch(error => console.error(error));
+    // 각 그룹에 대해 room 문서 생성 및 동기화
+    groups.forEach(async group => {
+      const roomData = {
+        group: group._id, // 그룹의 ID 참조
+        room: group.group_name, // 방 이름을 그룹 이름으로 설정
+        members: group.members, // 그룹의 멤버를 그대로 복사
+      };
+
+      try {
+        const savedRoom = await Room.findOneAndUpdate({ room: group.group_name }, roomData, { upsert: true });
+        console.log(`방 (${group.group_name}) 동기화 또는 업데이트 완료.`);
+      } catch (err) {
+        console.error(`방 (${group.group_name}) 동기화 중 오류 발생:`, err);
       }
     });
 
@@ -51,14 +52,21 @@ module.exports = function (io) {
       try {
         await userController.saveUser(joinUser.nick_name, socket.id);
         const user = await userController.checkUser(socket.id);
+
+        // user.rooms 초기화
+        user.rooms = [];
+
         await userController.joinRoom(rid, user);
-        socket.join(user.room.toString());
+
+        // 'user.rooms' 값이 설정된 이후에 'socket.join' 호출
+        socket.join(user.rooms.toString());
+
         const welcomeMessage = {
           chat: `${user.nick_name}님이 입장하셨습니다.`,
           user: { id: null, name: 'system' },
         };
-        io.to(user.room.toString()).emit('message', welcomeMessage);
-        io.emit('rooms', await userController.getAllRooms());
+        chatSpace.to(user.rooms.toString()).emit('message', welcomeMessage);
+        chatSpace.emit('rooms', await userController.getAllRooms());
         cb({ ok: true, data: user });
       } catch (error) {
         cb({ ok: false, error: error.message });
@@ -69,14 +77,14 @@ module.exports = function (io) {
     socket.on('leaveRoom', async (_, cb) => {
       try {
         const user = await userController.checkUser(socket.id);
-        await userController.leaveRoom(user);
+        // await userController.leaveRoom(user);
         const leaveMessage = {
           chat: `${user.nick_name}님이 나가셨습니다.`,
           user: { id: null, name: 'system' },
         };
-        socket.broadcast.to(user.room.toString()).emit('message', leaveMessage);
-        io.emit('rooms', await userController.getAllRooms());
-        socket.leave(user.room.toString());
+        socket.broadcast.to(user.rooms.toString()).emit('message', leaveMessage);
+        chatSpace.emit('rooms', await userController.getAllRooms());
+        socket.leave(user.rooms.toString());
         cb({ ok: true });
       } catch (error) {
         cb({ ok: false, message: error.message });
@@ -94,12 +102,12 @@ module.exports = function (io) {
     });
 
     // 채팅 메시지를 보내는 것을 처리합니다.
-    socket.on('sendMessage', async (receivedMessage, cb) => {
+    socket.on('sendMessage', async (rid, receivedMessage, cb) => {
       try {
         const user = await userController.checkUser(socket.id);
         if (user) {
-          const message = await userController.saveChat(receivedMessage, user);
-          io.to(user.room.toString()).emit('message', message);
+          const message = await userController.saveChat(rid, receivedMessage, user);
+          io.to(user.rooms.toString()).emit('message', message);
           return cb({ ok: true });
         }
       } catch (error) {
@@ -109,12 +117,7 @@ module.exports = function (io) {
 
     // 사용자가 연결을 해제하는 것을 처리합니다.
     socket.on('disconnect', async () => {
-      const user = await User.findOne({ nick_name: name });
-      if (user) {
-        user.online = false;
-        await user.save();
-      }
-      console.log('사용자가 소켓 연결을 해제했습니다', user);
+      console.log('사용자가 소켓 연결을 해제했습니다');
     });
   });
 };

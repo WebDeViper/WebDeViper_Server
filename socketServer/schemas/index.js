@@ -1,10 +1,7 @@
 const mongoose = require('mongoose');
 
-const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT } = process.env;
-const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/admin`;
-// const MONGO_URL = `mongodb+srv://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}/admin`;
-const User = require('../schemas/User');
-// const Group = require('../schemas/Group');
+const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DBNAME } = process.env;
+const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/`;
 
 const connect = () => {
   // 개발 환경에서만 몽구스가 생성하는 쿼리내용 확인
@@ -12,19 +9,14 @@ const connect = () => {
     mongoose.set('debug', true);
   }
 
-  mongoose.connect(
-    // 'mongodb://localhost:27017/minyeong',
-    MONGO_URL, // 접속을 시도하는 데이터베이스가 admin임
-    {
-      dbName: 'seeun_timer_test', // 실제로 사용할 데이터베이스이름
-      useNewUrlParser: true, // 별 의미 없음
-    },
-    console.log('몽고 연결!')
-  );
+  mongoose.connect(MONGO_URL, {
+    dbName: MONGO_DBNAME,
+  });
 
-  // 테스트용 코드
-
-  // console.log(extractedValues);
+  // 몽고디비 연결시 이벤트 리스너
+  mongoose.connection.on('connected', () => {
+    console.log(`${MONGO_HOST} 몽고디비 연결되었습니다.`);
+  });
 
   // 에러발생 이벤트 리스너
   mongoose.connection.on('error', error => {

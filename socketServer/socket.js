@@ -17,7 +17,7 @@ const io = new Server(httpServer, {
 });
 
 // io 를 /utils/io.js 로 전달
-// require('./utils/io')(io);
+require('./utils/io')(io);
 require('./utils/timer')(io);
 httpServer.listen(process.env.SOCKET_PORT, () => {
   console.log('server listening on port', process.env.SOCKET_PORT);
