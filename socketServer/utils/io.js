@@ -91,15 +91,15 @@ module.exports = function (io) {
       }
     });
 
-    // // 특정 채팅방의 채팅 로그를 가져오는 것을 처리합니다.
-    // socket.on('getChatLog', async (rid, cb) => {
-    //   try {
-    //     const chatLog = await userController.getChatLog(rid);
-    //     cb({ isOk: true, data: chatLog });
-    //   } catch (error) {
-    //     cb({ isOk: false, error: error.message });
-    //   }
-    // });
+    // 특정 채팅방의 채팅 로그를 가져오는 것을 처리합니다.
+    socket.on('getChatLog', async (rid, cb) => {
+      try {
+        const chatLog = await userController.getChatLog(rid);
+        cb({ isOk: true, data: chatLog });
+      } catch (error) {
+        cb({ isOk: false, error: error.message });
+      }
+    });
 
     // 채팅 메시지를 보내는 것을 처리합니다.
     socket.on('sendMessage', async (rid, receivedMessage, cb) => {

@@ -56,7 +56,10 @@ const chatSchema = new Schema({
   chat: { type: String },
   sender: { type: String },
   send_at: { type: Date, default: Date.now },
-  user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 사용자 id
+  user: {
+    user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 사용자 id
+    name: { type: String },
+  },
   room_id: { type: Schema.Types.ObjectId, ref: 'Room' },
 });
 

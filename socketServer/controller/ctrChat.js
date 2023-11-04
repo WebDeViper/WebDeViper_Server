@@ -74,7 +74,10 @@ exports.saveChat = async (rid, message, user) => {
     chat: message,
     sender: user.nick_name,
     // send_at: formattedDate,
-    user_id: user._id,
+    user: {
+      user_id: user._id,
+      name: user.nick_name,
+    },
     room_id: rid,
   });
   await newMessage.save();
@@ -85,17 +88,21 @@ exports.saveChat = async (rid, message, user) => {
   return msg;
 };
 
-// // 이전 채팅 로그를 검색하는 함수
-// exports.getChatLog = async rid => {
-//   try {
-//     const chats = await Chat.find({ room: rid });
-//     console.log('이전 채팅 기록 ->', chats);
-//     return chats;
-//   } catch (error) {
-//     console.error('채팅 로그 검색 중 오류 발생:', error);
-//     throw error;
-//   }
-// };
+// 이전 채팅 로그를 검색하는 함수
+exports.getChatLog = async rid => {
+  try {
+    const chats = await Chat.find({ room_id: rid });
+    console.log('이전 채팅 기록 ->', chats);
+    // const msg = {
+    //   chat: chats.chat,
+    //   user: { id: null, name: chats.sender },
+    // };
+    return chats;
+  } catch (error) {
+    console.error('채팅 로그 검색 중 오류 발생:', error);
+    throw error;
+  }
+};
 
 // 모든 채팅방의 목록을 반환하는 함수
 exports.getAllRooms = async () => {
@@ -103,7 +110,7 @@ exports.getAllRooms = async () => {
   return roomList;
 };
 
-// 사용자가 채팅방을 나가는 함수
+// // 사용자가 채팅방을 나가는 함수
 // exports.leaveRoom = async user => {
 //   const room = await Room.findById(user.rooms);
 //   if (!room) {
