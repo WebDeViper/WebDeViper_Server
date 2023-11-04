@@ -254,7 +254,7 @@ exports.postGroupInformation = async (req, res) => {
     // TODO: multer file path -> client와 붙이면서 확인
     const { filename } = req.file;
     // path == 이미지를 받을 수 있는 URL
-    const imagePath = `/api/static/profileImg/${filename}`;
+    const imagePath = `/api/static/groupImg/${filename}`;
     const newGroup = new Group({
       group_leader: userId, //그룹장의 user objectId
       group_name: name, // 그룹 이름
