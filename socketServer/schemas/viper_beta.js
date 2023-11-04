@@ -45,6 +45,7 @@ const groupSchema = new Schema({
 
 // Room 스키마
 const roomSchema = new Schema({
+  group: { type: String },
   members: [{ type: Schema.Types.ObjectId, ref: 'User' }], // User 모델을 참조  created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });
@@ -97,4 +98,4 @@ const Timer = mongoose.model('Timer', timerSchema, 'timer');
 const Todo = mongoose.model('Todo', todoSchema, 'todo');
 const Notice = mongoose.model('Notice', noticeSchema, 'notice');
 
-module.exports = { User, Room, Chat, Group, Timer, Todo, Notice, mongoose };
+module.exports = { User, Room, Chat, Timer, Group, Todo, Notice, mongoose };

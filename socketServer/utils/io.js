@@ -1,6 +1,5 @@
 const userController = require('../controller/ctrChat'); // 사용자 컨트롤러를 가져옵니다.
-const User = require('../schemas/User'); // User 스키마를 가져옵니다.
-const Room = require('../schemas/Room'); // Room 스키마를 가져옵니다.
+const { User, Group, Room } = require('../schemas/viper_beta');
 
 module.exports = function (io) {
   let name; // 사용자의 이름을 저장하는 변수
@@ -8,21 +7,37 @@ module.exports = function (io) {
   io.on('connection', async socket => {
     console.log('client is connected', socket.id);
 
+    // // Room 스키마에서 group 필드에 group_name을 넣기
+    // Room.findOne({ _id: roomId })
+    //   .populate({
+    //     path: 'group',
+    //     model: 'Group',
+    //     select: 'group_name members',
+    //   })
+    //   .exec((err, room) => {
+    //     if (err) {
+    //       // 에러 처리
+    //     } else {
+    //       // room.group에는 group_name과 members 정보가 채워진 Group 스키마의 문서가 들어 있음
+    //       console.log(room.group);
+    //     }
+    //   });
+
     // 채팅방이 존재하지 않는 경우, 기본 채팅방을 생성합니다.
-    Room.find({
-      $or: [{ room: '공무원' }, { room: '취준생' }, { room: '연습생' }],
-    }).then(rooms => {
-      if (rooms.length === 0) {
-        // 방이 없는 경우, 기본 채팅방을 세 개 생성합니다.
-        Room.insertMany([
-          { room: '공무원', members: [] },
-          { room: '취준생', members: [] },
-          { room: '연습생', members: [] },
-        ])
-          .then(() => console.log('기본 채팅방이 생성되었습니다.'))
-          .catch(error => console.error(error));
-      }
-    });
+    // Group.find({
+    //   $or: [{ room: '공무원' }, { room: '취준생' }, { room: '연습생' }],
+    // }).then(rooms => {
+    //   if (rooms.length === 0) {
+    //     // 방이 없는 경우, 기본 채팅방을 세 개 생성합니다.
+    //     Room.insertMany([
+    //       { room: '공무원', members: [] },
+    //       { room: '취준생', members: [] },
+    //       { room: '연습생', members: [] },
+    //     ])
+    //       .then(() => console.log('기본 채팅방이 생성되었습니다.'))
+    //       .catch(error => console.error(error));
+    //   }
+    // });
 
     // 사용자 로그인을 처리합니다.
     socket.on('login', async (userName, cb) => {
@@ -109,12 +124,7 @@ module.exports = function (io) {
 
     // 사용자가 연결을 해제하는 것을 처리합니다.
     socket.on('disconnect', async () => {
-      const user = await User.findOne({ nick_name: name });
-      if (user) {
-        user.online = false;
-        await user.save();
-      }
-      console.log('사용자가 소켓 연결을 해제했습니다', user);
+      console.log('사용자가 소켓 연결을 해제했습니다');
     });
   });
 };
