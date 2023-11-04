@@ -15,10 +15,7 @@ connect();
 // cors 미들웨어
 app.use(
   cors({
-    // origin: '*',
-    origin: true, // 요청을 보내온 origin이 Access-Control-Allow-Origin의 값으로 설정된다
-    // origin: ['http://localhost:3000', 'https://localhost:3000'], // 허용할 오리진
-    // credentials: true, // 쿠키를 사용하려면 true로 설정
+    origin: process.env.NODE_ENV !== 'production' ? true : ['http://13.124.233.17', 'https://13.124.233.17'],
   })
 );
 app.use(express.urlencoded({ extended: true }));
