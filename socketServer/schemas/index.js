@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const { MONGO_ID, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DBNAME } = process.env;
 const MONGO_URL = `mongodb://${MONGO_ID}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/`;
-const User = require('../schemas/User');
+// const User = require('../schemas/User');
 // const Group = require('../schemas/Group');
 
 const connect = () => {
@@ -11,12 +11,9 @@ const connect = () => {
     mongoose.set('debug', true);
   }
 
-  mongoose.connect(
-    MONGO_URL, // 접속을 시도하는 데이터베이스가 admin임
-    {
-      dbName: MONGO_DBNAME,
-    }
-  );
+  mongoose.connect(MONGO_URL, {
+    dbName: MONGO_DBNAME,
+  });
 
   // 몽고디비 연결시 이벤트 리스너
   mongoose.connection.on('connected', () => {
