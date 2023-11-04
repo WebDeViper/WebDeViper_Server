@@ -101,19 +101,19 @@ module.exports = function (io) {
     //   }
     // });
 
-    // // 채팅 메시지를 보내는 것을 처리합니다.
-    // socket.on('sendMessage', async (receivedMessage, cb) => {
-    //   try {
-    //     const user = await userController.checkUser(socket.id);
-    //     if (user) {
-    //       const message = await userController.saveChat(receivedMessage, user);
-    //       io.to(user.room.toString()).emit('message', message);
-    //       return cb({ ok: true });
-    //     }
-    //   } catch (error) {
-    //     cb({ ok: false, error: error.message });
-    //   }
-    // });
+    // 채팅 메시지를 보내는 것을 처리합니다.
+    socket.on('sendMessage', async (rid, receivedMessage, cb) => {
+      try {
+        const user = await userController.checkUser(socket.id);
+        if (user) {
+          const message = await userController.saveChat(rid, receivedMessage, user);
+          io.to(user.rooms.toString()).emit('message', message);
+          return cb({ ok: true });
+        }
+      } catch (error) {
+        cb({ ok: false, error: error.message });
+      }
+    });
 
     // 사용자가 연결을 해제하는 것을 처리합니다.
     socket.on('disconnect', async () => {

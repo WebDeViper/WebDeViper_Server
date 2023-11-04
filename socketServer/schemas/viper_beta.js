@@ -53,11 +53,11 @@ const roomSchema = new Schema({
 
 // Chat 스키마
 const chatSchema = new Schema({
-  sendAt: { type: Date, default: Date.now },
+  chat: { type: String },
+  sender: { type: String },
+  send_at: { type: Date, default: Date.now },
   user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 사용자 id
   room_id: { type: Schema.Types.ObjectId, ref: 'Room' },
-  created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now },
 });
 
 // Timer 스키마

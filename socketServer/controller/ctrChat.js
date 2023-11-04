@@ -1,7 +1,7 @@
 // const User = require('../schemas/User');
 // const Chat = require('../schemas/Chat');
 // const Room = require('../schemas/Room');
-const { User, Group, Room } = require('../schemas/viper_beta');
+const { User, Group, Room, Chat } = require('../schemas/viper_beta');
 
 // 사용자 정보를 저장하거나 업데이트하는 함수
 exports.saveUser = async (userName, socketid) => {
@@ -48,40 +48,42 @@ exports.joinRoom = async (roomId, user) => {
     console.log('이미 룸 아이디가 존재합니다.');
   }
 };
-// // 메시지를 저장하는 함수
-// exports.saveChat = async (message, user) => {
-//   // 현재 시각을 UTC 시간대로 얻어옴.
-//   const utcDate = new Date();
+// 메시지를 저장하는 함수
+exports.saveChat = async (rid, message, user) => {
+  // 현재 시각을 UTC 시간대로 얻어옴.
+  const utcDate = new Date();
 
-//   // 한국 표준시(KST)의 시간대 오프셋
-//   const koreaTimeOffset = 9 * 60; // 9시간을 분으로 표시
+  // 한국 표준시(KST)의 시간대 오프셋
+  const koreaTimeOffset = 9 * 60; // 9시간을 분으로 표시
 
-//   // UTC 시간에 한국 시간대 오프셋을 더함.
-//   utcDate.setMinutes(utcDate.getMinutes() + koreaTimeOffset);
+  // UTC 시간에 한국 시간대 오프셋을 더함.
+  utcDate.setMinutes(utcDate.getMinutes() + koreaTimeOffset);
 
-//   // 날짜 및 시간 정보 추출
-//   const hours = utcDate.getUTCHours();
-//   const minutes = utcDate.getUTCMinutes();
-//   const day = utcDate.getUTCDate();
-//   const month = utcDate.getUTCMonth() + 1; // getUTCMonth()는 0부터 시작하므로 1을 더함
-//   const year = utcDate.getUTCFullYear() % 100; // 두 자리 연도
+  // 날짜 및 시간 정보 추출
+  const hours = utcDate.getUTCHours();
+  const minutes = utcDate.getUTCMinutes();
+  const day = utcDate.getUTCDate();
+  const month = utcDate.getUTCMonth() + 1; // getUTCMonth()는 0부터 시작하므로 1을 더함
+  const year = utcDate.getUTCFullYear() % 100; // 두 자리 연도
 
-//   // 메시지의 전송 시간을 문자열로 조합
-//   const formattedDate = `${hours}:${minutes} [${year}/${month}/${day}]`;
+  // 메시지의 전송 시간을 문자열로 조합
+  // const formattedDate = `${hours}:${minutes} [${year}/${month}/${day}]`;
 
-//   // Chat 모델을 사용하여 새로운 메시지를 생성하고 저장
-//   const newMessage = new Chat({
-//     chat: message,
-//     sendAt: formattedDate,
-//     user: {
-//       id: user._id,
-//       nick_name: user.nick_name,
-//     },
-//     room: user.room,
-//   });
-//   await newMessage.save();
-//   return newMessage;
-// };
+  // Chat 모델을 사용하여 새로운 메시지를 생성하고 저장
+  const newMessage = new Chat({
+    chat: message,
+    sender: user.nick_name,
+    // send_at: formattedDate,
+    user_id: user._id,
+    room_id: rid,
+  });
+  await newMessage.save();
+  const msg = {
+    chat: message,
+    user: { id: null, name: user.nick_name },
+  };
+  return msg;
+};
 
 // // 이전 채팅 로그를 검색하는 함수
 // exports.getChatLog = async rid => {
@@ -101,7 +103,7 @@ exports.getAllRooms = async () => {
   return roomList;
 };
 
-// // 사용자가 채팅방을 나가는 함수
+// 사용자가 채팅방을 나가는 함수
 // exports.leaveRoom = async user => {
 //   const room = await Room.findById(user.rooms);
 //   if (!room) {
