@@ -31,14 +31,20 @@ exports.getTodoList = async (req, res) => {
 exports.postTodo = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '6544d9eeaabd61b4d1cf4bc5';
+    // const currentUserId = '6544cc034f18de981a274777';
+
+    const startTime = new Date(req.body.start_time);
+    startTime.setHours(startTime.getHours() + 9);
+
+    const endTime = new Date(req.body.start_time);
+    endTime.setHours(endTime.getHours() + 9);
 
     const newTodo = new Todo({
       user_id: currentUserId,
       title: req.body.title,
       content: req.body.content,
-      start_time: req.body.start_time,
-      end_time: req.body.end_time,
+      start_time: startTime,
+      end_time: endTime,
     });
 
     const result = await newTodo.save();
@@ -55,12 +61,19 @@ exports.patchTodo = async (req, res) => {
     // const currentUserId = '6544d9eeaabd61b4d1cf4bc5';
     const { todo_objId } = req.query;
     const { done, start_time, end_time, content, title } = req.body;
+
+    const startTime = new Date(req.body.start_time);
+    startTime.setHours(startTime.getHours() + 9);
+
+    const endTime = new Date(req.body.start_time);
+    endTime.setHours(endTime.getHours() + 9);
+
     const updatedTodoData = {
       title,
-      start_time,
+      start_time: startTime,
       content,
-      end_time,
-      updated_at: new Date(),
+      end_time: endTime,
+      updated_at: new Date().setHours(new Date().getHours() + 9),
       // done: done,
     };
 
