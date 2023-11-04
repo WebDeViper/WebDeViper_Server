@@ -18,11 +18,6 @@ exports.getNotice = async (req, res) => {
 
 exports.postNotice = async (req, res) => {
   try {
-    // const currentUserId = res.locals.decoded.userInfo.id;
-    // // const currentUserId = '6544c9106ec46b098ac68132';
-    // const isAdmin = await User.findById(currentUserId);
-    console.log(req.body);
-
     const notice = new Notice({
       title: req.body.title,
       content: req.body.content,
@@ -44,13 +39,17 @@ exports.patchNotice = async (req, res) => {
     // if (user.is_service_admin) {
     console.log(req.query.notice_id);
     console.log(req.body);
+
+    // 업데이트 시간
+    const updatedAt = new Date().setHours(new Date().getHours() + 9);
+
     if (req.query.notice_id) {
       const result = await Notice.findByIdAndUpdate(
         req.query.notice_id,
         {
           title: req.body.title,
           content: req.body.content,
-          updated_at: new Date(),
+          updated_at: updatedAt,
         },
         { new: true }
       );

@@ -85,8 +85,16 @@ const todoSchema = new Schema({
 const noticeSchema = new Schema({
   title: String, // 공지사항 제목
   content: String, // 공지사항 내용
-  created_at: { type: Date, default: Date.now }, //등록날짜
-  updated_at: { type: Date, default: Date.now }, //수정날짜
+  created_at: {
+    type: Date,
+    default: new Date().setHours(new Date().getHours() + 9),
+    // 9시간을 밀리초로 변환하여 더함 최초값만 그렇고 이후에는 데이터 생성/수정 시에 변환된 숫자를 넣어야함
+  }, //등록날짜
+  updated_at: {
+    type: Date,
+    default: new Date().setHours(new Date().getHours() + 9),
+    // 9시간을 밀리초로 변환하여 더함 최초값만 그렇고 이후에는 데이터 생성/수정 시에 변환된 숫자를 넣어야함
+  },
 });
 
 const User = mongoose.model('User', userSchema, 'user');
