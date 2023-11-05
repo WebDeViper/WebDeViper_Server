@@ -1,7 +1,7 @@
 const axios = require('axios');
 const { NAVER_CLIENT_ID, NAVER_CLIENT_SECRET, NAVER_REDIRECT_URL, NAVER_STATE } = process.env;
 const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL } = process.env;
-const { generateJwtToken } = require('../utils/jwt');
+const { generateJwtToken, generateRefreshToken } = require('../utils/jwt');
 const { User, mongoose } = require('../schemas/schema');
 
 // 네이버 로그인 창으로 리다이렉트 시킴
@@ -106,12 +106,14 @@ exports.getNaverLoginResult = async (req, res) => {
         isServiceAdmin: newUser.is_service_admin,
       };
     }
-    // 로그인 처리를 하기위해 jwt 발급
-    const token = generateJwtToken(userInfo);
-    // console.log('@@@@', token);
+    // 로그인 처리를 하기위해 jwt 발급(액세스 토큰)
+    const token = generateJwtToken(userInfo); // 만료 30분
+    // 리프레시 토큰 발급
+    const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
 
     return res.send({
       token,
+      refreshToken,
       userInfo,
     });
   } catch (err) {
@@ -119,6 +121,7 @@ exports.getNaverLoginResult = async (req, res) => {
   }
 };
 
+// 구글 로그인 창으로 리다이렉트 시킴
 exports.getGoogleOAuth = async (req, res) => {
   try {
     const googleLoginUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_REDIRECT_URL}&response_type=code&scope=email profile`;
@@ -131,6 +134,8 @@ exports.getGoogleOAuth = async (req, res) => {
     res.status(401).send(err);
   }
 };
+
+// 구글 로그인 결과를 받음
 exports.getGoogleLoginResult = async (req, res) => {
   try {
     const { code } = req.query;
@@ -214,13 +219,46 @@ exports.getGoogleLoginResult = async (req, res) => {
         isServiceAdmin: newUser.is_service_admin,
       };
     }
-    // 로그인 처리를 하기위해 jwt 발급
-    const token = generateJwtToken(userInfo);
-    // console.log('@@@@', token);
+    // 로그인 처리를 하기위해 jwt 발급(액세스 토큰)
+    const token = generateJwtToken(userInfo); // 만료 30분
+    // 리프레시 토큰 발급
+    const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
 
     return res.send({
       token,
+      refreshToken,
       userInfo,
     });
   } catch (err) {}
+};
+
+// 리프레시 토큰을 확인하고 액세스 토큰을 재발급 해줌
+exports.refreshAccessToken = async (req, res) => {
+  try {
+    // 리프레시 토큰을 검증하고 넘어옴
+
+    // 새로운 액세스 토큰을 발급해서 응답값으로 넘겨주기
+    const userId = res.locals.decoded.userInfo;
+    const exUser = await User.findById(userId);
+    const userInfo = {
+      id: exUser._id,
+      category: exUser.user_category_name,
+      nickName: exUser.nick_name,
+      profileImg: exUser.user_profile_image_path,
+      email: exUser?.email,
+      statusMsg: exUser.status_message,
+      isServiceAdmin: exUser.is_service_admin,
+    };
+
+    // 액세스 토큰 재발급
+    const accessToken = generateJwtToken(userInfo);
+    res.send({
+      accessToken,
+      userInfo,
+    });
+  } catch (err) {
+    res.status(500).send({
+      msg: '액세스토큰 재발급 중 서버 에러 발생',
+    });
+  }
 };

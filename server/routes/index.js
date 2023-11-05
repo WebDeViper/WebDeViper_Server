@@ -18,11 +18,8 @@ router.use('/api/user', routerUser);
 router.use('/api', routerNotice);
 
 // 네이버 & 구글 로그인
-const sns = require('../controller/sns');
-router.use('/api/auth/naver', sns.getNaverOAuth);
-router.use('/api/oauth/naver', sns.getNaverLoginResult);
-router.use('/api/auth/google', sns.getGoogleOAuth);
-router.use('/api/oauth/google', sns.getGoogleLoginResult);
+// 인증 라우터(토큰발급/재발급.. refreshToken)
+router.use('/api/auth', routerUser);
 
 // 테스트 페이지 렌더링
 // router.use('/test', (req, res) => {

@@ -1,5 +1,5 @@
 const { duplicateCheck } = require('../utils/userModelDuplicateCheck');
-const { generateJwtToken } = require('../utils/jwt');
+const { generateJwtToken, generateRefreshToken } = require('../utils/jwt');
 // Mongoose
 const { User, Room, mongoose } = require('../schemas/schema');
 // const ObjectId = mongoose.Types.ObjectId;
@@ -85,11 +85,13 @@ exports.kakaoAuth = async (req, res) => {
     }
 
     // 로그인 처리를 하기위해 jwt 발급
-    const token = generateJwtToken(userInfo);
-    // console.log('@@@@', token);
+    const token = generateJwtToken(userInfo); // 만료 30분
+    // 리프레시 토큰 발급
+    const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
 
     return res.send({
       token,
+      refreshToken,
       userInfo,
     });
   } catch (err) {
