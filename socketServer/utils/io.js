@@ -2,9 +2,9 @@ const userController = require('../controller/ctrChat'); // 사용자 컨트롤�
 const { User, Group, Room, mongoose } = require('../schemas/viper_beta');
 
 module.exports = function (io) {
+  const chatSpace = io.of('/chat');
   let name; // 사용자의 이름을 저장하는 변수
-
-  io.on('connection', async socket => {
+  chatSpace.on('connection', async socket => {
     console.log('client is connected', socket.id);
     // 모든 그룹을 조회
     const groups = await Group.find({}).exec();
@@ -65,8 +65,8 @@ module.exports = function (io) {
           chat: `${user.nick_name}님이 입장하셨습니다.`,
           user: { id: null, name: 'system' },
         };
-        io.to(user.rooms.toString()).emit('message', welcomeMessage);
-        io.emit('rooms', await userController.getAllRooms());
+        chatSpace.to(user.rooms.toString()).emit('message', welcomeMessage);
+        chatSpace.emit('rooms', await userController.getAllRooms());
         cb({ ok: true, data: user });
       } catch (error) {
         cb({ ok: false, error: error.message });
@@ -83,7 +83,7 @@ module.exports = function (io) {
           user: { id: null, name: 'system' },
         };
         socket.broadcast.to(user.rooms.toString()).emit('message', leaveMessage);
-        io.emit('rooms', await userController.getAllRooms());
+        chatSpace.emit('rooms', await userController.getAllRooms());
         socket.leave(user.rooms.toString());
         cb({ ok: true });
       } catch (error) {
