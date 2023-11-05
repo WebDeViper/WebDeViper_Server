@@ -51,6 +51,7 @@ const roomSchema = new Schema({
   members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   updated_at: { type: Date, default: Date.now },
 });
+
 // Chat 스키마
 const chatSchema = new Schema({
   chat: { type: String },
