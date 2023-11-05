@@ -10,16 +10,4 @@ router.use('/refresh', verifyRefreshToken, ctrAuth.refreshAccessToken);
 // 네이버는 프론트에서 처리하면 CORS떠서 어쩔수 없이 만듬
 router.use('/naver/token', ctrAuth.passToken);
 
-// 네이버 로그인 페이지
-// router.use('/naver', ctrAuth.getNaverOAuth);
-
-// 네이버 로그인 결과
-// router.use('/naver/callback', ctrAuth.getNaverLoginResult);
-
-// 구글 로그인 페이지
-router.use('/google', ctrAuth.getGoogleOAuth);
-
-// 구글 로그인 결과
-router.use('/google/callback', ctrAuth.getGoogleLoginResult);
-
 module.exports = router;

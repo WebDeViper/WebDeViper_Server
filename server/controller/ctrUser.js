@@ -38,9 +38,8 @@ exports.join = async (req, res) => {
     const exUser = await User.findOne({
       sns_id: profile.id,
       provider: profile.provider,
-      // provider: 'kakao',
     });
-    // console.log(exUser);
+
     // 응답값으로 보낼 userInfo 초기화
     let userInfo = {
       id: null,
@@ -66,42 +65,37 @@ exports.join = async (req, res) => {
       };
     } else {
       // 가입이력이 없으니 회원가입 처리 하기 위해 DB에 저장하고 그걸로 userInfo 세팅
+      let newUser = {};
+
       if (profile.provider === 'kakao') {
-        const newUser = await User.create({
-          sns_id: profile.id,
-          provider,
-          // provider: 'kakao',
-          email: profile.kakao_account?.email, // profile에 kakao_account 가 없어도 에러가 나지 않음
-        });
-        // userInfo 세팅
-        userInfo = {
-          id: newUser._id,
-          category: newUser.user_category_name,
-          nickName: newUser.nick_name,
-          profileImg: newUser.user_profile_image_path,
-          email: newUser.email,
-          statusMsg: newUser.status_message,
-          isServiceAdmin: newUser.is_service_admin,
-        };
-      }
-      if (profile.provider === 'naver') {
-        console.log(profile);
-        const newUser = await User.create({
+        newUser = await User.create({
           sns_id: profile.id,
           provider: profile.provider,
-          email: profile?.email, // profile에 kakao_account 가 없어도 에러가 나지 않음
+          email: profile.kakao_account?.email,
         });
-        // userInfo 세팅
-        userInfo = {
-          id: newUser._id,
-          category: newUser.user_category_name,
-          nickName: newUser.nick_name,
-          profileImg: newUser.user_profile_image_path,
-          email: newUser.email,
-          statusMsg: newUser.status_message,
-          isServiceAdmin: newUser.is_service_admin,
-        };
+      } else if (profile.provider === 'naver') {
+        newUser = await User.create({
+          sns_id: profile.id,
+          provider: profile.provider,
+          email: profile?.email,
+        });
+      } else if (profile.provider === 'google') {
+        newUser = await User.create({
+          sns_id: profile.id,
+          provider: profile.provider,
+          email: profile?.email,
+        });
       }
+      // userInfo 세팅
+      userInfo = {
+        id: newUser._id,
+        category: newUser.user_category_name,
+        nickName: newUser.nick_name,
+        profileImg: newUser.user_profile_image_path,
+        email: newUser.email,
+        statusMsg: newUser.status_message,
+        isServiceAdmin: newUser.is_service_admin,
+      };
     }
 
     // 로그인 처리를 하기위해 jwt 발급
