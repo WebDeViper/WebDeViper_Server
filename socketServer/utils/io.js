@@ -50,7 +50,7 @@ module.exports = function (io) {
     // 사용자가 채팅방에 참여하는 것을 처리합니다.
     socket.on('joinRoom', async (joinUser, rid, cb) => {
       try {
-        await userController.saveUser(joinUser.nick_name, socket.id);
+        await userController.saveUser(joinUser.nickName, socket.id);
         const user = await userController.checkUser(socket.id);
 
         // user.rooms 초기화
