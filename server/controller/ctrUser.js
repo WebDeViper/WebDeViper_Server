@@ -87,10 +87,9 @@ exports.join = async (req, res) => {
       if (profile.provider === 'naver') {
         console.log(profile);
         const newUser = await User.create({
-          sns_id: profile.response.id,
-          provider,
-          // provider: 'kakao',
-          email: profile.response?.email, // profile에 kakao_account 가 없어도 에러가 나지 않음
+          sns_id: profile.id,
+          provider: profile.provider,
+          email: profile?.email, // profile에 kakao_account 가 없어도 에러가 나지 않음
         });
         // userInfo 세팅
         userInfo = {
