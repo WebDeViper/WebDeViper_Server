@@ -19,6 +19,7 @@ const userSchema = new Schema({
     // 가입에 대한 승인 대기중인 그룹 리스트 배열
     {
       group: { type: Schema.Types.ObjectId, ref: 'Group' }, // 가입 신청한 그룹의 ID
+      // is_approved: { type: Boolean, default: false }, // 가입 승인 여부
     },
   ],
 });
@@ -29,43 +30,50 @@ const groupSchema = new Schema({
   group_name: String, // 그룹의 이름
   group_category: String, // 그룹의 카테고리
   group_description: String, // 그룹에 대한 설명
-  group_image_path: { type: String, default: '/api/notyet' },
+  group_image_path: { type: String, default: '/api/static/groupImg/defaultGroup.jpeg' },
   group_maximum_member: { type: Number, default: 5 }, // 그룹의 최대 수용인원
   daily_goal_time: String, // 그룹의 목표 공부시간
-  is_camera_on: Boolean,
+  is_camera_on: { type: Number, default: false },
   members: [{ type: Schema.Types.ObjectId, ref: 'User' }], // 그룹에 속한 사용자 리스트(배열)
   join_requests: [
     // 그룹에 가입 요청한 사용자 리스트(배열)
     {
       user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 가입 신청한 유저의 _id
+      // is_approved: { type: Boolean, default: false }, // 가입 승인 여부
     },
   ],
 });
 
 // Room 스키마
 const roomSchema = new Schema({
-  members: [{ type: Schema.Types.ObjectId, ref: 'User' }], // User 모델을 참조  created_at: { type: Date, default: Date.now },
+  group: { type: Schema.Types.ObjectId, ref: 'Group' },
+  room: { type: String },
+  members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   updated_at: { type: Date, default: Date.now },
 });
 
 // Chat 스키마
 const chatSchema = new Schema({
-  sendAt: { type: Date, default: Date.now },
-  user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 사용자 id
+  chat: { type: String },
+  sender: { type: String },
+  send_at: { type: Date, default: Date.now },
+  user: {
+    user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 사용자 id
+    name: { type: String },
+  },
   room_id: { type: Schema.Types.ObjectId, ref: 'Room' },
-  created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now },
 });
 
 // Timer 스키마
 const timerSchema = new Schema({
   user_id: { type: Schema.Types.ObjectId, ref: 'User' },
+  total_time: { type: Number, default: 0 },
   daily: {
     date: String, // 오늘 날짜
     data: [
       {
         title: { type: String }, // 과목
-        timer: { type: Number }, // 초 단위로 공부한 시간
+        timer: { type: Number, default: 0 }, // 초 단위로 공부한 시간
       },
     ],
   },
