@@ -107,7 +107,7 @@ module.exports = function (io) {
         const user = await userController.checkUser(socket.id);
         if (user) {
           const message = await userController.saveChat(rid, receivedMessage, user);
-          io.to(user.rooms.toString()).emit('message', message);
+          chatSpace.to(user.rooms.toString()).emit('message', message);
           return cb({ ok: true });
         }
       } catch (error) {
