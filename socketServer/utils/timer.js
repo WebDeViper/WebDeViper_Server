@@ -7,8 +7,21 @@ module.exports = function (io) {
     console.log('client is connected in stopwatch!', socket.id);
     const userId = socket.handshake.query.userId;
     const userGroupIds = await timerController.getUserGroups(userId);
-    timerSpace.emit('welcome', { userGroupIds });
+    timerSpace.emit('welcome', userGroupIds); //배열로 유저가 속한 그룹의 objId를 보냄
     // console.log('과연 유저의 그룹을 가져왔을까!!!', userGroups);
+    // socket.on('welcome', async userGroupIds => {
+    //   console.log('User', socket.id, 'joined groups:', userGroupIds);
+    //   userGroupIds.forEach(groupId => {
+    //     socket.join(groupId); // 각 그룹의 ObjectId를 room 이름으로 사용하여 조인합니다.
+    //   });
+    // });
+    socket.on('joinGroup', groupId => {
+      // "joinGroup" 이벤트를 받으면 이 함수가 실행됩니다.
+      console.log(`클라이언트가 그룹 ${groupId}에 가입을 시도합니다.`);
+      joinGroup(groupId, userId);
+      socket.emit('groupJoined', groupId);
+      // 이제 클라이언트가 그룹에 가입할 수 있도록 필요한 작업을 수행하세요.
+    });
 
     socket.on('start_watch', async data => {
       // 여기서 data 안에 userNickname 및 roomNickname이 포함되어 있다고 가정
