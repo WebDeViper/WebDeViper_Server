@@ -15,6 +15,8 @@ const io = new Server(httpServer, {
     origin: 'http://localhost:3000',
   },
 });
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // io 를 /utils/io.js 로 전달
 require('./utils/io')(io);

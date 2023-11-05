@@ -1,7 +1,7 @@
 const { duplicateCheck } = require('../utils/userModelDuplicateCheck');
 const { generateJwtToken } = require('../utils/jwt');
 // Mongoose
-const { User, mongoose } = require('../schemas/schema');
+const { User, Room, mongoose } = require('../schemas/schema');
 // const ObjectId = mongoose.Types.ObjectId;
 
 exports.getUser = async (req, res) => {

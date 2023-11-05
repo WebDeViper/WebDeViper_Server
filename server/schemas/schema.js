@@ -44,10 +44,11 @@ const groupSchema = new Schema({
 
 // Room 스키마
 const roomSchema = new Schema({
+  group: { type: Schema.Types.ObjectId, ref: 'Group' },
+  room: { type: String },
   members: [{ type: Schema.Types.ObjectId, ref: 'User' }], // User 모델을 참조  created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });
-
 // Chat 스키마
 const chatSchema = new Schema({
   sendAt: { type: Date, default: Date.now },
