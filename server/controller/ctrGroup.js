@@ -251,10 +251,16 @@ exports.postGroupInformation = async (req, res) => {
     // 클라이언트에서 요청으로 받은 데이터 추출
     const { name, description, category, dailyGoalTime, maximumNumberMember, isCameraOn } = req.body;
     // TODO: 유저의 카테고리 그룹생성시 default로 박기??
-    // TODO: multer file path -> client와 붙이면서 확인
-    const { filename } = req.file;
-    // path == 이미지를 받을 수 있는 URL
-    const imagePath = `/api/static/groupImg/${filename}`;
+
+    let imagePath;
+
+    // 파일 업로드 확인
+    if (req.file) {
+      const { filename } = req.file;
+
+      imagePath = `/api/static/groupImg/${filename}`;
+    }
+
     const newGroup = new Group({
       group_leader: userId, //그룹장의 user objectId
       group_name: name, // 그룹 이름
