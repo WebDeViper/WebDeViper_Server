@@ -33,7 +33,7 @@ const groupSchema = new Schema({
   group_image_path: { type: String, default: '/api/static/groupImg/defaultGroup.jpeg' },
   group_maximum_member: { type: Number, default: 5 }, // 그룹의 최대 수용인원
   daily_goal_time: String, // 그룹의 목표 공부시간
-  is_camera_on: { type: Number, default: false },
+  is_camera_on: { type: Boolean, default: false },
   members: [{ type: Schema.Types.ObjectId, ref: 'User' }], // 그룹에 속한 사용자 리스트(배열)
   join_requests: [
     // 그룹에 가입 요청한 사용자 리스트(배열)
