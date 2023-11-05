@@ -66,7 +66,7 @@ module.exports = function (io) {
           user: { id: null, name: 'system' },
         };
         chatSpace.to(user.rooms.toString()).emit('message', welcomeMessage);
-        chatSpace.emit('rooms', await userController.getAllRooms());
+        socket.emit('rooms', await userController.getAllRooms());
         cb({ ok: true, data: user });
       } catch (error) {
         cb({ ok: false, error: error.message });
@@ -83,7 +83,7 @@ module.exports = function (io) {
           user: { id: null, name: 'system' },
         };
         socket.broadcast.to(user.rooms.toString()).emit('message', leaveMessage);
-        chatSpace.emit('rooms', await userController.getAllRooms());
+        socket.emit('rooms', await userController.getAllRooms());
         socket.leave(user.rooms.toString());
         cb({ ok: true });
       } catch (error) {
@@ -107,7 +107,7 @@ module.exports = function (io) {
         const user = await userController.checkUser(socket.id);
         if (user) {
           const message = await userController.saveChat(rid, receivedMessage, user);
-          io.to(user.rooms.toString()).emit('message', message);
+          chatSpace.to(user.rooms.toString()).emit('message', message);
           return cb({ ok: true });
         }
       } catch (error) {
