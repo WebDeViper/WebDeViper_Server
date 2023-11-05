@@ -83,7 +83,6 @@ module.exports = function (io) {
           user: { id: null, name: 'system' },
         };
         socket.broadcast.to(user.rooms.toString()).emit('message', leaveMessage);
-        socket.emit('rooms', await userController.getAllRooms());
         socket.leave(user.rooms.toString());
         cb({ ok: true });
       } catch (error) {
