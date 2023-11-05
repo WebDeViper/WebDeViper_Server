@@ -1,4 +1,4 @@
-const { User, Group, mongoose } = require('../schemas/schema');
+const { User, Group, Room, mongoose } = require('../schemas/schema');
 
 // 카테고리에 따른 그룹 목록을 반환하는 함수
 exports.getCategoryGroups = async (req, res) => {
@@ -415,5 +415,15 @@ exports.removeAllMembersFromGroup = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send({ isSuccess: false, error: '서버 오류가 발생했습니다.' });
+  }
+};
+
+exports.getAllRooms = async (req, res) => {
+  try {
+    const roomList = await Room.find({});
+    console.log('겟룸실행', roomList);
+    return res.status(200).send(roomList);
+  } catch (err) {
+    console.error(err);
   }
 };

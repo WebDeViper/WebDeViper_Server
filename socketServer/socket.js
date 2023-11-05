@@ -24,6 +24,8 @@ const io = new Server(httpServer, {
     origin: process.env.NODE_ENV !== 'production' ? true : ['http://13.124.233.17', 'https://13.124.233.17'],
   },
 });
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // 소켓 커넥션 연결
 require('./utils/io')(io); // 채팅

@@ -45,7 +45,7 @@ module.exports = function (io) {
     });
 
     // 연결된 클라이언트에 채팅방 목록을 보냅니다.
-    socket.emit('rooms', await userController.getAllRooms());
+    // socket.emit('rooms', await userController.getAllRooms());
 
     // 사용자가 채팅방에 참여하는 것을 처리합니다.
     socket.on('joinRoom', async (joinUser, rid, cb) => {

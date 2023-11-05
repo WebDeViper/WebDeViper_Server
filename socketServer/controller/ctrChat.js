@@ -104,7 +104,8 @@ exports.getChatLog = async rid => {
 // 모든 채팅방의 목록을 반환하는 함수
 exports.getAllRooms = async () => {
   const roomList = await Room.find({});
-  return roomList;
+  console.log('겟룸실행', roomList);
+  return res.send(roomList);
 };
 
 // // 사용자가 채팅방을 나가는 함수
