@@ -31,14 +31,14 @@ exports.getUser = async (req, res) => {
 
 // 카카오유저 로그인 or 회원가입 시키고 로그인
 // /api/user/kakao/mongoose
-exports.kakaoAuth = async (req, res) => {
+exports.join = async (req, res) => {
   try {
     const profile = req.body;
-    // console.log('/api/user/kakao >>>', profile);
 
     const exUser = await User.findOne({
       sns_id: profile.id,
-      provider: 'kakao',
+      provider: profile.provider,
+      // provider: 'kakao',
     });
     // console.log(exUser);
     // 응답값으로 보낼 userInfo 초기화
@@ -66,22 +66,43 @@ exports.kakaoAuth = async (req, res) => {
       };
     } else {
       // 가입이력이 없으니 회원가입 처리 하기 위해 DB에 저장하고 그걸로 userInfo 세팅
-      const newUser = await User.create({
-        sns_id: profile.id,
-        provider: 'kakao',
-        email: profile.kakao_account?.email, // profile에 kakao_account 가 없어도 에러가 나지 않음
-      });
-
-      // userInfo 세팅
-      userInfo = {
-        id: newUser._id,
-        category: newUser.user_category_name,
-        nickName: newUser.nick_name,
-        profileImg: newUser.user_profile_image_path,
-        email: newUser.email,
-        statusMsg: newUser.status_message,
-        isServiceAdmin: newUser.is_service_admin,
-      };
+      if (profile.provider === 'kakao') {
+        const newUser = await User.create({
+          sns_id: profile.id,
+          provider,
+          // provider: 'kakao',
+          email: profile.kakao_account?.email, // profile에 kakao_account 가 없어도 에러가 나지 않음
+        });
+        // userInfo 세팅
+        userInfo = {
+          id: newUser._id,
+          category: newUser.user_category_name,
+          nickName: newUser.nick_name,
+          profileImg: newUser.user_profile_image_path,
+          email: newUser.email,
+          statusMsg: newUser.status_message,
+          isServiceAdmin: newUser.is_service_admin,
+        };
+      }
+      if (profile.provider === 'naver') {
+        console.log(profile);
+        const newUser = await User.create({
+          sns_id: profile.response.id,
+          provider,
+          // provider: 'kakao',
+          email: profile.response?.email, // profile에 kakao_account 가 없어도 에러가 나지 않음
+        });
+        // userInfo 세팅
+        userInfo = {
+          id: newUser._id,
+          category: newUser.user_category_name,
+          nickName: newUser.nick_name,
+          profileImg: newUser.user_profile_image_path,
+          email: newUser.email,
+          statusMsg: newUser.status_message,
+          isServiceAdmin: newUser.is_service_admin,
+        };
+      }
     }
 
     // 로그인 처리를 하기위해 jwt 발급
