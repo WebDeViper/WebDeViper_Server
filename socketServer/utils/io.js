@@ -2,7 +2,7 @@ const userController = require('../controller/ctrChat'); // 사용자 컨트롤�
 const { User, Group, Room, mongoose } = require('../schemas/schema');
 
 module.exports = function (io) {
-  const chatSpace = io.of('/chat');
+  const chatSpace = io.of('/group/chat');
   let name; // 사용자의 이름을 저장하는 변수
   chatSpace.on('connection', async socket => {
     console.log('client is connected', socket.id);
@@ -65,7 +65,8 @@ module.exports = function (io) {
           chat: `${user.nick_name}님이 입장하셨습니다.`,
           user: { id: null, name: 'system' },
         };
-        chatSpace.to(user.rooms.toString()).emit('message', welcomeMessage);
+        const chatLog = await userController.getChatLog(rid);
+        chatSpace.to(user.rooms.toString()).emit('message', [...chatLog, welcomeMessage]);
         socket.emit('rooms', await userController.getAllRooms());
         cb({ ok: true, data: user });
       } catch (error) {
@@ -91,14 +92,14 @@ module.exports = function (io) {
     });
 
     // 특정 채팅방의 채팅 로그를 가져오는 것을 처리합니다.
-    socket.on('getChatLog', async (rid, cb) => {
-      try {
-        const chatLog = await userController.getChatLog(rid);
-        cb({ isOk: true, data: chatLog });
-      } catch (error) {
-        cb({ isOk: false, error: error.message });
-      }
-    });
+    // socket.on('getChatLog', async (rid, cb) => {
+    //   try {
+    //     const chatLog = await userController.getChatLog(rid);
+    //     cb({ isOk: true, data: chatLog });
+    //   } catch (error) {
+    //     cb({ isOk: false, error: error.message });
+    //   }
+    // });
 
     // 채팅 메시지를 보내는 것을 처리합니다.
     socket.on('sendMessage', async (rid, receivedMessage, cb) => {
