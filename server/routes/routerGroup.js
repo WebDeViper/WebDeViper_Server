@@ -12,9 +12,17 @@ router.get('/studyGroups/users', verifyJwtToken, controller.getCategoryGroupsByU
 //그룹 요청 기능
 router.post('/studyGroup/:groupId/join', verifyJwtToken, controller.joinGroupRequest);
 //그룹 요청 수락 기능
-router.post('/studyGroup/:groupId/requests/accept', verifyJwtToken, controller.acceptGroupMembershipRequest);
+router.post(
+  '/studyGroup/:groupId/:requestNickName/requests/accept',
+  verifyJwtToken,
+  controller.acceptGroupMembershipRequest
+);
 //그룹 요청 거절 기능
-router.post('/studyGroup/:groupId/requests/reject', verifyJwtToken, controller.rejectGroupMembershipRequest);
+router.post(
+  '/studyGroup/:groupId/:requestNickName/requests/reject',
+  verifyJwtToken,
+  controller.rejectGroupMembershipRequest
+);
 
 //그룹 생성 기능
 router.post(
