@@ -1,4 +1,6 @@
-const { Timer, User, Group } = require('../schemas/viper_beta');
+
+const { Timer, User,Group, mongoose } = require('../schemas/schema');
+
 const moment = require('moment-timezone');
 
 const getKoreaDate = () => {

@@ -9,10 +9,9 @@ const controllerUser = require('../controller/ctrUser');
 // api/user
 router.get('/', verifyJwtToken, controllerUser.getUser);
 
-// 카카오유저 로그인 and 회원가입 시키고 로그인
-// /api/user/kakao
-// router.post('/kakao', ctrUser.kakaoAuth);
-router.post('/kakao', controllerUser.kakaoAuth);
+// 소셜유저 로그인 and 회원가입 시키고 로그인
+// /api/user/join
+router.post('/join', controllerUser.join);
 
 // 유저 정보 수정 ( nickName, category, statusMessage )
 // 유저정보 수정하면 다시 토큰생성해서 보냄

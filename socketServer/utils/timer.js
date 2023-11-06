@@ -1,5 +1,5 @@
 const timerController = require('../controller/ctrTimer');
-const { User, Timer } = require('../schemas/viper_beta.js');
+const { User, Timer, mongoose } = require('../schemas/schema');
 
 module.exports = function (io) {
   const timerSpace = io.of('/stopwatch'); //timer 네임스페이스 지정
