@@ -2,7 +2,7 @@ const userController = require('../controller/ctrChat'); // 사용자 컨트롤�
 const { User, Group, Room, mongoose } = require('../schemas/schema');
 
 module.exports = function (io) {
-  const chatSpace = io.of('/chat');
+  const chatSpace = io.of('/group/chat');
   let name; // 사용자의 이름을 저장하는 변수
   chatSpace.on('connection', async socket => {
     console.log('client is connected', socket.id);
