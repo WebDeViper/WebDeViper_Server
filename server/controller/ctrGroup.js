@@ -1,4 +1,4 @@
-const { User, Group, mongoose } = require('../schemas/schema');
+const { User, Group, Room, mongoose } = require('../schemas/schema');
 
 // 카테고리에 따른 그룹 목록을 반환하는 함수
 exports.getCategoryGroups = async (req, res) => {
@@ -62,19 +62,33 @@ exports.getCategoryGroupsByUser = async (req, res) => {
     // 사용자의 그룹 ID 목록 조회
     const userGroup = await User.findById(userId).select('groups');
     let groups = []; // 변수 선언 및 초기화
-    console.log('userGroup은 ', userGroup);
-    if (userGroup) {
-      console.log('사용자의 그룹 ID 목록:', userGroup.groups);
 
+    if (userGroup) {
       // 그룹 ID 목록을 사용하여 그룹 정보 조회 (비동기 처리)
       groups = await Group.find({ _id: { $in: userGroup.groups } });
-      console.log('조회된 그룹 정보:', groups);
-      // 여기서 groups에 조회된 그룹 정보가 배열로 포함됩니다.
+
+      // 그룹 멤버의 Timer 정보를 조회 및 추가
+      for (const group of groups) {
+        const memberTimers = [];
+        for (const memberId of group.members) {
+          const userTimer = await Timer.findOne({ user_id: memberId, 'daily.date': new Date() });
+          if (userTimer) {
+            memberTimers.push({ userId: memberId, timerData: userTimer.daily.data });
+          }
+        }
+        group.memberTimers = memberTimers;
+      }
+
+      res.status(200).send({ isSuccess: true, code: 200, study_groups: groups });
     } else {
       console.log('사용자를 찾을 수 없습니다.');
       // 사용자를 찾지 못한 경우에 대한 처리
+      res.status(400).send({
+        isSuccess: false,
+        code: 400,
+        error: '사용자를 찾을 수 없습니다.',
+      });
     }
-    res.status(200).send({ isSuccess: true, code: 200, study_groups: groups });
   } catch (err) {
     console.error(err);
     // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
@@ -251,10 +265,16 @@ exports.postGroupInformation = async (req, res) => {
     // 클라이언트에서 요청으로 받은 데이터 추출
     const { name, description, category, dailyGoalTime, maximumNumberMember, isCameraOn } = req.body;
     // TODO: 유저의 카테고리 그룹생성시 default로 박기??
-    // TODO: multer file path -> client와 붙이면서 확인
-    const { filename } = req.file;
-    // path == 이미지를 받을 수 있는 URL
-    const imagePath = `/api/static/groupImg/${filename}`;
+
+    let imagePath;
+
+    // 파일 업로드 확인
+    if (req.file) {
+      const { filename } = req.file;
+
+      imagePath = `/api/static/groupImg/${filename}`;
+    }
+
     const newGroup = new Group({
       group_leader: userId, //그룹장의 user objectId
       group_name: name, // 그룹 이름
@@ -415,5 +435,15 @@ exports.removeAllMembersFromGroup = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send({ isSuccess: false, error: '서버 오류가 발생했습니다.' });
+  }
+};
+
+exports.getAllRooms = async (req, res) => {
+  try {
+    const roomList = await Room.find({});
+    console.log('겟룸실행', roomList);
+    return res.status(200).send(roomList);
+  } catch (err) {
+    console.error(err);
   }
 };

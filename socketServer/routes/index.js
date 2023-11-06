@@ -1,7 +1,5 @@
-// routes/index.js
 const express = require('express');
-const Timer = require('../schemas/Timer');
-const Chat = require('../schemas/Chat');
+const { Timer, Chat } = require('../schemas/schema.js');
 const router = express.Router();
 
 // Define a route to render a chat page

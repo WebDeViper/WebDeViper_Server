@@ -1,5 +1,5 @@
 const userController = require('../controller/ctrChat'); // 사용자 컨트롤러를 가져옵니다.
-const { User, Group, Room, mongoose } = require('../schemas/viper_beta');
+const { User, Group, Room, mongoose } = require('../schemas/schema');
 
 module.exports = function (io) {
   const chatSpace = io.of('/chat');
@@ -45,12 +45,12 @@ module.exports = function (io) {
     });
 
     // 연결된 클라이언트에 채팅방 목록을 보냅니다.
-    socket.emit('rooms', await userController.getAllRooms());
+    // socket.emit('rooms', await userController.getAllRooms());
 
     // 사용자가 채팅방에 참여하는 것을 처리합니다.
     socket.on('joinRoom', async (joinUser, rid, cb) => {
       try {
-        await userController.saveUser(joinUser.nick_name, socket.id);
+        await userController.saveUser(joinUser.nickName, socket.id);
         const user = await userController.checkUser(socket.id);
 
         // user.rooms 초기화
@@ -66,7 +66,7 @@ module.exports = function (io) {
           user: { id: null, name: 'system' },
         };
         chatSpace.to(user.rooms.toString()).emit('message', welcomeMessage);
-        chatSpace.emit('rooms', await userController.getAllRooms());
+        socket.emit('rooms', await userController.getAllRooms());
         cb({ ok: true, data: user });
       } catch (error) {
         cb({ ok: false, error: error.message });
@@ -83,7 +83,6 @@ module.exports = function (io) {
           user: { id: null, name: 'system' },
         };
         socket.broadcast.to(user.rooms.toString()).emit('message', leaveMessage);
-        chatSpace.emit('rooms', await userController.getAllRooms());
         socket.leave(user.rooms.toString());
         cb({ ok: true });
       } catch (error) {
@@ -107,7 +106,7 @@ module.exports = function (io) {
         const user = await userController.checkUser(socket.id);
         if (user) {
           const message = await userController.saveChat(rid, receivedMessage, user);
-          io.to(user.rooms.toString()).emit('message', message);
+          chatSpace.to(user.rooms.toString()).emit('message', message);
           return cb({ ok: true });
         }
       } catch (error) {

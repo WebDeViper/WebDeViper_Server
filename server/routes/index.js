@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const routerUser = require('./routerUser');
+const routerAuth = require('./routerAuth');
 const routerNotice = require('./routerNotice');
 const routerTodo = require('./routerTodo');
 const groupRouter = require('./routerGroup');
@@ -11,22 +12,13 @@ router.use('/api/group', groupRouter);
 // Todo 라우터
 router.use('/api', routerTodo);
 
-// 유저 라우터
-router.use('/api/user', routerUser);
-
 // 공지사항 라우터
 router.use('/api', routerNotice);
 
-// 네이버 & 구글 로그인
-const sns = require('../controller/sns');
-router.use('/api/auth/naver', sns.getNaverOAuth);
-router.use('/api/oauth/naver', sns.getNaverLoginResult);
-router.use('/api/auth/google', sns.getGoogleOAuth);
-router.use('/api/oauth/google', sns.getGoogleLoginResult);
+// 유저 라우터
+router.use('/api/user', routerUser);
 
-// 테스트 페이지 렌더링
-// router.use('/test', (req, res) => {
-//   res.render('index');
-// });
+// 네이버 & 구글 로그인 // 인증 라우터(토큰발급/재발급.. refreshToken)
+router.use('/api/auth', routerAuth);
 
 module.exports = router;

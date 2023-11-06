@@ -1,7 +1,4 @@
-// const User = require('../schemas/User');
-// const Chat = require('../schemas/Chat');
-// const Room = require('../schemas/Room');
-const { User, Group, Room, Chat } = require('../schemas/viper_beta');
+const { User, Group, Room, Chat, mongoose } = require('../schemas/schema');
 
 // 사용자 정보를 저장하거나 업데이트하는 함수
 exports.saveUser = async (userName, socketid) => {
@@ -107,7 +104,8 @@ exports.getChatLog = async rid => {
 // 모든 채팅방의 목록을 반환하는 함수
 exports.getAllRooms = async () => {
   const roomList = await Room.find({});
-  return roomList;
+  console.log('겟룸실행', roomList);
+  return res.send(roomList);
 };
 
 // // 사용자가 채팅방을 나가는 함수
