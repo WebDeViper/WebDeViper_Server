@@ -1,4 +1,6 @@
-const { Timer, User, mongoose } = require('../schemas/schema');
+
+const { Timer, User,Group, mongoose } = require('../schemas/schema');
+
 
 const moment = require('moment-timezone');
 

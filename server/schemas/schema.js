@@ -39,6 +39,7 @@ const groupSchema = new Schema({
     // 그룹에 가입 요청한 사용자 리스트(배열)
     {
       user_id: { type: Schema.Types.ObjectId, ref: 'User' }, // 가입 신청한 유저의 _id
+      user_name: { type: String },
       // is_approved: { type: Boolean, default: false }, // 가입 승인 여부
     },
   ],
