@@ -118,7 +118,7 @@ exports.joinGroupRequest = async (req, res) => {
           message: '이미 그룹요청을 한 상태입니다.',
         });
       }
-      group.join_requests.push({ user_id: userId });
+      group.join_requests.push({ user_id: userId, user_name: userInfo.nickName });
       await group.save();
     }
 
