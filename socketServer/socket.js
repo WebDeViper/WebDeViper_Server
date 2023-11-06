@@ -9,7 +9,8 @@ const connect = require('./schemas/index');
 // cors 미들웨어
 app.use(
   cors({
-    origin: process.env.NODE_ENV !== 'production' ? true : ['http://13.124.233.17', 'https://13.124.233.17'],
+    origin:
+      process.env.NODE_ENV !== 'production' ? true : ['http://13.124.233.17/group', 'https://13.124.233.17/group'],
   })
 );
 
