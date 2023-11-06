@@ -112,10 +112,10 @@ exports.getGroupMembers = async userGroupIds => {
   }
 };
 
-exports.saveStartWatch = async (user_id, subject) => {
-  updateTimerData(user_id, subject, 0);
+exports.saveStartWatch = async (userId, subject) => {
+  updateTimerData(userId, subject, 0);
 };
 
-exports.updateStopWatch = async (user_id, subject, time) => {
-  updateTimerData(user_id, subject, time);
+exports.updateStopWatch = async (userId, subject, time) => {
+  updateTimerData(userId, subject, time);
 };
