@@ -30,7 +30,7 @@ exports.getCategoryGroups = async (req, res) => {
       }
       console.log(groups);
     } else {
-      res.status(204).send({
+      res.status(200).send({
         isSuccess: false,
         code: 204,
         error: '해당하는 카테고리의 그룹이 없습니다.',
@@ -109,17 +109,25 @@ exports.joinGroupRequest = async (req, res) => {
 
     // 그룹 업데이트
     const group = await Group.findById(groupId);
+
     if (group) {
+      const request = group.join_requests;
+      if (request.some(isUser => isUser.user_id.toString() === userId)) {
+        return res.status(202).send({
+          isSuccess: false,
+          message: '이미 그룹요청을 한 상태입니다.',
+        });
+      }
       group.join_requests.push({ user_id: userId });
       await group.save();
     }
-    res.status(200).send({
+
+    return res.status(200).send({
       isSuccess: true,
       message: '그룹 가입 요청이 성공적으로 처리되었습니다.',
     });
   } catch (err) {
     console.error(err);
-
     res.status(500).send({
       isSuccess: false,
       error: '서버 오류가 발생했습니다.',
