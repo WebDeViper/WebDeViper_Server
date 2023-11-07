@@ -1,6 +1,4 @@
-
 const { User, Group, Room, Timer, mongoose } = require('../schemas/schema');
-
 
 // 카테고리에 따른 그룹 목록을 반환하는 함수
 exports.getCategoryGroups = async (req, res) => {
@@ -49,22 +47,26 @@ exports.getCategoryGroups = async (req, res) => {
 exports.getCategoryGroupsByUser = async (req, res) => {
   try {
     // 토큰에서 현재 유저 정보 가져오기
-    const userInfo = res.locals.decoded.userInfo;
+    // const userInfo = res.locals.decoded.userInfo;
 
-    if (!userInfo) {
-      return res.status(400).send({
-        isSuccess: false,
-        code: 400,
-        error: '사용자 정보를 찾을 수 없습니다.',
-      });
-    }
+    // if (!userInfo) {
+    //   return res.status(400).send({
+    //     isSuccess: false,
+    //     code: 400,
+    //     error: '사용자 정보를 찾을 수 없습니다.',
+    //   });
+    // }
 
-    const userId = userInfo.id;
+    // const userId = userInfo.id;
+    const userId = '6549bb7f07eae932762e5e9f';
 
     // 사용자의 그룹 ID 목록 조회
     const userGroup = await User.findById(userId).select('groups');
+    console.log(userGroup, 'user의 그룹!!');
+    console.log(userGroup.groups);
     let groups = []; // 변수 선언 및 초기화
-
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     if (userGroup) {
       // 그룹 ID 목록을 사용하여 그룹 정보 조회 (비동기 처리)
       groups = await Group.find({ _id: { $in: userGroup.groups } });
@@ -73,9 +75,10 @@ exports.getCategoryGroupsByUser = async (req, res) => {
       for (const group of groups) {
         const memberTimers = [];
         for (const memberId of group.members) {
-          const userTimer = await Timer.findOne({ user_id: memberId, 'daily.date': new Date() });
+          const userTimer = await Timer.find({ user_id: memberId, 'daily.date': today });
           if (userTimer) {
-            memberTimers.push({ userId: memberId, timerData: userTimer.daily.data });
+            console.log(userTimer, '<<<<<<<<');
+            memberTimers.push({ userId: memberId, timerData: userTimer.daily.date });
           }
         }
         group.memberTimers = memberTimers;

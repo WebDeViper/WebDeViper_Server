@@ -1,6 +1,4 @@
-
-const { Timer, User,Group, mongoose } = require('../schemas/schema');
-
+const { Timer, User, Group, mongoose } = require('../schemas/schema');
 
 const moment = require('moment-timezone');
 
@@ -13,14 +11,41 @@ const getKoreaDate = () => {
 // Now you can use getKoreaDate() to get the start of the current day in the Asia/Seoul timezone
 
 exports.getUserGroups = async userId => {
-  const timer = await Timer.findOne({ user_id: userId }).populate('user_id', 'groups').exec();
-  console.log('====', timer.user_id.groups);
-  //이렇게 하면 오늘 공부 처음 시작한 경우에는 찾아올 수 없어서 undefined 뜸
-  // const user = await User.findById(userId);
-  //console.log('###########', user.groups, '#############');
-  return timer.user_id.groups; //유저가 속한 그룹을 가져옵니다. 배열 형태로...
-};
+  console.log(userId);
+  try {
+    // async/await를 사용하여 userId로 사용자를 찾습니다.
+    let user = await User.findOne({ _id: userId }).populate('groups');
+    console.log(user);
+    if (!user) {
+      // 사용자를 찾을 수 없으면 에러 메시지를 설정하고 던집니다.
+      throw new Error('사용자를 찾을 수 없습니다.');
+    }
 
+    // 사용자가 그룹을 가지고 있지 않으면 개인 그룹을 만들어줍니다.
+    if (user.groups.length === 0) {
+      const defaultGroup = new Group({
+        group_leader: user._id, // 사용자를 그룹 리더로 지정
+        group_name: '내 개인 그룹', // 개인 그룹의 이름을 설정
+        // 필요한 다른 그룹 속성을 설정합니다.
+      });
+
+      await defaultGroup.save();
+
+      // 사용자의 그룹 목록에 개인 그룹을 추가합니다.
+      user.groups.push(defaultGroup);
+
+      // 사용자의 그룹 목록을 업데이트합니다.
+      await user.save();
+    }
+
+    // 사용자의 그룹 목록을 반환합니다.
+    return user.groups;
+  } catch (error) {
+    // 잠재적인 오류(예: 데이터베이스 연결 문제)를 처리합니다.
+    console.error('사용자 그룹을 가져오거나 생성하는 중 오류 발생:', error);
+    throw error; // 오류를 다시 던지거나 필요에 따라 처리할 수 있습니다.
+  }
+};
 exports.hasDateSubjectTimer = async (userId, subject) => {
   const koreaDate = getKoreaDate();
 
