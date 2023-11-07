@@ -542,9 +542,9 @@ exports.cancelJoinRequest = async (req, res) => {
     await user.save();
     await group.save();
 
-    res.status(204).send({
+    res.status(200).send({
       isSuccess: true,
-      code: 204,
+      code: 200,
       message: '그룹요청이 취소되었습니다.',
     });
   } catch (err) {
