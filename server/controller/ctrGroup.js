@@ -123,13 +123,6 @@ exports.joinGroupRequest = async (req, res) => {
     // 그룹 업데이트
     const group = await Group.findById(groupId);
 
-    // 사용자 업데이트
-    const user = await User.findById(userId);
-    if (user) {
-      user.pending_groups.push({ group: groupId });
-      await user.save();
-    }
-
     if (group) {
       const isFull = group.members.length >= group.group_maximum_member;
       if (isFull) {
@@ -147,6 +140,13 @@ exports.joinGroupRequest = async (req, res) => {
             isFull: isFull,
             message: '이미 그룹요청을 한 상태입니다.',
           });
+        }
+
+        // 사용자 업데이트
+        const user = await User.findById(userId);
+        if (user) {
+          user.pending_groups.push({ group: groupId });
+          await user.save();
         }
         group.join_requests.push({ user_id: userId, user_name: userInfo.nickName });
         await group.save();
