@@ -54,29 +54,27 @@ const connect = () => {
     //     });
     //     await group.save();
     //   }
-
+    //   console.log('어제는', yesterday); //2023-11-06T04:05:10.568Z
     //   // 더미 타이머 데이터 생성
     //   for (let i = 1; i <= 10; i++) {
     //     const user = await User.findOne({ nick_name: `User${i}` }); // 기존 사용자 찾기
     //     const timer = new Timer({
     //       user_id: user._id,
     //       total_time: 3100, // 초기 공부 시간은 0으로 설정
-    //       daily: [
-    //         {
-    //           date: yesterday, // 어제 날짜를 설정
-    //           data: [
-    //             {
-    //               title: 'Study',
-    //               timer: 1800, // 예: 30분
-    //             },
-    //             {
-    //               title: 'Math',
-    //               timer: 1500, // 예: 25분
-    //             },
-    //             // 다른 과목과 타임 추가
-    //           ],
-    //         },
-    //       ],
+    //       daily: {
+    //         date: yesterday, // 어제 날짜를 설정
+    //         data: [
+    //           {
+    //             title: 'Study',
+    //             timer: 1800, // 예: 30분
+    //           },
+    //           {
+    //             title: 'Math',
+    //             timer: 1500, // 예: 25분
+    //           },
+    //           // 다른 과목과 타임 추가
+    //         ],
+    //       },
     //     });
     //     await timer.save();
     //   }
@@ -84,7 +82,7 @@ const connect = () => {
     //   console.log('더미 데이터 생성 완료');
     // };
 
-    // createDummyData();
+    createDummyData();
 
     console.log(`${MONGO_HOST} 몽고디비 연결되었습니다.`);
   });
