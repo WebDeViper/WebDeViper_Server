@@ -28,12 +28,15 @@ exports.getMyCategoryRank = async (req, res) => {
       // 요청에서 카테고리 파라미터가 주어진 경우, 해당 카테고리의 랭킹을 조회합니다.
       const userRanking = await getUserRanking(req.query.category, yesterday);
       const groupRanking = await getGroupRanking(req.query.category, yesterday);
-      if (userRanking.length === 0) {
-        return res.status(200).send({ message: '아직 해당 카테고리의 유저가 존재하지 않습니다.' });
-      } else if (groupRanking.length === 0) {
-        return res.status(200).send({ message: '아직 해당 카태고리의 스터디 그룹이 존재하지 않습니다.' });
+      if (!userRanking.length && !groupRanking.length) {
+        return res.status(200).send({ message: '유저 및 스터디 그룹 없음' });
+      } else if (!userRanking.length) {
+        return res.status(200).send({ message: '유저 없음', topGroups: groupRanking });
+      } else if (!groupRanking.length) {
+        return res.status(200).send({ message: '스터디 그룹 없음', topUsers: userRanking });
+      } else {
+        return res.status(200).send({ topUsers: userRanking, topGroups: groupRanking });
       }
-      return res.status(200).send({ topUsers: userRanking, topGroups: groupRanking });
     } else {
       // 카테고리 파라미터가 주어지지 않은 경우, 로그인한 유저와 같은 카테고리의 랭킹을 조회합니다.
       const userRanking = await getUserRanking(userCategory, yesterday);
