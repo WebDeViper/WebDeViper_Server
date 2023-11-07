@@ -23,5 +23,6 @@ router.use('/api/user', routerUser);
 router.use('/api/auth', routerAuth);
 
 // 랭킹 라우터
-router.use('/api', routerCategory);
+router.use('/', routerCategory);
+
 module.exports = router;

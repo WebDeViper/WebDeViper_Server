@@ -18,6 +18,7 @@ const connect = () => {
 
   // 몽고디비 연결시 이벤트 리스너
   mongoose.connection.on('connected', async () => {
+
     console.log(`${MONGO_HOST} 몽고디비 연결되었습니다.`);
   });
   // 데이터 강제로 입력
