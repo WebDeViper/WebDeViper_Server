@@ -1,6 +1,4 @@
-
 const { User, Group, Room, Timer, mongoose } = require('../schemas/schema');
-
 
 // 카테고리에 따른 그룹 목록을 반환하는 함수
 exports.getCategoryGroups = async (req, res) => {
@@ -116,6 +114,9 @@ exports.joinGroupRequest = async (req, res) => {
 
     const { groupId } = req.params; // 가입하려는 group의 object Id
 
+    // 그룹 업데이트
+    const group = await Group.findById(groupId);
+
     // 사용자 업데이트
     const user = await User.findById(userId);
     if (user) {
@@ -123,23 +124,32 @@ exports.joinGroupRequest = async (req, res) => {
       await user.save();
     }
 
-    // 그룹 업데이트
-    const group = await Group.findById(groupId);
-
     if (group) {
-      const request = group.join_requests;
-      if (request.some(isUser => isUser.user_id.toString() === userId)) {
+      const isFull = group.members.length >= group.group_maximum_member;
+      if (isFull) {
+        //이미 최대인원수가 찻다면
         return res.status(202).send({
           isSuccess: false,
-          message: '이미 그룹요청을 한 상태입니다.',
+          isFull: isFull,
+          message: '그룹의 멤버 수가 최대인원 수 입니다. 그룹요청을 할 수 없습니다. ',
         });
+      } else {
+        const request = group.join_requests;
+        if (request.some(isUser => isUser.user_id.toString() === userId)) {
+          return res.status(202).send({
+            isSuccess: false,
+            isFull: isFull,
+            message: '이미 그룹요청을 한 상태입니다.',
+          });
+        }
+        group.join_requests.push({ user_id: userId, user_name: userInfo.nickName });
+        await group.save();
       }
-      group.join_requests.push({ user_id: userId, user_name: userInfo.nickName });
-      await group.save();
     }
 
     return res.status(200).send({
       isSuccess: true,
+      isFull: false,
       message: '그룹 가입 요청이 성공적으로 처리되었습니다.',
     });
   } catch (err) {
