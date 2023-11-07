@@ -198,14 +198,16 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
     }
 
     // 그룹의 join_requests에서 requestId에 해당하는 문서를 찾아서 삭제
-    group.join_requests = group.join_requests.filter(request => request.user_id !== requestUser._id);
+    group.join_requests = group.join_requests.filter(
+      request => request.user_id.toString() !== requestUser._id.toString()
+    );
 
     // 그룹의 멤버로 사용자 추가
     group.members.push(requestUser._id);
 
     // 사용자의 pending_groups에서 groupId에 해당하는 문서를 찾아서 삭제
     requestUser.pending_groups = requestUser.pending_groups.filter(
-      groupRequest => groupRequest.group.toString() !== groupId
+      groupRequest => groupRequest.group._id.toString() !== groupId
     );
 
     // 사용자의 그룹 목록에 groupId 추가
@@ -242,12 +244,12 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
 
   const userId = userInfo.id;
   const { groupId, requestNickName } = req.params;
-
+  console.log('requestNickName은 -> ', requestNickName);
   try {
     const group = await Group.findById(groupId);
     const user = await User.findById(userId);
     const requestUser = await User.findOne({ nick_name: requestNickName });
-
+    console.log('requestUser 는 -> ', requestUser);
     if (!group || !user) {
       return res.status(404).send({
         isSuccess: false,
@@ -260,6 +262,7 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
 
     // 사용자의 pending_groups에서 groupId에 해당하는 문서를 찾아서 삭제
     requestUser.pending_groups = user.pending_groups.filter(groupRequest => groupRequest.group.toString() !== groupId);
+    console.log(group);
 
     await group.save();
     await requestUser.save();
