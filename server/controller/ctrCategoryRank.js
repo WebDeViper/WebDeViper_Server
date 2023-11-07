@@ -4,15 +4,17 @@ const today = new Date();
 // 현재 날짜에서 1일(24시간)을 빼서 어제 날짜를 얻습니다.
 const yesterday = new Date(today);
 yesterday.setDate(today.getDate() - 1);
+yesterday.setHours(0, 0, 0, 0);
 
 exports.getMyCategoryRank = async (req, res) => {
   try {
     // console.log(req.query.category);
     //토큰 값에서 현재 유저 정보 가져오기
     // const currentUserId = res.locals.decoded.userInfo.id;
-    const currentUserId = '65496b00e419313392232543';
-    const userInfo = await User.findById(currentUserId);
-    const userCategory = userInfo.user_category_name; // 사용자의 카테고리
+    // const currentUserId = '6549bb7f07eae932762e5e9f';
+    // const userInfo = await User.findById(currentUserId);
+    const userInfo = res.locals.decoded.userInfo;
+    const userCategory = userInfo.category; // 사용자의 카테고리
 
     if (!userInfo) {
       return res.status(400).send({
