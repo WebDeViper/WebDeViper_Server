@@ -1,4 +1,6 @@
+
 const { User, Group, Room, Timer, mongoose } = require('../schemas/schema');
+
 
 // 카테고리에 따른 그룹 목록을 반환하는 함수
 exports.getCategoryGroups = async (req, res) => {
@@ -459,5 +461,38 @@ exports.getAllRooms = async (req, res) => {
     return res.status(200).send(roomList);
   } catch (err) {
     console.error(err);
+  }
+};
+exports.getPendingGroups = async (req, res) => {
+  try {
+    // 현재 사용자 정보를 추출
+    const userInfo = res.locals.decoded.userInfo;
+    const userId = userInfo.id;
+
+    // 사용자 정보를 조회
+    const user = await User.findById(userId);
+
+    // 사용자의 "pending_groups" 배열을 가져옴
+    const pendingGroups = user.pending_groups;
+
+    const groupInfoArray = [];
+
+    // "pendingGroups" 배열 내의 각 ObjectId에 대한 그룹 정보를 가져옴
+    for (const item of pendingGroups) {
+      const group = await Group.findById(item.group);
+
+      // 그룹이 존재하는 경우에만 정보를 추가
+      if (group) {
+        groupInfoArray.push(group);
+      }
+    }
+
+    // 그룹 정보를 로깅하고 클라이언트에 응답을 보냄
+    console.log(groupInfoArray);
+    res.status(200).send({ pendingGroups: groupInfoArray });
+  } catch (err) {
+    // 에러 발생 시 에러 메시지를 로깅하고 클라이언트에 에러 상태 코드로 응답을 보냄
+    console.error(err);
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 };
