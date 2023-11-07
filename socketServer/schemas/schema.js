@@ -35,6 +35,7 @@ const groupSchema = new Schema({
   daily_goal_time: String, // 그룹의 목표 공부시간
   is_camera_on: { type: Boolean, default: false },
   members: [{ type: Schema.Types.ObjectId, ref: 'User' }], // 그룹에 속한 사용자 리스트(배열)
+  is_private: { type: Boolean, default: false },
   join_requests: [
     // 그룹에 가입 요청한 사용자 리스트(배열)
     {
