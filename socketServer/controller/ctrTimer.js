@@ -26,6 +26,7 @@ exports.getUserGroups = async userId => {
       const defaultGroup = new Group({
         group_leader: user._id, // 사용자를 그룹 리더로 지정
         group_name: '내 개인 그룹', // 개인 그룹의 이름을 설정
+        is_private: true,
         // 필요한 다른 그룹 속성을 설정합니다.
       });
 
