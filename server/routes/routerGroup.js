@@ -9,6 +9,7 @@ const { groupImgUploader } = require('../middlewares/multer/multerConfig'); // �
 router.get('/studyGroups', verifyJwtToken, controller.getCategoryGroups);
 // 현재 로그인한 유저가 속한 스터디 그룹을 조회
 router.get('/studyGroups/users', verifyJwtToken, controller.getCategoryGroupsByUser);
+// router.get('/studyGroups/users', controller.getCategoryGroupsByUser);
 // 현재 로그인한 유저의 pending_group 조회
 router.get('/pendingGroups', verifyJwtToken, controller.getPendingGroups);
 //그룹 요청 기능

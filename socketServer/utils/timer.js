@@ -19,7 +19,7 @@ module.exports = function (io) {
       }
     });
     console.log('client is connected in stopwatch!', socket.id);
-    const userId = socket.handshake.query.userId;
+    const userId = socket.handshake.auth.userId;
     const userGroupIds = await timerController.getUserGroups(userId);
 
     timerSpace.emit('welcome', userGroupIds); //배열로 유저가 속한 그룹의 objId를 보냄
