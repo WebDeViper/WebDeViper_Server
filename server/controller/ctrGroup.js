@@ -506,3 +506,52 @@ exports.getPendingGroups = async (req, res) => {
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
+
+exports.cancelJoinRequest = async (req, res) => {
+  try {
+    const userInfo = res.locals.decoded.userInfo;
+
+    if (!userInfo) {
+      return res.status(400).send({
+        isSuccess: false,
+        code: 400,
+        error: '사용자 정보를 찾을 수 없습니다.',
+      });
+    }
+
+    const userId = userInfo.id;
+    const { groupId } = req.params;
+
+    const group = await Group.findById(groupId);
+    const user = await User.findById(userId);
+
+    if (!group || !user) {
+      return res.status(404).send({
+        isSuccess: false,
+        code: 404,
+        error: '그룹 또는 사용자를 찾을 수 없습니다.',
+      });
+    }
+
+    // 사용자의 pending_groups에서 groupId 제거
+    user.pending_groups = user.pending_groups.filter(item => item.group.toString() !== groupId);
+
+    // 그룹의 join_requests에서 userId 제거
+    group.join_requests = group.join_requests.filter(item => item.user_id.toString() !== userId);
+
+    await user.save();
+    await group.save();
+
+    res.status(204).send({
+      isSuccess: true,
+      code: 204,
+      message: '그룹요청이 취소되었습니다.',
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      isSuccess: false,
+      error: '서버 오류가 발생했습니다.',
+    });
+  }
+};

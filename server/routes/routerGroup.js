@@ -55,6 +55,8 @@ router.patch('/studyGroup/:groupId', verifyJwtToken, controller.patchGroupInform
 router.delete('/studyGroup/:groupId', verifyJwtToken, controller.deleteGroup);
 //그룹장이 그룹을 삭제했을 때
 router.delete('/studyGroup/:groupId/members', verifyJwtToken, controller.removeAllMembersFromGroup);
+//그룹 가입 요청 취소 기능
+router.delete('/studyGroup/:groupId/joinRequests', verifyJwtToken, controller.cancelJoinRequest);
 
 router.get('/rooms', controller.getAllRooms);
 module.exports = router;
