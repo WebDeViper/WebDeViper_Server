@@ -62,19 +62,33 @@ exports.getCategoryGroupsByUser = async (req, res) => {
     // 사용자의 그룹 ID 목록 조회
     const userGroup = await User.findById(userId).select('groups');
     let groups = []; // 변수 선언 및 초기화
-    console.log('userGroup은 ', userGroup);
-    if (userGroup) {
-      console.log('사용자의 그룹 ID 목록:', userGroup.groups);
 
+    if (userGroup) {
       // 그룹 ID 목록을 사용하여 그룹 정보 조회 (비동기 처리)
       groups = await Group.find({ _id: { $in: userGroup.groups } });
-      console.log('조회된 그룹 정보:', groups);
-      // 여기서 groups에 조회된 그룹 정보가 배열로 포함됩니다.
+
+      // 그룹 멤버의 Timer 정보를 조회 및 추가
+      for (const group of groups) {
+        const memberTimers = [];
+        for (const memberId of group.members) {
+          const userTimer = await Timer.findOne({ user_id: memberId, 'daily.date': new Date() });
+          if (userTimer) {
+            memberTimers.push({ userId: memberId, timerData: userTimer.daily.data });
+          }
+        }
+        group.memberTimers = memberTimers;
+      }
+
+      res.status(200).send({ isSuccess: true, code: 200, study_groups: groups });
     } else {
       console.log('사용자를 찾을 수 없습니다.');
       // 사용자를 찾지 못한 경우에 대한 처리
+      res.status(400).send({
+        isSuccess: false,
+        code: 400,
+        error: '사용자를 찾을 수 없습니다.',
+      });
     }
-    res.status(200).send({ isSuccess: true, code: 200, study_groups: groups });
   } catch (err) {
     console.error(err);
     // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환

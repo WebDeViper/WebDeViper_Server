@@ -69,7 +69,7 @@ const timerSchema = new Schema({
   user_id: { type: Schema.Types.ObjectId, ref: 'User' },
   total_time: { type: Number, default: 0 },
   daily: {
-    date: String, // 오늘 날짜
+    date: { type: Date, default: Date.now }, // 오늘 날짜
     data: [
       {
         title: { type: String }, // 과목
