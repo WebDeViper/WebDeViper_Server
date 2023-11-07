@@ -16,25 +16,26 @@ exports.getCategoryGroups = async (req, res) => {
 
     const userId = userInfo.id;
     const userCategory = userInfo.category;
+    console.log(userCategory);
 
     // 사용자의 카테고리를 조회
     const user = await User.findById(userId);
     if (user) {
       const groups = await Group.find({ group_category: userCategory });
+      console.log('groups는', groups);
       if (groups.length > 0) {
         res.status(200).send({
           isSuccess: true,
           code: 200,
           study_groups: groups,
         });
+      } else {
+        res.status(200).send({
+          isSuccess: false,
+          code: 204,
+          error: '해당하는 카테고리의 그룹이 없습니다.',
+        });
       }
-      console.log(groups);
-    } else {
-      res.status(200).send({
-        isSuccess: false,
-        code: 204,
-        error: '해당하는 카테고리의 그룹이 없습니다.',
-      });
     }
   } catch (err) {
     // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
@@ -47,18 +48,18 @@ exports.getCategoryGroups = async (req, res) => {
 exports.getCategoryGroupsByUser = async (req, res) => {
   try {
     // 토큰에서 현재 유저 정보 가져오기
-    // const userInfo = res.locals.decoded.userInfo;
+    const userInfo = res.locals.decoded.userInfo;
 
-    // if (!userInfo) {
-    //   return res.status(400).send({
-    //     isSuccess: false,
-    //     code: 400,
-    //     error: '사용자 정보를 찾을 수 없습니다.',
-    //   });
-    // }
+    if (!userInfo) {
+      return res.status(400).send({
+        isSuccess: false,
+        code: 400,
+        error: '사용자 정보를 찾을 수 없습니다.',
+      });
+    }
 
-    // const userId = userInfo.id;
-    const userId = '6549bb7f07eae932762e5e9f';
+    const userId = userInfo.id;
+    // const userId = '6549bb7f07eae932762e5e9f';
 
     // 사용자의 그룹 ID 목록 조회
     const userGroup = await User.findById(userId).select('groups');
@@ -72,17 +73,17 @@ exports.getCategoryGroupsByUser = async (req, res) => {
       groups = await Group.find({ _id: { $in: userGroup.groups } });
 
       // 그룹 멤버의 Timer 정보를 조회 및 추가
-      for (const group of groups) {
-        const memberTimers = [];
-        for (const memberId of group.members) {
-          const userTimer = await Timer.find({ user_id: memberId, 'daily.date': today });
-          if (userTimer) {
-            console.log(userTimer, '<<<<<<<<');
-            memberTimers.push({ userId: memberId, timerData: userTimer.daily.date });
-          }
-        }
-        group.memberTimers = memberTimers;
-      }
+      // for (const group of groups) {
+      //   const memberTimers = [];
+      //   for (const memberId of group.members) {
+      //     const userTimer = await Timer.find({ user_id: memberId, 'daily.date': today });
+      //     if (userTimer) {
+      //       console.log(userTimer, '<<<<<<<<');
+      //       memberTimers.push({ userId: memberId, timerData: userTimer.daily.date });
+      //     }
+      //   }
+      //   group.memberTimers = memberTimers;
+      // }
 
       res.status(200).send({ isSuccess: true, code: 200, study_groups: groups });
     } else {
@@ -197,14 +198,16 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
     }
 
     // 그룹의 join_requests에서 requestId에 해당하는 문서를 찾아서 삭제
-    group.join_requests = group.join_requests.filter(request => request.user_id !== requestUser._id);
+    group.join_requests = group.join_requests.filter(
+      request => request.user_id.toString() !== requestUser._id.toString()
+    );
 
     // 그룹의 멤버로 사용자 추가
     group.members.push(requestUser._id);
 
     // 사용자의 pending_groups에서 groupId에 해당하는 문서를 찾아서 삭제
     requestUser.pending_groups = requestUser.pending_groups.filter(
-      groupRequest => groupRequest.group.toString() !== groupId
+      groupRequest => groupRequest.group._id.toString() !== groupId
     );
 
     // 사용자의 그룹 목록에 groupId 추가
@@ -241,12 +244,12 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
 
   const userId = userInfo.id;
   const { groupId, requestNickName } = req.params;
-
+  console.log('requestNickName은 -> ', requestNickName);
   try {
     const group = await Group.findById(groupId);
     const user = await User.findById(userId);
     const requestUser = await User.findOne({ nick_name: requestNickName });
-
+    console.log('requestUser 는 -> ', requestUser);
     if (!group || !user) {
       return res.status(404).send({
         isSuccess: false,
@@ -259,6 +262,7 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
 
     // 사용자의 pending_groups에서 groupId에 해당하는 문서를 찾아서 삭제
     requestUser.pending_groups = user.pending_groups.filter(groupRequest => groupRequest.group.toString() !== groupId);
+    console.log(group);
 
     await group.save();
     await requestUser.save();
