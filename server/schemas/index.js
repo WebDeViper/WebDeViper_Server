@@ -24,6 +24,7 @@ const connect = () => {
     //   // 현재 날짜에서 1일(24시간)을 빼서 어제 날짜를 얻습니다.
     //   const yesterday = new Date(today);
     //   yesterday.setDate(today.getDate() - 1);
+    //   yesterday.setHours(0, 0, 0, 0);
     //   // 더미 사용자 생성
     //   for (let i = 1; i <= 10; i++) {
     //     const user = new User({
@@ -82,7 +83,7 @@ const connect = () => {
     //   console.log('더미 데이터 생성 완료');
     // };
 
-    createDummyData();
+    // createDummyData();
 
     console.log(`${MONGO_HOST} 몽고디비 연결되었습니다.`);
   });
