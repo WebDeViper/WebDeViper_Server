@@ -62,6 +62,7 @@ async function getGroupRanking(userCategory, date) {
     const groupData = {
       group_name: group.group_name,
       membersTime: [],
+      group_image_path: group.group_image_path,
     };
 
     const members = group.members;
@@ -105,6 +106,7 @@ async function getRankingData(data, date) {
     const userData = {
       user_nickname: item.nick_name,
       user_total_time: total_time.length > 0 ? total_time[0].total_time : 0,
+      user_profile_image_path: item.user_profile_image_path,
     };
     rankingData.push(userData);
   }
