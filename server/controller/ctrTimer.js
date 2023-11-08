@@ -48,7 +48,7 @@ exports.getTimerByUser = async (req, res) => {
           const memberInfo = {
             _id: member._id,
             nick_name: member.nick_name,
-            is_running: member.is_running,
+            is_running: timerInfo ? timerInfo.is_running : false,
             total_time: timerInfo ? timerInfo.total_time : 0,
             // This is where you can extract the member's total_time
             // Modify this part based on your schema structure
@@ -56,7 +56,7 @@ exports.getTimerByUser = async (req, res) => {
 
           groupInfo.members.push(memberInfo);
         }
-        console.log(groupInfo);
+        console.log(groupInfo, '>>>>>>>');
         return groupInfo;
       });
 
