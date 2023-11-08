@@ -18,6 +18,42 @@ exports.saveUser = async (userName, socketid) => {
   await user.save();
   return user;
 };
+exports.deleteUser = async socketId => {
+  const user = await User.findOne({ token: socketId });
+  console.log('user는', user);
+  // 사용자가 존재하지 않으면 새 사용자 정보를 생성
+  if (!user) {
+    return user;
+  }
+  // 이미 존재하는 사용자의 연결 정보 (token)를 업데이트하고 온라인 상태로 설정
+  user.token = null;
+  // user.online = true;
+
+  await user.save();
+  return user;
+};
+exports.isToken = async name => {
+  const user = await User.findOne({ nick_name: name });
+  User.findOne({ nick_name: name }, (err, user) => {
+    if (err) {
+      console.error('데이터베이스 쿼리 오류:', err);
+    } else {
+      if (user) {
+        if (user.token) {
+          console.log(`사용자 ${name}의 토큰 값: ${user.token}`);
+          const token = user.token;
+        } else {
+          console.log(`사용자 ${name}는 토큰 값을 가지고 있지 않습니다.`);
+          const token = null;
+        }
+      } else {
+        console.log(`사용자 ${name}를 찾을 수 없음`);
+      }
+    }
+  });
+  console.log('token은 ->', token);
+  return token;
+};
 
 // 사용자의 토큰 (연결 정보)을 검사하고 해당 사용자를 반환
 exports.checkUser = async joinUser => {
