@@ -6,31 +6,12 @@ module.exports = function (io) {
   let name; // 사용자의 이름을 저장하는 변수
   chatSpace.on('connection', async socket => {
     console.log('client is connected', socket.id);
-    // 모든 그룹을 조회
-    const groups = await Group.find({}).exec();
-
-    // 각 그룹에 대해 room 문서 생성 및 동기화
-    groups.forEach(async group => {
-      const roomData = {
-        group: group._id, // 그룹의 ID 참조
-        room: group.group_name, // 방 이름을 그룹 이름으로 설정
-        members: group.members, // 그룹의 멤버를 그대로 복사
-      };
-
-      try {
-        const savedRoom = await Room.findOneAndUpdate({ room: group.group_name }, roomData, { upsert: true });
-        console.log(`방 (${group.group_name}) 동기화 또는 업데이트 완료.`);
-      } catch (err) {
-        console.error(`방 (${group.group_name}) 동기화 중 오류 발생:`, err);
-      }
-    });
-
     // 사용자 로그인을 처리합니다.
     socket.on('login', async (userName, cb) => {
       try {
         name = userName;
         const user = await userController.saveUser(userName, socket.id);
-
+        console.log('소켓서버측 로그인 응답위한 user', user);
         if (user) {
           // 사용자가 성공적으로 저장된 경우 성공 응답을 보냅니다.
           cb({ isOk: true, data: user });
@@ -43,9 +24,6 @@ module.exports = function (io) {
         cb({ isOk: false, error: error.message });
       }
     });
-
-    // 연결된 클라이언트에 채팅방 목록을 보냅니다.
-    // socket.emit('rooms', await userController.getAllRooms());
 
     // 사용자가 채팅방에 참여하는 것을 처리합니다.
     socket.on('joinRoom', async (joinUser, rid, cb) => {
@@ -68,9 +46,9 @@ module.exports = function (io) {
         const chatLog = await userController.getChatLog(rid);
         chatSpace.to(user.rooms.toString()).emit('message', [...chatLog, welcomeMessage]);
         socket.emit('rooms', await userController.getAllRooms());
-        cb({ ok: true, data: user });
+        cb({ isOk: true, data: user });
       } catch (error) {
-        cb({ ok: false, error: error.message });
+        cb({ isOk: false, error: error.message });
       }
     });
 
@@ -85,9 +63,9 @@ module.exports = function (io) {
         };
         socket.broadcast.to(user.rooms.toString()).emit('message', leaveMessage);
         socket.leave(user.rooms.toString());
-        cb({ ok: true });
+        cb({ isOk: true });
       } catch (error) {
-        cb({ ok: false, message: error.message });
+        cb({ isOk: false, message: error.message });
       }
     });
 

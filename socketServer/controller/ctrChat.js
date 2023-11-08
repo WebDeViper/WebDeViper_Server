@@ -3,6 +3,7 @@ const { User, Group, Room, Chat, mongoose } = require('../schemas/schema');
 // 사용자 정보를 저장하거나 업데이트하는 함수
 exports.saveUser = async (userName, socketid) => {
   // 이미 있는 사용자인지 확인
+  console.log('userName은 컨트롤러 함수에서 ', userName);
   const user = await User.findOne({ nick_name: userName });
   console.log('user는', user);
   // 사용자가 존재하지 않으면 새 사용자 정보를 생성
@@ -28,7 +29,7 @@ exports.checkUser = async socketid => {
 
 // 사용자가 채팅방에 참여하는 함수
 exports.joinRoom = async (roomId, user) => {
-  const room = await Room.findById(roomId);
+  const room = await Group.findById(roomId);
   if (!room) {
     throw new Error('해당 방이 없습니다.');
   }
@@ -103,7 +104,7 @@ exports.getChatLog = async rid => {
 
 // 모든 채팅방의 목록을 반환하는 함수
 exports.getAllRooms = async () => {
-  const roomList = await Room.find({});
+  const roomList = await Group.find({});
   console.log('겟룸실행', roomList);
   return res.send(roomList);
 };
