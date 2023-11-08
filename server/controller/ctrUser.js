@@ -1,8 +1,29 @@
 const { duplicateCheck } = require('../utils/userModelDuplicateCheck');
 const { generateJwtToken, generateRefreshToken } = require('../utils/jwt');
 // Mongoose
-const { User, Room, mongoose } = require('../schemas/schema');
+const { User, Group, Room, Chat, mongoose } = require('../schemas/schema');
 // const ObjectId = mongoose.Types.ObjectId;
+
+//TODO 받은 유저아이디로 유저정보를 반환하는 API
+// api/user/:id
+exports.getUserInfo = async (req, res) => {
+  try {
+    const targetUser = req.params.userId;
+
+    const userInfo = await User.findById(targetUser);
+    console.log('파람스로 받은 유저정보 조회 >> ', userInfo);
+    res.send({
+      isSuccess: true,
+      message: '유저 정보 조회 성공',
+      userInfo,
+    });
+  } catch (err) {
+    res.status(500).send({
+      isSuccess: false,
+      message: '유저 조회 실패',
+    });
+  }
+};
 
 exports.getUser = async (req, res) => {
   try {
@@ -125,7 +146,7 @@ exports.patchUser = async (req, res) => {
 
     const { nickName, category, statusMsg } = req.body;
 
-    const user = await User.findById(currentUserId);
+    let user = await User.findById(currentUserId);
 
     if (nickName) {
       // 닉네임 중복검사
@@ -136,6 +157,38 @@ exports.patchUser = async (req, res) => {
           msg: '닉네임이 이미 존재합니다.',
         });
       }
+
+      // TODO 1
+      // 만약 그룹스키마의 join_requests에 user_id와 현재 유저의 _id가 같은게 있다면
+      // join_requests의 user_name 값도 최신화 해줘야 한다.
+      const pendingGroup = await User.findById(currentUserId).select('pending_groups');
+
+      for (let group of pendingGroup.pending_groups) {
+        const groupId = group.group; // 그룹 ID
+        console.log('그룹 ID >> ', groupId);
+
+        // Group스키마의 join_requests를 조회
+        const groupData = await Group.findById(groupId);
+        console.log('Group스키마의 join_requests를 조회', groupData);
+
+        // join_requests 배열의 요소들을 순회하면서 user_id와 현재 유저의 _id를 비교
+        for (let joinRequest of groupData.join_requests) {
+          console.log('joinRequest 순회', joinRequest);
+          if (joinRequest.user_id.toString() === currentUserId) {
+            // 일치하는 경우 user_name 필드 업데이트
+            joinRequest.user_name = nickName;
+
+            // Group스키마 업데이트
+            await groupData.save();
+            console.log('Group스키마 업데이트', groupData);
+          }
+        }
+      }
+
+      // TODO 2
+      // 만약 chat스키마의 user 필드에 user_id와 현재 유저의 _id가 같은게 있다면 user의 name 값도 최신화 해줘야 한다.
+      Chat.updateMany({ 'user.user_id': currentUserId }, { $set: { 'user.name': nickName } });
+
       user.nick_name = nickName;
     }
     if (category) {
