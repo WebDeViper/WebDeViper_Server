@@ -475,7 +475,7 @@ exports.removeAllMembersFromGroup = async (req, res) => {
 
 exports.getAllRooms = async (req, res) => {
   try {
-    const roomList = await Room.find({});
+    const roomList = await Group.find({});
     console.log('겟룸실행', roomList);
     return res.status(200).send(roomList);
   } catch (err) {
