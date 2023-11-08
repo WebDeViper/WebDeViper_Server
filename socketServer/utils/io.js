@@ -45,18 +45,19 @@ module.exports = function (io) {
         };
         console.log('환영', welcomeMessage);
         const chatLog = await userController.getChatLog(rid);
-        const isToken = await userController.isToken(name);
-        if (!isToken) {
-          //token값이 없다면
-          chatSpace.to(user.rooms.toString()).emit('message', [...chatLog, welcomeMessage]);
-        } else {
-          chatSpace.to(user.rooms.toString()).emit('message', [welcomeMessage]);
-        }
-        cb({ isOk: true, data: user });
+        // const isToken = await userController.isToken(name);
+
+        // if (!isToken) {
+        //token값이 없다면
+        // chatSpace.to(user.rooms.toString()).emit('message', [...chatLog, welcomeMessage]);
+        // } else {
+        // }
+        cb({ isOk: true, data: chatLog });
       } catch (error) {
         cb({ isOk: false, error: error.message });
       }
     });
+    // chatSpace.to(user.rooms.toString()).emit('message', [welcomeMessage]);
 
     // 사용자가 채팅방을 나가는 것을 처리합니다.
     socket.on('leaveRoom', async (name, cb) => {
