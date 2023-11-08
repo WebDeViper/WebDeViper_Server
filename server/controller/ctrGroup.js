@@ -1,5 +1,25 @@
 const { User, Group, Room, Timer, mongoose } = require('../schemas/schema');
 
+// 그룹 아이디를 받아 그룹 정보 조회/응답
+// api/group/:groupId
+exports.getGroupInfo = async (req, res) => {
+  try {
+    const targetGroup = req.params.groupId;
+    const GroupInfo = await Group.findById(targetGroup);
+    console.log('조회한 그룹 정보 >>', GroupInfo);
+    res.send({
+      isSuccess: true,
+      message: '그룹 정보 조회 성공',
+      GroupInfo,
+    });
+  } catch (err) {
+    res.status(500).send({
+      isSuccess: false,
+      message: '그룹 정보 조회중 서버에러 발생',
+    });
+  }
+};
+
 // 카테고리에 따른 그룹 목록을 반환하는 함수
 exports.getCategoryGroups = async (req, res) => {
   try {
