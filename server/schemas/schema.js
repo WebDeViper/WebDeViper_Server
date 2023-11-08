@@ -12,7 +12,7 @@ const userSchema = new Schema({
   provider: String, // 소셜로그인 제공업체
   sns_id: String, // 소셜로그인 제공업체로부터 받은 유저 식별값 (구글/카카오/네이버 전부 다를 수 있음)
   groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }], // 유저가 속한 그룹 리스트(배열)
-  rooms: [{ type: Schema.Types.ObjectId, ref: 'Room' }], // 유저가 속한 채팅 룸 리스트(배열)
+  rooms: [{ type: Schema.Types.ObjectId, ref: 'Group' }], // 유저가 속한 채팅 룸 리스트(배열)
   chat_online: Boolean, // 확인 필요
   token: String, // 확인 필요
   pending_groups: [
