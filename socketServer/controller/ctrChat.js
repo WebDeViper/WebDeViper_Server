@@ -20,8 +20,9 @@ exports.saveUser = async (userName, socketid) => {
 };
 
 // 사용자의 토큰 (연결 정보)을 검사하고 해당 사용자를 반환
-exports.checkUser = async socketid => {
-  const user = await User.findOne({ token: socketid });
+exports.checkUser = async joinUser => {
+  console.log('check User함수에서 nick_name은', joinUser);
+  const user = await User.findOne({ nick_name: joinUser });
   if (!user) throw new Error('사용자를 찾을 수 없음');
   console.log(user);
   return user;
@@ -103,11 +104,11 @@ exports.getChatLog = async rid => {
 };
 
 // 모든 채팅방의 목록을 반환하는 함수
-exports.getAllRooms = async () => {
-  const roomList = await Group.find({});
-  console.log('겟룸실행', roomList);
-  return res.send(roomList);
-};
+// exports.getAllRooms = async () => {
+//   const roomList = await Group.find({});
+//   console.log('겟룸실행', roomList);
+//   return res.send(roomList);
+// };
 
 // // 사용자가 채팅방을 나가는 함수
 // exports.leaveRoom = async user => {
