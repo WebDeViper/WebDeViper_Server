@@ -18,6 +18,7 @@ exports.getUser = async (req, res) => {
         profileImg: result.user_profile_image_path,
         email: result.email,
         statusMsg: result.status_message,
+        isServiceAdmin: result.is_service_admin,
       },
     });
   } catch (err) {

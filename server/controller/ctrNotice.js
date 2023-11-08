@@ -107,7 +107,7 @@ exports.getNoticeDetail = async (req, res) => {
   try {
     const result = await Notice.findById(req.params.notice_id);
     if (result) {
-      res.status(200).send({ result, message: '공지사항 찾기 성공!', isAdmin: user.is_service_admin });
+      res.status(200).send({ result, message: '공지사항 찾기 성공!', isAdmin: result.is_service_admin });
     } else {
       res.status(400).send({ message: '존재하지 않는 공지사항입니다.' });
     }
