@@ -1,7 +1,8 @@
 const { Timer, User, Group, mongoose } = require('../schemas/schema');
 
 const moment = require('moment-timezone');
-
+const today = new Date();
+today.setHours(0, 0, 0, 0);
 const getKoreaDate = () => {
   const koreaTimezone = 'Asia/Seoul';
   const currentDate = moment().tz(koreaTimezone);
@@ -48,11 +49,11 @@ exports.getUserGroups = async userId => {
   }
 };
 exports.hasDateSubjectTimer = async (userId, subject) => {
-  const koreaDate = getKoreaDate();
+  // const koreaDate = getKoreaDate();
 
   const result = await Timer.findOne({
     user_id: userId,
-    'daily.date': koreaDate,
+    'daily.date': today,
   });
 
   // console.log('???????그룹에어떻게 접근하지', Timer.userId.groups);
@@ -65,8 +66,9 @@ exports.hasDateSubjectTimer = async (userId, subject) => {
         return data.title === subject;
       });
       if (hasData) {
-        console.log('============', hasData.timer);
-        return hasData.timer;
+        console.log('============', hasData);
+        const userTimer = await Timer.find({ user_id: userId, 'daily.date': today });
+        return userTimer[0].total_time;
       } else {
         return false;
       }
@@ -75,11 +77,11 @@ exports.hasDateSubjectTimer = async (userId, subject) => {
 };
 
 const updateTimerData = async (userId, subject, time) => {
-  const koreaDate = getKoreaDate();
+  // const koreaDate = getKoreaDate();
 
   const result = await Timer.findOne({
     user_id: userId,
-    'daily.date': koreaDate,
+    'daily.date': today,
   });
 
   if (result) {
@@ -108,7 +110,7 @@ const updateTimerData = async (userId, subject, time) => {
       user_id: userId,
       total_time: time, // 주어진 시간으로 total_time을 초기화합니다
       daily: {
-        date: koreaDate,
+        date: today,
         data: [
           {
             title: subject,
@@ -141,7 +143,15 @@ exports.getGroupMembers = async userGroupIds => {
     console.error('그룹 및 사용자 조회 실패:', error);
   }
 };
-
+exports.getTotalTime = async userId => {
+  try {
+    const userTimer = await Timer.find({ user_id: userId, 'daily.date': today });
+    console.log('&&&&&&&&', userTimer[0].total_time, '&&&&&&&&&&&&&&&&');
+    return userTimer[0].total_time;
+  } catch (err) {
+    console.log(err);
+  }
+};
 exports.saveStartWatch = async (userId, subject) => {
   updateTimerData(userId, subject, 0);
 };
