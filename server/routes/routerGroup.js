@@ -5,14 +5,10 @@ const { verifyJwtToken } = require('../middlewares/jwt/jwt');
 const multer = require('multer');
 const { groupImgUploader } = require('../middlewares/multer/multerConfig'); // 그룹이미지 업로드임
 
-// 그룹 아이디를 받아 그룹 정보 조회/응답
-// api/group/:groupId
-router.get('/:groupId', verifyJwtToken, controller.getGroupInfo);
 //현재 로그인한 유저의 카테고리내에서 그룹조회
 router.get('/studyGroups', verifyJwtToken, controller.getCategoryGroups);
 // 현재 로그인한 유저가 속한 스터디 그룹을 조회
 router.get('/studyGroups/users', verifyJwtToken, controller.getCategoryGroupsByUser);
-// router.get('/studyGroups/users', controller.getCategoryGroupsByUser);
 // 현재 로그인한 유저의 pending_group 조회
 router.get('/pendingGroups', verifyJwtToken, controller.getPendingGroups);
 //그룹 요청 기능
@@ -63,4 +59,8 @@ router.delete('/studyGroup/:groupId/members', verifyJwtToken, controller.removeA
 router.delete('/studyGroup/:groupId/joinRequests', verifyJwtToken, controller.cancelJoinRequest);
 
 router.get('/rooms', controller.getAllRooms);
+
+// 그룹 아이디를 받아 그룹 정보 조회/응답
+// api/group/find/:groupId
+router.get('/find/:groupId', verifyJwtToken, controller.getGroupInfo);
 module.exports = router;
