@@ -68,6 +68,7 @@ const chatSchema = new Schema({
 const timerSchema = new Schema({
   user_id: { type: Schema.Types.ObjectId, ref: 'User' },
   total_time: { type: Number, default: 0 },
+  is_running: { type: Boolean, default: false },
   daily: {
     date: { type: Date, default: Date.now }, // 오늘 날짜
     data: [
