@@ -43,6 +43,7 @@ module.exports = function (io) {
           chat: `${user.nick_name}님이 입장하셨습니다.`,
           user: { id: null, name: 'system' },
         };
+        console.log('환영', welcomeMessage);
         const chatLog = await userController.getChatLog(rid);
         const isToken = await userController.isToken(name);
         if (!isToken) {
@@ -51,7 +52,6 @@ module.exports = function (io) {
         } else {
           chatSpace.to(user.rooms.toString()).emit('message', [welcomeMessage]);
         }
-
         cb({ isOk: true, data: user });
       } catch (error) {
         cb({ isOk: false, error: error.message });
