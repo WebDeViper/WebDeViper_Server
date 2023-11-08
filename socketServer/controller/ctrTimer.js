@@ -59,6 +59,7 @@ exports.hasDateSubjectTimer = async (userId, subject) => {
   // console.log('???????그룹에어떻게 접근하지', Timer.userId.groups);
 
   if (result) {
+    console.log(result, 'resultresultresultresultresultresult');
     // restart인 경우
     const { daily } = result;
     if (daily && Array.isArray(daily.data)) {
@@ -159,3 +160,37 @@ exports.saveStartWatch = async (userId, subject) => {
 exports.updateStopWatch = async (userId, subject, time) => {
   updateTimerData(userId, subject, time);
 };
+
+exports.getGroupMemberTimerInfo = async function (userGroupIds) {
+  const groupData = []; // 그룹 정보를 담을 배열
+
+  for (const userGroupId of userGroupIds) {
+    const group = await Group.findById(userGroupId);
+    const groupInfo = {
+      groupId: group._id,
+      group_name: group.group_name,
+      members: [],
+    };
+    for (const member of group.members) {
+      const timerInfo = await getTimerInfo(member._id, today);
+      const mem = await User.findById(member._id);
+      const memberInfo = {
+        _id: member._id,
+        nick_name: mem.nick_name,
+        is_running: timerInfo ? timerInfo.is_running : false,
+        total_time: timerInfo ? timerInfo.total_time : 0,
+      };
+      groupInfo.members.push(memberInfo);
+    }
+    groupData.push(groupInfo);
+  }
+
+  return groupData;
+};
+async function getTimerInfo(userId, date) {
+  const timerInfo = await Timer.findOne({
+    user_id: userId,
+    'daily.date': date,
+  });
+  return timerInfo;
+}
