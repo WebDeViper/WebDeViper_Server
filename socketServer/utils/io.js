@@ -86,10 +86,10 @@ module.exports = function (io) {
         if (user) {
           const message = await userController.saveChat(rid, receivedMessage, user);
           chatSpace.to(user.rooms.toString()).emit('message', message);
-          return cb({ ok: true });
+          return cb({ isOk: true });
         }
       } catch (error) {
-        cb({ ok: false, error: error.message });
+        cb({ isOk: false, error: error.message });
       }
     });
 
