@@ -24,7 +24,14 @@ exports.getTimerByUser = async (req, res) => {
       }
 
       // Populate the 'groups' field to retrieve the actual group information
-      const populatedUser = await User.populate(user, 'groups');
+      // Populate the 'groups' field to retrieve the actual group information
+      const populatedUser = await User.findById(currentId).populate({
+        path: 'groups',
+        populate: {
+          path: 'members',
+          model: 'User',
+        },
+      });
       const groupsArray = populatedUser.groups.map(async group => {
         // Extract basic group information
         const groupInfo = {
