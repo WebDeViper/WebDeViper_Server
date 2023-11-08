@@ -10,3 +10,6 @@ package-lock.json
 #mac 
 .DS_Store
 
+# 유저가 업로드한 이미지 파일
+!static/editorImg/.gitkeep
+!static/profileImg/.gitkeep
