@@ -6,7 +6,7 @@ const routerNotice = require('./routerNotice');
 const routerTodo = require('./routerTodo');
 const routerCategory = require('./routerCategory');
 const groupRouter = require('./routerGroup');
-
+const routerTimer = require('./routerTimer');
 // (스터디)그룹 라우터
 router.use('/api/group', groupRouter);
 
@@ -15,6 +15,9 @@ router.use('/api', routerTodo);
 
 // 공지사항 라우터
 router.use('/api', routerNotice);
+
+//타이머 라우터
+router.use('/api', routerTimer);
 
 // 유저 라우터
 router.use('/api/user', routerUser);
