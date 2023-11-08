@@ -79,9 +79,10 @@ module.exports = function (io) {
     // });
 
     // 채팅 메시지를 보내는 것을 처리합니다.
-    socket.on('sendMessage', async (rid, receivedMessage, cb) => {
+    socket.on('sendMessage', async (rid, name, receivedMessage, cb) => {
       try {
-        const user = await userController.checkUser(socket.id);
+        console.log('rid는', rid);
+        const user = await userController.checkUser(name);
         if (user) {
           const message = await userController.saveChat(rid, receivedMessage, user);
           chatSpace.to(user.rooms.toString()).emit('message', message);
