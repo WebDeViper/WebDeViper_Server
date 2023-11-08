@@ -47,11 +47,12 @@ module.exports = function (io) {
     //   }
     // }
     socket.on('joinGroup', groupId => {
+      console.log(groupId._id);
       // "joinGroup" 이벤트를 받으면 이 함수가 실행됩니다.
-      console.log(`클라이언트가 그룹 ${groupId}에 가입을 시도합니다.`);
+      console.log(`클라이언트가 그룹 ${groupId._id}에 가입을 시도합니다.`);
       // joinGroup(groupId, userId);
-      socket.join(groupId);
-      socket.emit('groupJoined', groupId);
+      socket.join(groupId._id);
+      socket.emit('groupJoined', groupId._id);
       // 이제 클라이언트가 그룹에 가입할 수 있도록 필요한 작업을 수행하세요.
     });
 
@@ -68,41 +69,41 @@ module.exports = function (io) {
 
         if (has_date_subject_timer) {
           // pause->start인경우
-          userGroupIds.forEach(groupId => {
-            const groupIdString = groupId.toString();
-            timerSpace.to(groupIdString).emit('myStopwatchStart-to-Other', {
-              userId,
-              subject,
-              time: has_date_subject_timer,
-              stopwatch_running: true,
-            });
-          });
-          // timerSpace.emit('myStopwatchStart-to-Other', {
-          //   userId,
-          //   // roomNickname,
-          //   subject,
-          //   time: has_date_subject_timer,
-          //   stopwatch_running: true,
+          // userGroupIds.forEach(groupId => {
+          //   const groupIdString = groupId.toString();
+          //   timerSpace.to(groupIdString).emit('myStopwatchStart-to-Other', {
+          //     userId,
+          //     subject,
+          //     time: has_date_subject_timer,
+          //     stopwatch_running: true,
+          //   });
           // });
+          timerSpace.emit('myStopwatchStart-to-Other', {
+            userId,
+            // roomNickname,
+            subject,
+            time: has_date_subject_timer,
+            stopwatch_running: true,
+          });
         } else {
           //그냥 start인 경우
           const timer = await timerController.saveStartWatch(userId, subject);
-          userGroupIds.forEach(groupId => {
-            const groupIdString = groupId.toString();
-            console.log('groupIdString', groupIdString);
-            timerSpace.to(groupIdString).emit('myStopwatchStart-to-Other', {
-              userId,
-              subject,
-              stopwatch_running: true,
-            });
-          });
-          // timerSpace.emit('myStopwatchStart-to-Other', {
-          //   userId,
-          //   // roomNickname,
-          //   subject,
-          //   // time: 0,
-          //   stopwatch_running: true,
+          // userGroupIds.forEach(groupId => {
+          //   const groupIdString = groupId.toString();
+          //   console.log('groupIdString', groupIdString);
+          //   timerSpace.to(groupIdString).emit('myStopwatchStart-to-Other', {
+          //     userId,
+          //     subject,
+          //     stopwatch_running: true,
+          //   });
           // });
+          timerSpace.emit('myStopwatchStart-to-Other', {
+            userId,
+            // roomNickname,
+            subject,
+            // time: 0,
+            stopwatch_running: true,
+          });
         }
         // const timer = await timerController.saveStartWatch(
         //   userNickname,
@@ -126,21 +127,22 @@ module.exports = function (io) {
       console.log('pauseevent!!!', userId, subject, time);
       try {
         await timerController.updateStopWatch(userId, subject, time);
-        userGroupIds.forEach(groupId => {
-          const groupIdString = groupId.toString();
-          timerSpace.to(groupIdString).emit('myStopwatchPause-to-Other', {
-            userId,
-            subject,
-            time,
-            stopwatch_running: false,
-          });
-        });
-        // timerSpace.emit('myStopwatchPause-to-Other', {
-        //   userId,
-        //   subject,
-        //   time,
-        //   stopwatch_running: false,
+        const total_time = await timerController.getTotalTime(userId);
+        // userGroupIds.forEach(groupId => {
+        //   const groupIdString = groupId.toString();
+        //   timerSpace.to(groupIdString).emit('myStopwatchPause-to-Other', {
+        //     userId,
+        //     subject,
+        //     time,
+        //     stopwatch_running: false,
+        //   });
         // });
+        timerSpace.emit('myStopwatchPause-to-Other', {
+          userId,
+          subject,
+          time: total_time,
+          stopwatch_running: false,
+        });
       } catch (err) {
         console.log(err);
       }
@@ -150,22 +152,22 @@ module.exports = function (io) {
       try {
         const time = 0;
         await timerController.updateStopWatch(userId, subject, time);
-        userGroupIds.forEach(groupId => {
-          const groupIdString = groupId.toString();
-          timerSpace.to(groupIdString).emit('myStopwatchPause-to-Other', {
-            userId,
-            subject,
-            time: 0,
-            stopwatch_running: false,
-          });
-        });
-        // timerSpace.emit('myStopwatchPause-to-Other', {
-        //   userId,
-        //   // roomNickname,
-        //   subject,
-        //   time: 0,
-        //   stopwatch_running: false,
+        // userGroupIds.forEach(groupId => {
+        //   const groupIdString = groupId.toString();
+        //   timerSpace.to(groupIdString).emit('myStopwatchPause-to-Other', {
+        //     userId,
+        //     subject,
+        //     time: 0,
+        //     stopwatch_running: false,
+        //   });
         // });
+        timerSpace.emit('myStopwatchPause-to-Other', {
+          userId,
+          // roomNickname,
+          subject,
+          time: 0,
+          stopwatch_running: false,
+        });
       } catch (err) {
         console.log(err);
       }
