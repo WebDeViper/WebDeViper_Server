@@ -8,7 +8,7 @@ exports.generateJwtToken = userInfo => {
   };
 
   // sign({토큰의 내용}, 토큰의 비밀 키, {토큰의 설정}) // issuer 는 발급자임.
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '30m', issuer: 'APIServer' });
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '2h', issuer: 'APIServer' });
   return token;
 };
 
