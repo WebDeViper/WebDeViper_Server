@@ -1,8 +1,29 @@
 const { duplicateCheck } = require('../utils/userModelDuplicateCheck');
 const { generateJwtToken, generateRefreshToken } = require('../utils/jwt');
 // Mongoose
-const { User, Room, mongoose } = require('../schemas/schema');
+const { User, Group, Room, Chat, mongoose } = require('../schemas/schema');
 // const ObjectId = mongoose.Types.ObjectId;
+
+//TODO 받은 유저아이디로 유저정보를 반환하는 API
+// api/user/:id
+exports.getUserInfo = async (req, res) => {
+  try {
+    const targetUser = req.params.userId;
+
+    const userInfo = await User.findById(targetUser);
+    console.log('파람스로 받은 유저정보 조회 >> ', userInfo);
+    res.send({
+      isSuccess: true,
+      message: '유저 정보 조회 성공',
+      userInfo,
+    });
+  } catch (err) {
+    res.status(500).send({
+      isSuccess: false,
+      message: '유저 조회 실패',
+    });
+  }
+};
 
 exports.getUser = async (req, res) => {
   try {
@@ -136,6 +157,17 @@ exports.patchUser = async (req, res) => {
           msg: '닉네임이 이미 존재합니다.',
         });
       }
+
+      // TODO 1
+      // 만약 그룹스키마의 join_requests에 user_id와 현재 유저의 _id가 같은게 있다면
+      // join_requests의 user_name 값도 최신화 해줘야 한다.
+      // User스키마에서 현재 유저의 _id로 User스키마의 pending_groups를 조회하고 pending_groups에 있는 group_id를 가지고 Group스키마의 join_requests를 조회한다.
+      // 조회된 join_requests의 user_id와 현재 유저의 _id가 같은 경우 join_requests의 user_name 필드도 업데이트 한다.
+
+      // TODO 2
+      // 만약 chat스키마의 user에 user_id와 현재 유저의 _id가 같은게 있다면
+      // user의 name 값도 최신화 해줘야 한다.
+
       user.nick_name = nickName;
     }
     if (category) {

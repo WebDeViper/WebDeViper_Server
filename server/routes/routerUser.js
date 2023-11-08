@@ -5,6 +5,10 @@ const multer = require('multer');
 const { userImgUploader } = require('../middlewares/multer/multerConfig');
 const controllerUser = require('../controller/ctrUser');
 
+//TODO 받은 유저아이디로 유저정보를 반환하는 API
+// api/user/:userId
+router.get('/:userId', verifyJwtToken, controllerUser.getUserInfo);
+
 // 유저 기본정보 조회
 // api/user
 router.get('/', verifyJwtToken, controllerUser.getUser);
