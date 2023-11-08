@@ -52,9 +52,9 @@ module.exports = function (io) {
     });
 
     // 사용자가 채팅방을 나가는 것을 처리합니다.
-    socket.on('leaveRoom', async (_, cb) => {
+    socket.on('leaveRoom', async (name, cb) => {
       try {
-        const user = await userController.checkUser(socket.id);
+        const user = await userController.checkUser(name);
         // await userController.leaveRoom(user);
         const leaveMessage = {
           chat: `${user.nick_name}님이 나가셨습니다.`,
