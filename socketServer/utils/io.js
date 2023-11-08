@@ -28,8 +28,8 @@ module.exports = function (io) {
     // 사용자가 채팅방에 참여하는 것을 처리합니다.
     socket.on('joinRoom', async (joinUser, rid, cb) => {
       try {
-        await userController.saveUser(joinUser.nickName, socket.id);
-        const user = await userController.checkUser(socket.id);
+        await userController.saveUser(joinUser, socket.id);
+        const user = await userController.checkUser(joinUser);
 
         // user.rooms 초기화
         user.rooms = [];
@@ -45,7 +45,6 @@ module.exports = function (io) {
         };
         const chatLog = await userController.getChatLog(rid);
         chatSpace.to(user.rooms.toString()).emit('message', [...chatLog, welcomeMessage]);
-        socket.emit('rooms', await userController.getAllRooms());
         cb({ isOk: true, data: user });
       } catch (error) {
         cb({ isOk: false, error: error.message });
