@@ -43,7 +43,7 @@ module.exports = function (io) {
           chat: `${user.nick_name}님이 입장하셨습니다.`,
           user: { id: null, name: 'system' },
         };
-        console.log(welcomeMessage);
+        console.log('환영', welcomeMessage);
         const chatLog = await userController.getChatLog(rid);
         const isToken = await userController.isToken(name);
         if (!isToken) {
