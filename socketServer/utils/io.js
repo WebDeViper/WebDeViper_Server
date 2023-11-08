@@ -44,7 +44,14 @@ module.exports = function (io) {
           user: { id: null, name: 'system' },
         };
         const chatLog = await userController.getChatLog(rid);
-        chatSpace.to(user.rooms.toString()).emit('message', [...chatLog, welcomeMessage]);
+        const isToken = await userController.isToken(name);
+        if (!isToken) {
+          //token값이 없다면
+          chatSpace.to(user.rooms.toString()).emit('message', [...chatLog, welcomeMessage]);
+        } else {
+          chatSpace.to(user.rooms.toString()).emit('message', [welcomeMessage]);
+        }
+
         cb({ isOk: true, data: user });
       } catch (error) {
         cb({ isOk: false, error: error.message });
@@ -95,6 +102,7 @@ module.exports = function (io) {
 
     // 사용자가 연결을 해제하는 것을 처리합니다.
     socket.on('disconnect', async () => {
+      const user = await userController.deleteUser(socket.id);
       console.log('사용자가 소켓 연결을 해제했습니다');
     });
   });
