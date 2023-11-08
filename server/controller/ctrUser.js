@@ -146,7 +146,7 @@ exports.patchUser = async (req, res) => {
 
     const { nickName, category, statusMsg } = req.body;
 
-    const user = await User.findById(currentUserId);
+    let user = await User.findById(currentUserId);
 
     if (nickName) {
       // 닉네임 중복검사
@@ -161,12 +161,33 @@ exports.patchUser = async (req, res) => {
       // TODO 1
       // 만약 그룹스키마의 join_requests에 user_id와 현재 유저의 _id가 같은게 있다면
       // join_requests의 user_name 값도 최신화 해줘야 한다.
-      // User스키마에서 현재 유저의 _id로 User스키마의 pending_groups를 조회하고 pending_groups에 있는 group_id를 가지고 Group스키마의 join_requests를 조회한다.
-      // 조회된 join_requests의 user_id와 현재 유저의 _id가 같은 경우 join_requests의 user_name 필드도 업데이트 한다.
+      const pendingGroup = await User.findById(currentUserId).select('pending_groups');
+
+      for (let group of pendingGroup.pending_groups) {
+        const groupId = group.group; // 그룹 ID
+        console.log('그룹 ID >> ', groupId);
+
+        // Group스키마의 join_requests를 조회
+        const groupData = await Group.findById(groupId);
+        console.log('Group스키마의 join_requests를 조회', groupData);
+
+        // join_requests 배열의 요소들을 순회하면서 user_id와 현재 유저의 _id를 비교
+        for (let joinRequest of groupData.join_requests) {
+          console.log('joinRequest 순회', joinRequest);
+          if (joinRequest.user_id.toString() === currentUserId) {
+            // 일치하는 경우 user_name 필드 업데이트
+            joinRequest.user_name = nickName;
+
+            // Group스키마 업데이트
+            await groupData.save();
+            console.log('Group스키마 업데이트', groupData);
+          }
+        }
+      }
 
       // TODO 2
-      // 만약 chat스키마의 user에 user_id와 현재 유저의 _id가 같은게 있다면
-      // user의 name 값도 최신화 해줘야 한다.
+      // 만약 chat스키마의 user 필드에 user_id와 현재 유저의 _id가 같은게 있다면 user의 name 값도 최신화 해줘야 한다.
+      Chat.updateMany({ 'user.user_id': currentUserId }, { $set: { 'user.name': nickName } });
 
       user.nick_name = nickName;
     }
