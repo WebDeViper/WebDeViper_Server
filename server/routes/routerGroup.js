@@ -14,17 +14,9 @@ router.get('/pendingGroups', verifyJwtToken, controller.getPendingGroups);
 //그룹 요청 기능
 router.post('/studyGroup/:groupId/join', verifyJwtToken, controller.joinGroupRequest);
 //그룹 요청 수락 기능
-router.post(
-  '/studyGroup/:groupId/:requestNickName/requests/accept',
-  verifyJwtToken,
-  controller.acceptGroupMembershipRequest
-);
+router.post('/studyGroup/:groupId/:requestId/requests/accept', verifyJwtToken, controller.acceptGroupMembershipRequest);
 //그룹 요청 거절 기능
-router.post(
-  '/studyGroup/:groupId/:requestNickName/requests/reject',
-  verifyJwtToken,
-  controller.rejectGroupMembershipRequest
-);
+router.post('/studyGroup/:groupId/:requestId/requests/reject', verifyJwtToken, controller.rejectGroupMembershipRequest);
 
 //그룹 생성 기능
 router.post(
