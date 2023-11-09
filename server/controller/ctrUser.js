@@ -4,7 +4,77 @@ const { generateJwtToken, generateRefreshToken } = require('../utils/jwt');
 const { User, Group, Room, Chat, mongoose } = require('../schemas/schema');
 // const ObjectId = mongoose.Types.ObjectId;
 
-//TODO 받은 유저아이디로 유저정보를 반환하는 API
+// 테스트용 계정의 로그인처리, 없다면 회원가입 처리
+// api/user/login/tester
+// exports.loginTester = async (req, res) => {
+//   try {
+//     const exUser = await User.find({ provider: 'test' });
+
+//     let testerInfo = {
+//       // user_category_name: '기타',
+//       // nick_name: '테스트유저346474335',
+//       is_service_admin: 'true',
+//       email: 'tester@test.com',
+//       provider: 'test',
+//     };
+
+//     if (!exUser) {
+//       // 회원가입 시키고 로그인시키기
+//       const result = await User.create(testerInfo);
+
+//       const userInfo = {
+//         id: result._id,
+//         category: result.user_category_name,
+//         nickName: result.nick_name,
+//         profileImg: result.user_profile_image_path,
+//         email: result.email,
+//         statusMsg: result.status_message,
+//         isServiceAdmin: result.is_service_admin,
+//       };
+
+//       // 토큰 발급 및 전송
+//       // 로그인 처리를 하기위해 jwt 발급
+//       const token = generateJwtToken(userInfo); // 만료 2시간
+//       // 리프레시 토큰 발급
+//       const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
+
+//       return res.send({
+//         token,
+//         refreshToken,
+//         userInfo,
+//       });
+//     } else {
+//       // 바로 로그인 시키기
+//       const userInfo = {
+//         id: exUser._id,
+//         category: exUser.user_category_name,
+//         nickName: exUser.nick_name,
+//         profileImg: exUser.user_profile_image_path,
+//         email: exUser.email,
+//         statusMsg: exUser.status_message,
+//         isServiceAdmin: exUser.is_service_admin,
+//       };
+
+//       // 토큰 발급 및 전송
+//       // 로그인 처리를 하기위해 jwt 발급
+//       const token = generateJwtToken(userInfo); // 만료 2시간
+//       // 리프레시 토큰 발급
+//       const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
+
+//       return res.send({
+//         token,
+//         refreshToken,
+//         userInfo,
+//       });
+//     }
+//   } catch (err) {
+//     res.status(500).send({
+//       message: '테스트 계정 로그인중 서버에러 발생',
+//     });
+//   }
+// };
+
+// 받은 유저아이디로 유저정보를 반환하는 API
 // api/user/:id
 exports.getUserInfo = async (req, res) => {
   try {
@@ -51,8 +121,8 @@ exports.getUser = async (req, res) => {
   }
 };
 
-// 카카오유저 로그인 or 회원가입 시키고 로그인
-// /api/user/kakao/mongoose
+// 소셜 로그인 or 회원가입 시키고 로그인
+// /api/user/join
 exports.join = async (req, res) => {
   try {
     const profile = req.body;
@@ -107,6 +177,13 @@ exports.join = async (req, res) => {
           provider: profile.provider,
           email: profile?.email,
         });
+      } else if (profile.provider === 'test') {
+        newUser = await User.create({
+          sns_id: profile.id,
+          provider: profile.provider,
+          email: profile?.email,
+          is_service_admin: profile.isServiceAdmin,
+        });
       }
       // userInfo 세팅
       userInfo = {
@@ -121,7 +198,7 @@ exports.join = async (req, res) => {
     }
 
     // 로그인 처리를 하기위해 jwt 발급
-    const token = generateJwtToken(userInfo); // 만료 30분
+    const token = generateJwtToken(userInfo); // 만료 2시간
     // 리프레시 토큰 발급
     const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
 
