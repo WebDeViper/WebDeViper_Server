@@ -13,9 +13,11 @@ exports.getMyCategoryRank = async (req, res) => {
     // const currentUserId = res.locals.decoded.userInfo.id;
     // const currentUserId = '6549bb7f07eae932762e5e9f';
     // const userInfo = await User.findById(currentUserId);
-    const userInfo = res.locals.decoded.userInfo;
-    const userCategory = userInfo.category; // 사용자의 카테고리
+    const userId = res.locals.decoded.userInfo.id;
+    const userInfo = await User.findOne({ _id: userId });
 
+    const userCategory = userInfo.user_category_name;
+    console.log(userCategory);
     if (!userInfo) {
       return res.status(400).send({
         isSucecess: false,
