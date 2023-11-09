@@ -51,11 +51,13 @@ module.exports = function (io) {
     //   }
     // }
     socket.on('joinGroup', async groupId => {
-      console.log(groupId);
+
       // "joinGroup" 이벤트를 받으면 이 함수가 실행됩니다.
       console.log(`클라이언트가 그룹 ${groupId}에 가입을 시도합니다.`);
       // joinGroup(groupId, userId);
+
       socket.join(groupId);
+
       const groupMemberTimerInfo = await timerController.getGroupMemberTimerInfo(userGroupIds);
       socket.emit('groupJoined', groupMemberTimerInfo);
       // 이제 클라이언트가 그룹에 가입할 수 있도록 필요한 작업을 수행하세요.
@@ -112,7 +114,9 @@ module.exports = function (io) {
             _id: userId,
             // roomNickname,
             subject,
-            time: 0,
+
+           time: 0,
+
             is_running: true,
           });
           // timerSpace.emit('myStopwatchStart-to-Other', {

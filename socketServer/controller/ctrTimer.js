@@ -177,11 +177,13 @@ exports.saveStartWatch = async (userId, subject) => {
 exports.updateStopWatch = async (userId, subject, time) => {
   updateTimerData(userId, subject, time);
 };
+
 exports.getUserNickName = async userId => {
   const user = await User.findById({ _id: userId });
   // console.log('asdfadsfadf', user);
   return user.nick_name;
 };
+
 exports.getGroupMemberTimerInfo = async function (userGroupIds) {
   const groupData = []; // 그룹 정보를 담을 배열
 
@@ -205,7 +207,9 @@ exports.getGroupMemberTimerInfo = async function (userGroupIds) {
     }
     groupData.push(groupInfo);
   }
+
   console.log(groupData, '소켓접속시 만든 내가 속한 그룹의 멤버들의 타이머 데이터');
+
   return groupData;
 };
 async function getTimerInfo(userId, date) {
