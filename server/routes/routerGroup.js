@@ -5,6 +5,8 @@ const { verifyJwtToken } = require('../middlewares/jwt/jwt');
 const multer = require('multer');
 const { groupImgUploader } = require('../middlewares/multer/multerConfig'); // 그룹이미지 업로드임
 
+//현재 그룹조회
+router.get('/all', verifyJwtToken, controller.getGroups);
 //현재 로그인한 유저의 카테고리내에서 그룹조회
 router.get('/studyGroups', verifyJwtToken, controller.getCategoryGroups);
 // 현재 로그인한 유저가 속한 스터디 그룹을 조회
