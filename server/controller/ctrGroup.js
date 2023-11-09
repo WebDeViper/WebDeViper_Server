@@ -201,13 +201,13 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
   }
 
   const userId = userInfo.id;
-  const { groupId, requestNickName } = req.params;
-  console.log('요청한 유저의 닉네임은 ', requestNickName);
+  const { groupId, requestId } = req.params;
+  console.log('요청한 유저의 id는 ', requestId);
 
   try {
     const group = await Group.findById(groupId);
     const user = await User.findById(userId);
-    const requestUser = await User.findOne({ nick_name: requestNickName });
+    const requestUser = await User.findById(requestId);
     console.log(requestUser);
 
     if (!group || !user) {
@@ -263,12 +263,13 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
   }
 
   const userId = userInfo.id;
-  const { groupId, requestNickName } = req.params;
-  console.log('requestNickName은 -> ', requestNickName);
+  const { groupId, requestId } = req.params;
+  console.log('requestId는 -> ', requestId);
   try {
     const group = await Group.findById(groupId);
     const user = await User.findById(userId);
-    const requestUser = await User.findOne({ nick_name: requestNickName });
+    const requestUser = await User.findById(requestId);
+
     console.log('requestUser 는 -> ', requestUser);
     if (!group || !user) {
       return res.status(404).send({
@@ -278,7 +279,9 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
     }
 
     // 그룹의 join_requests에서 requestId에 해당하는 문서를 찾아서 삭제
-    group.join_requests = group.join_requests.filter(request => request.user_id.toString() !== requestUser._id);
+    group.join_requests = group.join_requests.filter(
+      request => request.user_id.toString() !== requestUser._id.toString()
+    );
 
     // 사용자의 pending_groups에서 groupId에 해당하는 문서를 찾아서 삭제
     requestUser.pending_groups = user.pending_groups.filter(groupRequest => groupRequest.group.toString() !== groupId);
