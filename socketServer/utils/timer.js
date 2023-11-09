@@ -7,6 +7,7 @@ module.exports = function (io) {
     //1시간마다 소켓이벤트를 발생시킨 걸 백에서 받아서 처리
     timerSpace.on('updateTimer', async data => {
       const { userId, subject, time } = data;
+
       try {
         const updateTimerOneHour = await timerController.updateTimerData(userId, subject, time);
         // 여기에서 해당 userId와 subject를 기반으로 타이머 업데이트 로직을 구현
@@ -21,7 +22,10 @@ module.exports = function (io) {
     console.log('client is connected in stopwatch!', socket.id);
     const userId = socket.handshake.auth.userId;
     const userGroupIds = await timerController.getUserGroups(userId);
-
+    const userNickName = await timerController.getUserNickName(userId);
+    console.log('내 닉네임은???', userNickName);
+    console.log('내 그룹 목록??', userGroupIds);
+    const groupMemberTimerInfo = await timerController.getGroupMemberTimerInfo(userGroupIds);
     timerSpace.emit('welcome', userGroupIds); //배열로 유저가 속한 그룹의 objId를 보냄
     // console.log('과연 유저의 그룹을 가져왔을까!!!', userGroups);
     // socket.on('welcome', async userGroupIds => {
@@ -46,22 +50,24 @@ module.exports = function (io) {
     //     groups[groupName] = groups[groupName].filter(id => id !== clientId);
     //   }
     // }
-    socket.on('joinGroup', groupId => {
+    socket.on('joinGroup', async groupId => {
       console.log(groupId._id);
       // "joinGroup" 이벤트를 받으면 이 함수가 실행됩니다.
       console.log(`클라이언트가 그룹 ${groupId._id}에 가입을 시도합니다.`);
       // joinGroup(groupId, userId);
       socket.join(groupId._id);
-      socket.emit('groupJoined', groupId._id);
+      const groupMemberTimerInfo = await timerController.getGroupMemberTimerInfo(userGroupIds);
+      socket.emit('groupJoined', groupMemberTimerInfo);
       // 이제 클라이언트가 그룹에 가입할 수 있도록 필요한 작업을 수행하세요.
     });
 
     socket.on('start_watch', async data => {
       const groupMembers = await timerController.getGroupMembers(userGroupIds);
-      console.log('@@@@@@@@@@', groupMembers);
-      // 여기서 data 안에 userNickname 및 roomNickname이 포함되어 있다고 가정
-      const { subject } = data;
+      // console.log('@@@@@@@@@@', groupMembers); //여기까지 들어옴
 
+      const { subject, userId } = data;
+      const getUserNickName = await timerController.getUserNickName(userId);
+      console.log(getUserNickName, ':::::::::::');
       console.log(subject);
       try {
         const has_date_subject_timer = await timerController.hasDateSubjectTimer(userId, subject);
@@ -69,41 +75,49 @@ module.exports = function (io) {
 
         if (has_date_subject_timer) {
           // pause->start인경우
-          // userGroupIds.forEach(groupId => {
-          //   const groupIdString = groupId.toString();
-          //   timerSpace.to(groupIdString).emit('myStopwatchStart-to-Other', {
-          //     userId,
-          //     subject,
-          //     time: has_date_subject_timer,
-          //     stopwatch_running: true,
-          //   });
-          // });
-          timerSpace.emit('myStopwatchStart-to-Other', {
-            userId,
-            // roomNickname,
-            subject,
-            time: has_date_subject_timer,
-            stopwatch_running: true,
+          const timer = await timerController.saveStartWatch(userId, subject);
+          console.log('>><<><><><', timer);
+          const total_time = await timerController.getTotalTime(userId);
+          userGroupIds.forEach(groupId => {
+            const groupIdString = groupId._id.toString();
+            // console.log('**********', groupId._id.toString());
+            timerSpace.to(groupIdString).emit('myStopwatchStart-to-Other', {
+              _id: userId,
+              nick_name: userNickName,
+              subject,
+              total_time,
+              is_running: true,
+            });
           });
+          // timerSpace.emit('myStopwatchStart-to-Other', {
+          //   userId,
+          //   // roomNickname,
+          //   subject,
+          //   time: has_date_subject_timer,
+          //   stopwatch_running: true,
+          // });
         } else {
           //그냥 start인 경우
           const timer = await timerController.saveStartWatch(userId, subject);
-          // userGroupIds.forEach(groupId => {
-          //   const groupIdString = groupId.toString();
-          //   console.log('groupIdString', groupIdString);
-          //   timerSpace.to(groupIdString).emit('myStopwatchStart-to-Other', {
-          //     userId,
-          //     subject,
-          //     stopwatch_running: true,
-          //   });
-          // });
-          timerSpace.emit('myStopwatchStart-to-Other', {
-            userId,
-            // roomNickname,
-            subject,
-            // time: 0,
-            stopwatch_running: true,
+          const total_time = await timerController.getTotalTime(userId);
+
+          userGroupIds.forEach(groupId => {
+            const groupIdString = groupId._id.toString();
+            timerSpace.to(groupIdString).emit('myStopwatchStart-to-Other', {
+              _id: userId,
+              nick_name: userNickName,
+              subject,
+              time: total_time,
+              is_running: true,
+            });
           });
+          // timerSpace.emit('myStopwatchStart-to-Other', {
+          //   userId,
+          //   // roomNickname,
+          //   subject,
+          //   // time: 0,
+          //   stopwatch_running: true,
+          // });
         }
         // const timer = await timerController.saveStartWatch(
         //   userNickname,
@@ -128,21 +142,23 @@ module.exports = function (io) {
       try {
         await timerController.updateStopWatch(userId, subject, time);
         const total_time = await timerController.getTotalTime(userId);
-        // userGroupIds.forEach(groupId => {
-        //   const groupIdString = groupId.toString();
-        //   timerSpace.to(groupIdString).emit('myStopwatchPause-to-Other', {
-        //     userId,
-        //     subject,
-        //     time,
-        //     stopwatch_running: false,
-        //   });
-        // });
-        timerSpace.emit('myStopwatchPause-to-Other', {
-          userId,
-          subject,
-          time: total_time,
-          stopwatch_running: false,
+
+        userGroupIds.forEach(groupId => {
+          const groupIdString = groupId._id.toString();
+          timerSpace.to(groupIdString).emit('myStopwatchPause-to-Other', {
+            _id: userId,
+            nick_name: userNickName,
+            subject,
+            total_time,
+            is_running: false,
+          });
         });
+        // timerSpace.emit('myStopwatchPause-to-Other', {
+        //   userId,
+        //   subject,
+        //   time: total_time,
+        //   stopwatch_running: false,
+        // });
       } catch (err) {
         console.log(err);
       }
@@ -152,22 +168,24 @@ module.exports = function (io) {
       try {
         const time = 0;
         await timerController.updateStopWatch(userId, subject, time);
-        // userGroupIds.forEach(groupId => {
-        //   const groupIdString = groupId.toString();
-        //   timerSpace.to(groupIdString).emit('myStopwatchPause-to-Other', {
-        //     userId,
-        //     subject,
-        //     time: 0,
-        //     stopwatch_running: false,
-        //   });
-        // });
-        timerSpace.emit('myStopwatchPause-to-Other', {
-          userId,
-          // roomNickname,
-          subject,
-          time: 0,
-          stopwatch_running: false,
+        const total_time = await timerController.getTotalTime(userId);
+        userGroupIds.forEach(groupId => {
+          const groupIdString = groupId._id.toString();
+          timerSpace.to(groupIdString).emit('myStopwatchPause-to-Other', {
+            _id: userId,
+            nick_name: userNickName,
+            subject,
+            total_time,
+            is_running: false,
+          });
         });
+        // timerSpace.emit('myStopwatchPause-to-Other', {
+        //   userId,
+        //   // roomNickname,
+        //   subject,
+        //   time: 0,
+        //   stopwatch_running: false,
+        // });
       } catch (err) {
         console.log(err);
       }

@@ -43,7 +43,7 @@ exports.getTimerByUser = async (req, res) => {
         // Iterate through the populated 'members' field
         for (const member of group.members) {
           const timerInfo = await getTimerInfo(member._id, today);
-
+          console.log(timerInfo, 'zzzzzzzz');
           // Extract member information
           const memberInfo = {
             _id: member._id,

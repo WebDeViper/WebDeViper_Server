@@ -1,22 +1,16 @@
 const { Timer, User, Group, mongoose } = require('../schemas/schema');
 
-const moment = require('moment-timezone');
 const today = new Date();
 today.setHours(0, 0, 0, 0);
-const getKoreaDate = () => {
-  const koreaTimezone = 'Asia/Seoul';
-  const currentDate = moment().tz(koreaTimezone);
-  currentDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-  return currentDate.toISOString();
-};
+
 // Now you can use getKoreaDate() to get the start of the current day in the Asia/Seoul timezone
 
 exports.getUserGroups = async userId => {
   console.log(userId);
   try {
     // async/await를 사용하여 userId로 사용자를 찾습니다.
-    let user = await User.findOne({ _id: userId }).populate('groups');
-    console.log(user);
+    let user = await User.findOne({ _id: userId }).populate('groups', 'nick_name');
+    console.log(user, '^^^^^^^^^^^^^^^^^');
     if (!user) {
       // 사용자를 찾을 수 없으면 에러 메시지를 설정하고 던집니다.
       throw new Error('사용자를 찾을 수 없습니다.');
@@ -61,6 +55,7 @@ exports.hasDateSubjectTimer = async (userId, subject) => {
   if (result) {
     // restart인 경우
     const { daily } = result;
+    // result.is_running = true;
     if (daily && Array.isArray(daily.data)) {
       const hasData = daily.data.find(data => {
         return data.title === subject;
@@ -101,7 +96,7 @@ const updateTimerData = async (userId, subject, time) => {
       // total_time을 업데이트합니다
       result.total_time += time;
     }
-
+    result.is_running = !result.is_running;
     await result.save();
     console.log('데이터가 업데이트되었습니다:', result);
   } else {
@@ -109,6 +104,7 @@ const updateTimerData = async (userId, subject, time) => {
     const newTimer = new Timer({
       user_id: userId,
       total_time: time, // 주어진 시간으로 total_time을 초기화합니다
+      is_running: true,
       daily: {
         date: today,
         data: [
@@ -159,3 +155,41 @@ exports.saveStartWatch = async (userId, subject) => {
 exports.updateStopWatch = async (userId, subject, time) => {
   updateTimerData(userId, subject, time);
 };
+exports.getUserNickName = async userId => {
+  const user = await User.findById({ _id: userId });
+  // console.log('asdfadsfadf', user);
+  return user.nick_name;
+};
+exports.getGroupMemberTimerInfo = async function (userGroupIds) {
+  const groupData = []; // 그룹 정보를 담을 배열
+
+  for (const userGroupId of userGroupIds) {
+    const group = await Group.findById(userGroupId);
+    const groupInfo = {
+      groupId: group._id,
+      group_name: group.group_name,
+      members: [],
+    };
+    for (const member of group.members) {
+      const timerInfo = await getTimerInfo(member._id, today);
+      const mem = await User.findById(member._id);
+      const memberInfo = {
+        _id: member._id,
+        nick_name: mem.nick_name,
+        is_running: timerInfo ? timerInfo.is_running : false,
+        total_time: timerInfo ? timerInfo.total_time : 0,
+      };
+      groupInfo.members.push(memberInfo);
+    }
+    groupData.push(groupInfo);
+  }
+
+  return groupData;
+};
+async function getTimerInfo(userId, date) {
+  const timerInfo = await Timer.findOne({
+    user_id: userId,
+    'daily.date': date,
+  });
+  return timerInfo;
+}
