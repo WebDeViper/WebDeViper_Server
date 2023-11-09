@@ -5,10 +5,6 @@ const multer = require('multer');
 const { userImgUploader } = require('../middlewares/multer/multerConfig');
 const controllerUser = require('../controller/ctrUser');
 
-//TODO 받은 유저아이디로 유저정보를 반환하는 API
-// api/user/:userId
-router.get('/:userId', verifyJwtToken, controllerUser.getUserInfo);
-
 // 유저 기본정보 조회
 // api/user
 router.get('/', verifyJwtToken, controllerUser.getUser);
@@ -51,17 +47,12 @@ router.post(
   controllerUser.userProfileImgUpload
 );
 
-// 카카오유저 회원탈퇴 (클라에서 유저-카카오 연결을 끊은 다음 해당라우터로 요청하여 DB에 데에터도 삭제)
-// /api/user/kakao/remove
-// router.get('/kakao/remove', verifyJwtToken, ctrUser.deleteKakaoUser);
+// 받은 유저아이디로 유저정보를 반환하는 API
+// api/user/:userId
+router.get('/:userId', verifyJwtToken, controllerUser.getUserInfo);
 
-// 일반 회원가입
-//router.post('/local/join', ctrUser.localJoin);
-// 일반 회원탈퇴
-//router.delete('/local/Drop', ctrUser.localDrop);
-// 일반 로그인
-//router.get('/local/login', ctrUser.localAuth);
-// 일반 로그아웃(비검증 JWT를 발급해서 보냄)
-//router.get('/local/logout', ctrUser.localLogout);
+// 테스트용 계정 로그인 신청에 대한 처리
+// api/user/login/tester
+// router.post('/login/tester', controllerUser.loginTester);
 
 module.exports = router;
