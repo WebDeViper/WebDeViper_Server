@@ -1,5 +1,24 @@
-const { User, Group, Room, Timer, mongoose } = require('../schemas/schema');
+const { User, Group, Timer, mongoose } = require('../schemas/schema');
 
+//모든 그룹 조회
+
+exports.getGroups = async (req, res) => {
+  try {
+    const allGroup = await Group.find(); // 모든 그룹을 찾기
+    // 그룹을 찾았는지 확인합니다.
+    if (allGroup && allGroup.length > 0) {
+      // 그룹을 찾았다면, 그룹을 JSON으로 포함하여 200 (OK) 상태 코드로 응답합니다.
+      return res.status(200).send({ isSuccess: true, data: allGroup });
+    } else {
+      // 그룹을 찾지 못했다면
+      return res.status(200).send({ isSuccess: true, data: false, message: '그룹이 존재하지 않습니다.' });
+    }
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).send({ isSuccess: false, message: '내부 서버 오류' });
+  }
+};
 // 그룹 아이디를 받아 그룹 정보 조회/응답
 // api/group/:groupId
 exports.getGroupInfo = async (req, res) => {
