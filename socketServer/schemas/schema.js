@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
   user_category_name: { type: String, default: null }, // 유저의 카테고리
   nick_name: { type: String, default: null }, // 유저의 닉네임
-  user_profile_image_path: { type: String, default: '/api/static/profileImg/defaultProfile.jpeg' }, // 유저 프로필 이미지 경로
+  user_profile_image_path: { type: String, default: '/api/static/profileImg/defaultProfile.png' }, // 유저 프로필 이미지 경로
   status_message: { type: String, default: null }, // 유저의 상태메세지(카톡 같은)
   is_service_admin: { type: Boolean, default: false }, // 서비스 관리자 여부
   email: { type: String, default: null }, // 카카오한테 받은 유저 이메일
@@ -30,7 +30,7 @@ const groupSchema = new Schema({
   group_name: String, // 그룹의 이름
   group_category: String, // 그룹의 카테고리
   group_description: String, // 그룹에 대한 설명
-  group_image_path: { type: String, default: '/api/static/groupImg/defaultGroup.jpeg' },
+  group_image_path: { type: String, default: '/api/static/groupImg/defaultGroup.png' },
   group_maximum_member: { type: Number, default: 5 }, // 그룹의 최대 수용인원
   daily_goal_time: String, // 그룹의 목표 공부시간
   is_camera_on: { type: Boolean, default: false },
