@@ -4,14 +4,10 @@ const { Schema } = mongoose;
 // Chat 스키마
 const chatSchema = new Schema({
   chat: { type: String },
-  sender: { type: String },
-  receiver: { type: String, default: null },
+  sender: { id: { type: String }, name: { type: String } },
+  receiver: { receive_id: { type: String, default: null }, name: { type: String } },
   send_at: { type: Date, default: Date.now },
-  user: {
-    user_id: { type: String }, // 사용자 id
-    name: { type: String },
-  },
-  room_id: { type: Schema.Types.ObjectId, ref: 'Room' },
+  room_id: { type: String },
 });
 
 //알림 스키마
