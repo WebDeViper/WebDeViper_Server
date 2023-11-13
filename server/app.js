@@ -1,6 +1,8 @@
 const dotenv = require('dotenv');
 dotenv.config();
 const { PORT } = process.env;
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 const path = require('path');
 const express = require('express');
 const connect = require('./schemas/index');
@@ -35,7 +37,13 @@ app.get('*', (req, res) => {
     msg: '요청경로를 찾을 수 없습니다.',
   });
 });
-
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: { origin: process.env.NODE_ENV !== 'production' ? true : ['http://13.124.233.17', 'https://13.124.233.17'] },
+});
+//소켓 커넥션 연결
+require('./sockets/io')(io); //채팅
+require('./sockets/timer')(io); //타이머
 app.listen(PORT, () => {
   console.log(`server open on port ${PORT}`);
 });
