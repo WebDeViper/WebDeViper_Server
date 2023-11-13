@@ -1,4 +1,4 @@
-const userController = require('../controller/ctrChat'); // 사용자 컨트롤러를 가져옵니다.
+// const userController = require('../controller/ctrChat'); // 사용자 컨트롤러를 가져옵니다.
 const { User, Group, Room, mongoose } = require('../schemas/schema');
 
 module.exports = function (io) {
