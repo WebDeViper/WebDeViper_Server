@@ -14,6 +14,18 @@ const chatSchema = new Schema({
 const notificationSchema = new Schema({
   user_id: { type: String },
   content: { type: String },
+  notification_kind: {
+    type: String,
+    enum: [
+      'chat_whisper',
+      'group_creation',
+      'group_request',
+      'group_deletion',
+      'group_rejection',
+      'group_approve',
+      'new_notice',
+    ],
+  },
   group_id: { type: String, default: null },
   is_read: { type: Boolean, default: false },
   updated_at: { type: Date, default: Date.now },
