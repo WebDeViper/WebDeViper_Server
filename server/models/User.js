@@ -44,6 +44,7 @@ const User = (Sequelize, DataTypes) => {
       freezeTableName: true, // 테이블명을 복수형으로 변환하지 않도록 설정
     }
   );
+
   return User;
 };
 module.exports = User;

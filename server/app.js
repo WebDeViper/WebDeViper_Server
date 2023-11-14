@@ -6,6 +6,7 @@ const { Server } = require('socket.io');
 const { sequelize } = require('./models/index');
 const path = require('path');
 const express = require('express');
+
 const connect = require('./schemas/index');
 const cookieParser = require('cookie-parser');
 const indexRouter = require('./routes/index');
@@ -48,7 +49,7 @@ require('./sockets/io')(io); //채팅
 require('./sockets/timer')(io); //타이머
 
 // 서버 연결
-sequelize.sync({ force: true }).then(() => {
+sequelize.sync({ force: false }).then(() => {
   app.listen(PORT, () => {
     console.log(`server open on port ${PORT}`);
   });
