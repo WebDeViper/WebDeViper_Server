@@ -7,14 +7,14 @@ module.exports = function (io) {
   // $match stage를 사용하여 notification_kind가 'new_notification'인 변경 사항만 감지
   const matchStage = {
     $match: {
-      'fullDocument.notification_kind': 'new_notification',
+      'fullDocument.notification_kind': 'new_notice',
       operationType: 'insert',
     },
   };
   notificationChangeStream.on('change', change => {
     if (change.operationType === 'insert') {
       const newNotification = change.fullDocument;
-      io.emit('newNotification', newNotification);
+      io.emit('newNotice', newNotification);
     }
   });
 };
