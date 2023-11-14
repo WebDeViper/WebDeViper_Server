@@ -27,8 +27,8 @@ const Todo = (Sequelize, DataTypes) => {
         type: DataTypes.DATE,
       },
       done: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
+        type: DataTypes.CHAR(1),
+        defaultValue: 'n', // 'y':완료, 'n':완료되지 않음
       },
     },
     {
