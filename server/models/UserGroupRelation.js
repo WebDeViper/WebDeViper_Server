@@ -17,8 +17,8 @@ const UserGroupRelation = (Sequelize, DataTypes) => {
         },
       },
       request_status: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: 0, //
+        type: DataTypes.CHAR(1),
+        defaultValue: 'w', //'w':대기중(waiting), 'a':승인(approveed), 'r':거절(rejected)
       },
     },
     {

@@ -16,18 +16,18 @@ const notificationSchema = new Schema({
   content: { type: String },
   notification_kind: {
     type: String,
-    enum: [
-      'chat_whisper',
-      'group_creation',
-      'group_request',
-      'group_deletion',
-      'group_rejection',
-      'group_approve',
-      'new_notice',
-    ],
+    // enum: [
+    //   'chat_whisper',
+    //   'group_creation',
+    //   'group_request',
+    //   'group_deletion',
+    //   'group_rejection',
+    //   'group_approve',
+    //   'new_notice',
+    // ],
   },
   group_id: { type: String, default: null },
-  is_read: { type: Boolean, default: false },
+  is_read: { type: String, default: 'n', maxlength: 1 },
   updated_at: { type: Date, default: Date.now },
 });
 
@@ -35,7 +35,7 @@ const notificationSchema = new Schema({
 const timerSchema = new Schema({
   user_id: { type: String },
   total_time: { type: Number, default: 0 },
-  is_running: { type: Boolean, default: false },
+  is_running: { type: String, default: 'n', maxlength: 1 }, // Change Boolean to String
   daily: {
     date: { type: Date, default: Date.now }, // 오늘 날짜
     data: [

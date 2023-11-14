@@ -26,8 +26,8 @@ const User = (Sequelize, DataTypes) => {
         defaultValue: 'local',
       },
       is_admin: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
+        type: DataTypes.CHAR(1),
+        defaultValue: 'n', //'n':관리자 아님, 'y':관리자임
       },
       category: {
         type: DataTypes.STRING,
