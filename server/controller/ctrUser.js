@@ -1,4 +1,4 @@
-// const { duplicateCheck } = require('../utils/userModelDuplicateCheck');
+const { duplicateCheck } = require('../utils/userModelDuplicateCheck');
 const { generateJwtToken, generateRefreshToken } = require('../utils/jwt');
 const { hashPassword, comparePassword } = require('../utils/bcrypt');
 
@@ -12,8 +12,8 @@ exports.getUserInfo = async (req, res) => {
   try {
     const targetUser = req.params.userId;
 
-    const userInfo = await User.findById(targetUser);
-    console.log('파람스로 받은 유저정보 조회 >> ', userInfo);
+    const userInfo = await User.findByPk(targetUser);
+
     res.send({
       isSuccess: true,
       message: '유저 정보 조회 성공',
@@ -32,25 +32,24 @@ exports.getUserInfo = async (req, res) => {
 exports.getUser = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
-    // console.log(currentUserId);
-    const result = await User.findById(currentUserId);
+
+    const exUser = await User.findById(currentUserId);
 
     res.status(200).send({
       userInfo: {
-        id: result._id,
-        category: result.user_category_name,
-        nickName: result.nick_name,
-        profileImg: result.user_profile_image_path,
-        email: result.email,
-        statusMsg: result.status_message,
-        isServiceAdmin: result.is_service_admin,
+        id: exUser.user_id,
+        category: exUser.category,
+        nickName: exUser.nick_name,
+        profileImg: exUser.image_path,
+        email: exUser.email,
+        statusMsg: exUser.status_message,
+        isServiceAdmin: exUser.is_admin,
       },
     });
   } catch (err) {
     res.status(500).send({
       code: 500,
       msg: 'SERVER ERROR',
-      errorData: err,
     });
   }
 };
@@ -62,8 +61,9 @@ exports.join = async (req, res) => {
     const profile = req.body;
 
     const exUser = await User.findOne({
-      sns_id: profile.id,
-      provider: profile.provider,
+      where: {
+        [Op.and]: [{ sns_id: profile.id }, { provider: profile.provider }],
+      },
     });
 
     // 응답값으로 보낼 userInfo 초기화
@@ -81,13 +81,13 @@ exports.join = async (req, res) => {
     if (exUser) {
       // 이미 회원가입이 되어있으니 그걸로 userInfo 세팅
       userInfo = {
-        id: exUser._id,
-        category: exUser.user_category_name,
+        id: exUser.user_id,
+        category: exUser.category,
         nickName: exUser.nick_name,
-        profileImg: exUser.user_profile_image_path,
+        profileImg: exUser.image_path,
         email: exUser.email,
         statusMsg: exUser.status_message,
-        isServiceAdmin: exUser.is_service_admin,
+        isServiceAdmin: exUser.is_admin,
       };
     } else {
       // 가입이력이 없으니 회원가입 처리 하기 위해 DB에 저장하고 그걸로 userInfo 세팅
@@ -99,45 +99,33 @@ exports.join = async (req, res) => {
           provider: profile.provider,
           email: profile.kakao_account?.email,
         });
-      } else if (profile.provider === 'naver') {
-        newUser = await User.create({
-          sns_id: profile.id,
-          provider: profile.provider,
-          email: profile?.email,
-        });
-      } else if (profile.provider === 'google') {
-        newUser = await User.create({
-          sns_id: profile.id,
-          provider: profile.provider,
-          email: profile?.email,
-        });
       } else if (profile.provider === 'test') {
         newUser = await User.create({
           sns_id: profile.id,
           provider: profile.provider,
           email: profile?.email,
-          is_service_admin: profile.isServiceAdmin,
+          is_admin: profile.isServiceAdmin,
         });
       }
       // userInfo 세팅
       userInfo = {
-        id: newUser._id,
-        category: newUser.user_category_name,
-        nickName: newUser.nick_name,
-        profileImg: newUser.user_profile_image_path,
-        email: newUser.email,
-        statusMsg: newUser.status_message,
-        isServiceAdmin: newUser.is_service_admin,
+        id: exUser.user_id,
+        category: exUser.category,
+        nickName: exUser.nick_name,
+        profileImg: exUser.image_path,
+        email: exUser.email,
+        statusMsg: exUser.status_message,
+        isServiceAdmin: exUser.is_admin,
       };
     }
 
     // 로그인 처리를 하기위해 jwt 발급
-    const token = generateJwtToken(userInfo); // 만료 2시간
+    const accessToken = generateJwtToken(userInfo); // 만료 2시간
     // 리프레시 토큰 발급
     const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
 
     return res.send({
-      token,
+      token: accessToken,
       refreshToken,
       userInfo,
     });
@@ -224,8 +212,20 @@ exports.login = async (req, res) => {
 
   // 암호 확인
   let passCheck;
+  let userInfo;
   for (const user of exUser) {
     passCheck = comparePassword(password, user.password);
+    if (passCheck) {
+      userInfo = {
+        id: user.user_id,
+        category: user.category,
+        nickName: user.nick_name,
+        profileImg: user.image_path,
+        email: user.email,
+        statusMsg: user.status_message,
+        isServiceAdmin: user.is_admin,
+      };
+    }
   }
 
   if (!passCheck) {
@@ -235,28 +235,16 @@ exports.login = async (req, res) => {
     });
   }
 
-  // 토큰 생성
-  // userInfo 세팅
-  const payload = {
-    id: exUser.user_id,
-    category: exUser.category,
-    nickName: exUser.nick_name,
-    profileImg: exUser.image_path,
-    email: exUser.email,
-    statusMsg: exUser.status_message,
-    isServiceAdmin: exUser.is_admin,
-  };
-
   // 로그인 처리를 하기위해 jwt 발급
-  const accessToken = generateJwtToken(payload);
+  const accessToken = generateJwtToken(userInfo);
   // 리프레시 토큰 발급
-  const refreshToken = generateRefreshToken(payload.id); // 만료 12시간
+  const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
 
   // 응답값 전송
   res.send({
     isSuccess: true,
     message: '로그인 처리 성공',
-    userInfo: exUser,
+    userInfo: userInfo,
     accessToken,
     refreshToken,
   });
@@ -268,53 +256,23 @@ exports.login = async (req, res) => {
 exports.patchUser = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '6544cc034f18de981a274777';
-
+    // const currentUserId = 'd885213b-030f-4bb8-a196-363f44a04a4f';
+    // console.log('>>>>', currentUserId);
     const { nickName, category, statusMsg } = req.body;
 
-    let user = await User.findById(currentUserId);
+    let user = await User.findByPk(currentUserId);
 
     if (nickName) {
       // 닉네임 중복검사
       const isDuplicate = await duplicateCheck(User, 'nick_name', nickName);
+
+      console.log('@@@@@', isDuplicate);
 
       if (isDuplicate) {
         return res.status(409).send({
           msg: '닉네임이 이미 존재합니다.',
         });
       }
-
-      // TODO 1
-      // 만약 그룹스키마의 join_requests에 user_id와 현재 유저의 _id가 같은게 있다면
-      // join_requests의 user_name 값도 최신화 해줘야 한다.
-      const pendingGroup = await User.findById(currentUserId).select('pending_groups');
-
-      for (let group of pendingGroup.pending_groups) {
-        const groupId = group.group; // 그룹 ID
-        console.log('그룹 ID >> ', groupId);
-
-        // Group스키마의 join_requests를 조회
-        const groupData = await Group.findById(groupId);
-        console.log('Group스키마의 join_requests를 조회', groupData);
-
-        // join_requests 배열의 요소들을 순회하면서 user_id와 현재 유저의 _id를 비교
-        for (let joinRequest of groupData.join_requests) {
-          console.log('joinRequest 순회', joinRequest);
-          if (joinRequest.user_id.toString() === currentUserId) {
-            // 일치하는 경우 user_name 필드 업데이트
-            joinRequest.user_name = nickName;
-
-            // Group스키마 업데이트
-            await groupData.save();
-            console.log('Group스키마 업데이트', groupData);
-          }
-        }
-      }
-
-      // TODO 2
-      // 만약 chat스키마의 user 필드에 user_id와 현재 유저의 _id가 같은게 있다면 user의 name 값도 최신화 해줘야 한다.
-      Chat.updateMany({ 'user.user_id': currentUserId }, { $set: { 'user.name': nickName } });
-
       user.nick_name = nickName;
     }
     if (category) {
@@ -327,21 +285,21 @@ exports.patchUser = async (req, res) => {
     const result = await user.save();
 
     const userInfo = {
-      id: result._id,
-      category: result.user_category_name,
+      id: result.user_id,
+      category: result.category,
       nickName: result.nick_name,
-      profileImg: result.user_profile_image_path,
+      profileImg: result.image_path,
       email: result.email,
       statusMsg: result.status_message,
-      isServiceAdmin: result.is_service_admin,
+      isServiceAdmin: result.is_admin,
     };
 
     // 변경된 userInfo로 jwt 재생성
-    const token = generateJwtToken(userInfo);
+    const accessToken = generateJwtToken(userInfo);
 
     // 토큰과 함께 변경된 유저정보 전달
     res.status(200).send({
-      token,
+      token: accessToken,
       userInfo,
     });
   } catch (err) {
@@ -356,6 +314,7 @@ exports.patchUser = async (req, res) => {
 
 exports.userNickDuplicateCheck = async (req, res) => {
   try {
+    console.log(req.params);
     // 닉네임 중복확인
     const isDuplicate = await duplicateCheck(User, 'nick_name', req.params.nickName);
 
