@@ -46,6 +46,7 @@ const io = new Server(httpServer, {
 // 소켓 커넥션 연결
 require('./sockets/io')(io); //채팅
 require('./sockets/timer')(io); //타이머
+require('./sockets/notification')(io); //알림
 
 // 서버 연결
 sequelize.sync({ force: false }).then(() => {

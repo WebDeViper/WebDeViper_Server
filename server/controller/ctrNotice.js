@@ -1,4 +1,5 @@
 const { Notice, User, Sequelize } = require('../models');
+const { Notification, mongoose } = require('../schemas/schema');
 exports.getNotice = async (req, res) => {
   try {
     const result = await Notice.findAll();
@@ -23,6 +24,13 @@ exports.postNotice = async (req, res) => {
         date: Date.now(),
       });
       console.log('result', result);
+      //notification스키마에 추가
+      const newNofication = new Notification({
+        user_id: 'admin',
+        content: '새로운 공지사항이 등록되었습니다.',
+        notification_kind: 'new_notice',
+      });
+      await newNofication.save();
       res.status(201).send({ result, message: '공지사항이 성공적으로 생셩되었습니다.' });
     } else {
       res.status(403).send({ message: '공지사항 등록권한이 없습니다.' });
@@ -73,11 +81,12 @@ exports.deleteNotice = async (req, res) => {
       if (req.query.notice_id) {
         const result = await Notice.destroy({ where: { notice_id: req.query.notice_id } });
         if (result) {
-          res.status(204).send({ message: '공지사항이 성공적으로 삭제되었습니다!' });
+          res.status(200).send({ message: '공지사항이 성공적으로 삭제되었습니다!' });
         } else {
           res.status(400).send({ message: '잘못된 요청입니다.' });
         }
       }
+      //삭제될 때 알람 스키마에서도 지워야함!!!!
     } else {
       res.status(403).send({ message: '공지사항 삭제권한이 없습니다.' });
     }

@@ -3,9 +3,9 @@ const Notice = (Sequelize, DataTypes) => {
     'notice',
     {
       notice_id: {
-        type: DataTypes.UUID,
+        type: DataTypes.INTEGER,
         primaryKey: true,
-        defaultValue: DataTypes.UUIDV1, // Or DataTypes.UUIDV4
+        autoIncrement: true, // INTEGER 타입의 자동 증가 설정
       },
       title: {
         type: DataTypes.STRING,
