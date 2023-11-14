@@ -17,6 +17,19 @@ const Todo = require('./Todo')(sequelize, Sequelize);
 const Notice = require('./Notice')(sequelize, Sequelize);
 
 // 모델 관계
+// User 모델과 Group 모델 간의 다대다 관계 설정
+User.belongsToMany(Group, { through: UserGroupRelation, foreignKey: 'user_id' });
+Group.belongsToMany(User, { through: UserGroupRelation, foreignKey: 'group_id' });
+
+// UserGroupRelation 테이블에 User 모델과 Group 모델 간의 외래 키 설정
+UserGroupRelation.belongsTo(User, { foreignKey: 'user_id' });
+UserGroupRelation.belongsTo(Group, { foreignKey: 'group_id' });
+
+// Group 모델에 추가
+Group.hasMany(UserGroupRelation, { foreignKey: 'group_id', onDelete: 'CASCADE' });
+// UserGroupRelation 모델에 추가
+UserGroupRelation.belongsTo(Group, { foreignKey: 'group_id', onDelete: 'CASCADE' });
+
 // 한명의 유저는 여러개의 Timer를 가진다
 // 사용자가 삭제되면 해당 사용자와 연결된 모든 타이머 자동 삭제 == onDelete: 'CASCADE'
 // User.hasMany(Timer, { foreignKey: 'user_id', onDelete: 'CASCADE' });

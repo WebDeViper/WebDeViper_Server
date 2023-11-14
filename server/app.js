@@ -6,6 +6,7 @@ const { Server } = require('socket.io');
 const { sequelize } = require('./models/index');
 const path = require('path');
 const express = require('express');
+
 const connect = require('./schemas/index');
 const cookieParser = require('cookie-parser');
 const indexRouter = require('./routes/index');
