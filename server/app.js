@@ -13,6 +13,13 @@ const indexRouter = require('./routes/index');
 const cors = require('cors');
 const app = express();
 
+// EJS 뷰 엔진 설정
+// app.set('views', path.join(__dirname, './views'));
+// app.set('view engine', 'ejs');
+
+// 정적 파일 서빙
+// app.use(express.static(path.join(__dirname, 'views/client')));
+
 // 몽고 DB 연결
 connect();
 
@@ -24,13 +31,17 @@ app.use(
 );
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cookieParser()); // 서버에서 클라이언트로 응답을 보낼 때, 쿠키를 설정하려면 Express 응답 객체(res.cookie())를 사용할 수 있도
+app.use(cookieParser());
 
 // 정적 파일 서빙
 app.use('/api/static', express.static(path.join(__dirname, 'static')));
+app.use(express.static(path.join(__dirname, './views/client')));
 
 // 라우터
 app.use('/', indexRouter);
+app.get('/client', (req, res) => {
+  res.render('client');
+});
 
 // 에러처리 하는 미들웨어를 사용하는걸로 업그레이드 해보기..
 app.get('*', (req, res) => {
@@ -39,10 +50,9 @@ app.get('*', (req, res) => {
     msg: '요청경로를 찾을 수 없습니다.',
   });
 });
+
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: { origin: process.env.NODE_ENV !== 'production' ? true : ['http://13.124.233.17', 'https://13.124.233.17'] },
-});
+const io = new Server(httpServer);
 
 // 소켓 커넥션 연결
 require('./sockets/io')(io); //채팅
@@ -51,7 +61,7 @@ require('./sockets/notification')(io); //알림
 
 // 서버 연결
 sequelize.sync({ force: false }).then(() => {
-  app.listen(PORT, () => {
+  httpServer.listen(PORT, () => {
     console.log(`server open on port ${PORT}`);
   });
 });
