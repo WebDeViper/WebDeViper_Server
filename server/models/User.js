@@ -5,7 +5,7 @@ const User = (Sequelize, DataTypes) => {
       user_id: {
         type: DataTypes.UUID,
         primaryKey: true,
-        defaultValue: DataTypes.UUIDV1, // Or DataTypes.UUIDV4
+        defaultValue: DataTypes.UUIDV4, // Or DataTypes.UUIDV1 (1은 시간 순서의 의존, 4는 무작위라고 함)
       },
       email: {
         type: DataTypes.STRING,
