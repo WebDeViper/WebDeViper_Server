@@ -1,17 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const { verifyJwtToken } = require('../middlewares/jwt/jwt');
 const multer = require('multer');
 const { userImgUploader } = require('../middlewares/multer/multerConfig');
+const { verifyJwtToken } = require('../middlewares/jwt/jwt');
 const controllerUser = require('../controller/ctrUser');
 
-// 유저 기본정보 조회
+// 유저 기본정보 조회(본인)
 // api/user
 router.get('/', verifyJwtToken, controllerUser.getUser);
 
 // 소셜유저 로그인 and 회원가입 시키고 로그인
 // /api/user/join
 router.post('/join', controllerUser.join);
+
+// local 회원가입
+// /api/user/register
+router.post('/register', controllerUser.registerUser);
+
+// local 로그인
+// /api/user/login
+router.get('/login', controllerUser.login);
 
 // 유저 정보 수정 ( nickName, category, statusMessage )
 // 유저정보 수정하면 다시 토큰생성해서 보냄
