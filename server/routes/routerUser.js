@@ -10,9 +10,9 @@ const controllerUser = require('../controller/ctrUser');
 // router.get('/', controllerUser.getUser);
 router.get('/', verifyJwtToken, controllerUser.getUser);
 
-// 소셜유저 로그인 and 회원가입 시키고 로그인
-// /api/user/join
-router.post('/join', controllerUser.join);
+// 카카오 계정 로그인/회원가입
+// /api/user/kakaologin
+router.post('/kakaologin', controllerUser.kakaologin);
 
 // local 회원가입
 // /api/user/register
@@ -29,12 +29,12 @@ router.patch('/profile', verifyJwtToken, controllerUser.patchUser);
 // router.patch('/profile', controllerUser.patchUser);
 
 // 유저 닉네임 중복 체크
-// api/user/nick/:nick/duplicateCheck
-router.get('/nick/:nickName/duplicateCheck', verifyJwtToken, controllerUser.userNickDuplicateCheck);
+// api/user/nick/:nickName/duplicateCheck
+router.get('/nick/:nickName/duplicateCheck', controllerUser.userNickDuplicateCheck);
 
 // 로컬 유저 이메일 중복 체크(회원가입시)
 // api/user/email/:email/duplicateCheck
-router.get('/email/:email/duplicateCheck', verifyJwtToken, controllerUser.emailDuplicateCheck);
+router.get('/email/:email/duplicateCheck', controllerUser.emailDuplicateCheck);
 
 // 유저 프로필 이미지 업로드
 // api/user/profile/img
