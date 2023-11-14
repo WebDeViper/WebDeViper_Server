@@ -61,8 +61,4 @@ router.post(
 // api/user/:userId
 router.get('/:userId', verifyJwtToken, controllerUser.getUserInfo);
 
-// 테스트용 계정 로그인 신청에 대한 처리
-// api/user/login/tester
-// router.post('/login/tester', controllerUser.loginTester);
-
 module.exports = router;
