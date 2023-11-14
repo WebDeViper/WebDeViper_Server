@@ -9,7 +9,7 @@ exports.verifyJwtToken = (req, res, next) => {
     // res.locals 에 저장한 내용은 다음 미들웨어로 전달된다.
     // verify(요청헤더에 저장된 토큰 , 비밀키)
     res.locals.decoded = jwt.verify(req.headers.authorization.split(' ')[1], JWT_SECRET);
-
+    console.log('>>>>', res.locals.decoded);
     return next();
   } catch (err) {
     // 여기서 검증 실패시 처리

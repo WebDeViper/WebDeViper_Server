@@ -7,6 +7,7 @@ const controllerUser = require('../controller/ctrUser');
 
 // 유저 기본정보 조회(본인)
 // api/user
+// router.get('/', controllerUser.getUser);
 router.get('/', verifyJwtToken, controllerUser.getUser);
 
 // 소셜유저 로그인 and 회원가입 시키고 로그인
@@ -25,6 +26,7 @@ router.get('/login', controllerUser.login);
 // 유저정보 수정하면 다시 토큰생성해서 보냄
 // api/user/profile
 router.patch('/profile', verifyJwtToken, controllerUser.patchUser);
+// router.patch('/profile', controllerUser.patchUser);
 
 // 유저 닉네임 중복 체크
 // api/user/nick/:nick/duplicateCheck
