@@ -6,6 +6,31 @@ const { hashPassword, comparePassword } = require('../utils/bcrypt');
 const { User } = require('../models/index');
 const { Op } = require('sequelize');
 
+// 로컬 유저 이메일 중복 체크(회원가입시)
+// api/user/email/:email/duplicateCheck
+exports.emailDuplicateCheck = async (req, res) => {
+  try {
+    // 이메일의 중복 확인한다.
+    const emailDuplicate = await User.count({
+      where: {
+        [Op.and]: [{ provider: 'local' }, { email: req.params.email }],
+      },
+    });
+
+    const isDuplicate = emailDuplicate !== 0;
+
+    res.send({
+      isSuccess: true,
+      isDuplicate: isDuplicate,
+    });
+  } catch (err) {
+    res.status(500).send({
+      isSuccess: false,
+      message: '서버 에러 발생',
+    });
+  }
+};
+
 // 받은 유저아이디로 유저정보를 반환하는 API
 // api/user/:id
 exports.getUserInfo = async (req, res) => {

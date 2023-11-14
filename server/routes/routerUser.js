@@ -32,6 +32,10 @@ router.patch('/profile', verifyJwtToken, controllerUser.patchUser);
 // api/user/nick/:nick/duplicateCheck
 router.get('/nick/:nickName/duplicateCheck', verifyJwtToken, controllerUser.userNickDuplicateCheck);
 
+// 로컬 유저 이메일 중복 체크(회원가입시)
+// api/user/email/:email/duplicateCheck
+router.get('/email/:email/duplicateCheck', verifyJwtToken, controllerUser.emailDuplicateCheck);
+
 // 유저 프로필 이미지 업로드
 // api/user/profile/img
 router.post(
