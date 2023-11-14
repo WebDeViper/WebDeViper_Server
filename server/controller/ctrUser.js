@@ -12,7 +12,7 @@ exports.getUserInfo = async (req, res) => {
   try {
     const targetUser = req.params.userId;
 
-    const userInfo = await User.findById(targetUser);
+    const userInfo = await User.findByPk(targetUser);
 
     res.send({
       isSuccess: true,
@@ -33,7 +33,7 @@ exports.getUser = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
 
-    const exUser = await User.findById(currentUserId);
+    const exUser = await User.findByPk(currentUserId);
 
     res.status(200).send({
       userInfo: {
