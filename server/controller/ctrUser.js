@@ -1,78 +1,10 @@
-const { duplicateCheck } = require('../utils/userModelDuplicateCheck');
+// const { duplicateCheck } = require('../utils/userModelDuplicateCheck');
 const { generateJwtToken, generateRefreshToken } = require('../utils/jwt');
-// Mongoose
-const { User, Group, Room, Chat, mongoose } = require('../schemas/schema');
-// const ObjectId = mongoose.Types.ObjectId;
+const { hashPassword, comparePassword } = require('../utils/bcrypt');
 
-// 테스트용 계정의 로그인처리, 없다면 회원가입 처리
-// api/user/login/tester
-// exports.loginTester = async (req, res) => {
-//   try {
-//     const exUser = await User.find({ provider: 'test' });
-
-//     let testerInfo = {
-//       // user_category_name: '기타',
-//       // nick_name: '테스트유저346474335',
-//       is_service_admin: 'true',
-//       email: 'tester@test.com',
-//       provider: 'test',
-//     };
-
-//     if (!exUser) {
-//       // 회원가입 시키고 로그인시키기
-//       const result = await User.create(testerInfo);
-
-//       const userInfo = {
-//         id: result._id,
-//         category: result.user_category_name,
-//         nickName: result.nick_name,
-//         profileImg: result.user_profile_image_path,
-//         email: result.email,
-//         statusMsg: result.status_message,
-//         isServiceAdmin: result.is_service_admin,
-//       };
-
-//       // 토큰 발급 및 전송
-//       // 로그인 처리를 하기위해 jwt 발급
-//       const token = generateJwtToken(userInfo); // 만료 2시간
-//       // 리프레시 토큰 발급
-//       const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
-
-//       return res.send({
-//         token,
-//         refreshToken,
-//         userInfo,
-//       });
-//     } else {
-//       // 바로 로그인 시키기
-//       const userInfo = {
-//         id: exUser._id,
-//         category: exUser.user_category_name,
-//         nickName: exUser.nick_name,
-//         profileImg: exUser.user_profile_image_path,
-//         email: exUser.email,
-//         statusMsg: exUser.status_message,
-//         isServiceAdmin: exUser.is_service_admin,
-//       };
-
-//       // 토큰 발급 및 전송
-//       // 로그인 처리를 하기위해 jwt 발급
-//       const token = generateJwtToken(userInfo); // 만료 2시간
-//       // 리프레시 토큰 발급
-//       const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
-
-//       return res.send({
-//         token,
-//         refreshToken,
-//         userInfo,
-//       });
-//     }
-//   } catch (err) {
-//     res.status(500).send({
-//       message: '테스트 계정 로그인중 서버에러 발생',
-//     });
-//   }
-// };
+// 시퀄라이즈 모듈 불러오기
+const { User } = require('../models/index');
+const { Op } = require('sequelize');
 
 // 받은 유저아이디로 유저정보를 반환하는 API
 // api/user/:id
@@ -95,6 +27,8 @@ exports.getUserInfo = async (req, res) => {
   }
 };
 
+// 유저 기본정보 조회(본인)
+// api/user
 exports.getUser = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
@@ -211,6 +145,121 @@ exports.join = async (req, res) => {
     console.log(err);
     res.status(500).send(err);
   }
+};
+
+// local 회원가입
+// /api/user/register
+exports.registerUser = async (req, res) => {
+  try {
+    // 요청 본문의 null 검사
+    if (!req.body.email || !req.body.password || !req.body.nickName || !req.body.category) {
+      return res.status(404).send({
+        message: '요청값이 비었습니다.',
+      });
+    }
+
+    // 요청 본문으로
+    // 유저 이메일, 패스워드, 닉네임, 카테고리를 받는다.
+    const { email, password, nickName, category } = req.body;
+
+    // 닉네임의 중복만 확인한다.
+    const nickDuplicate = await User.findAll({ where: { nick_name: nickName } });
+    if (nickDuplicate.length !== 0) {
+      console.log('이미 해당 닉네임이 있음');
+      return res.status(409).send({
+        message: '이미 존재하는 닉네임 입니다.',
+      });
+    }
+
+    // 패스워드 암호화
+    const hashedPassword = hashPassword(password);
+    console.log('>>>>>>', hashedPassword);
+
+    // 데이터베이스에 유저 정보 저장
+    let userInfo = {
+      email: email,
+      password: hashedPassword,
+      nick_name: nickName,
+      category: category,
+    };
+    const newUser = await User.create(userInfo);
+
+    // 성공 응답을 전달합니다.
+    res.send({
+      isSuccess: true,
+      message: '회원가입 처리 성공',
+    });
+  } catch (err) {
+    res.status(500).send({
+      message: '회원가입 처리 중 서버에러 발생',
+    });
+  }
+};
+
+// local 로그인
+// /api/user/login
+exports.login = async (req, res) => {
+  // 요청 본문의 null 검사
+  if (!req.body.email || !req.body.password) {
+    return res.status(404).send({
+      message: '요청값이 비었습니다.',
+    });
+  }
+
+  // 이메일과 패스워드를 받는다
+  const { email, password } = req.body;
+
+  // DB에 조회
+  const exUser = await User.findAll({
+    where: { email },
+  });
+
+  // 이메일 확인
+  if (exUser.length === 0) {
+    return res.status(409).send({
+      isSuccess: false,
+      message: '이메일 오류',
+    });
+  }
+
+  // 암호 확인
+  let passCheck;
+  for (const user of exUser) {
+    passCheck = comparePassword(password, user.password);
+  }
+
+  if (!passCheck) {
+    return res.status(409).send({
+      isSuccess: false,
+      message: '패스워드 오류',
+    });
+  }
+
+  // 토큰 생성
+  // userInfo 세팅
+  const payload = {
+    id: exUser.user_id,
+    category: exUser.category,
+    nickName: exUser.nick_name,
+    profileImg: exUser.image_path,
+    email: exUser.email,
+    statusMsg: exUser.status_message,
+    isServiceAdmin: exUser.is_admin,
+  };
+
+  // 로그인 처리를 하기위해 jwt 발급
+  const accessToken = generateJwtToken(payload);
+  // 리프레시 토큰 발급
+  const refreshToken = generateRefreshToken(payload.id); // 만료 12시간
+
+  // 응답값 전송
+  res.send({
+    isSuccess: true,
+    message: '로그인 처리 성공',
+    userInfo: exUser,
+    accessToken,
+    refreshToken,
+  });
 };
 
 // 유저 정보 수정 ( nickName, category, statusMessage )

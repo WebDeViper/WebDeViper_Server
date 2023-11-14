@@ -53,6 +53,3 @@ sequelize.sync({ force: false }).then(() => {
     console.log(`server open on port ${PORT}`);
   });
 });
-// app.listen(PORT, () => {
-//   console.log(`server open on port ${PORT}`);
-// });
