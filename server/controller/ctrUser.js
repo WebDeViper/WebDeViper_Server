@@ -17,11 +17,11 @@ exports.emailDuplicateCheck = async (req, res) => {
       },
     });
 
-    const isDuplicate = emailDuplicate !== 0;
+    const result = emailDuplicate !== 0;
 
     res.send({
       isSuccess: true,
-      isDuplicate: isDuplicate,
+      isDuplicate: result,
     });
   } catch (err) {
     res.status(500).send({
@@ -79,16 +79,14 @@ exports.getUser = async (req, res) => {
   }
 };
 
-// 소셜 로그인 or 회원가입 시키고 로그인
-// /api/user/join
-exports.join = async (req, res) => {
+// 카카오 계정 로그인/회원가입
+// /api/user/kakaologin
+exports.kakaologin = async (req, res) => {
   try {
     const profile = req.body;
 
     const exUser = await User.findOne({
-      where: {
-        [Op.and]: [{ sns_id: profile.id }, { provider: profile.provider }],
-      },
+      where: { sns_id: profile.id },
     });
 
     // 응답값으로 보낼 userInfo 초기화
@@ -116,36 +114,26 @@ exports.join = async (req, res) => {
       };
     } else {
       // 가입이력이 없으니 회원가입 처리 하기 위해 DB에 저장하고 그걸로 userInfo 세팅
-      let newUser = {};
+      let newUser = await User.create({
+        sns_id: profile.id,
+        provider: 'kakao',
+        email: profile.kakao_account?.email,
+      });
 
-      if (profile.provider === 'kakao') {
-        newUser = await User.create({
-          sns_id: profile.id,
-          provider: profile.provider,
-          email: profile.kakao_account?.email,
-        });
-      } else if (profile.provider === 'test') {
-        newUser = await User.create({
-          sns_id: profile.id,
-          provider: profile.provider,
-          email: profile?.email,
-          is_admin: profile.isServiceAdmin,
-        });
-      }
       // userInfo 세팅
       userInfo = {
-        id: exUser.user_id,
-        category: exUser.category,
-        nickName: exUser.nick_name,
-        profileImg: exUser.image_path,
-        email: exUser.email,
-        statusMsg: exUser.status_message,
-        isServiceAdmin: exUser.is_admin,
+        id: newUser.user_id,
+        category: newUser.category,
+        nickName: newUser.nick_name,
+        profileImg: newUser.image_path,
+        email: newUser.email,
+        statusMsg: newUser.status_message,
+        isServiceAdmin: newUser.is_admin,
       };
     }
 
     // 로그인 처리를 하기위해 jwt 발급
-    const accessToken = generateJwtToken(userInfo); // 만료 2시간
+    const accessToken = generateJwtToken(userInfo);
     // 리프레시 토큰 발급
     const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
 
@@ -212,6 +200,7 @@ exports.registerUser = async (req, res) => {
       password: hashedPassword,
       nick_name: nickName,
       category: category,
+      provider: 'local',
     };
     const newUser = await User.create(userInfo);
 
@@ -222,6 +211,7 @@ exports.registerUser = async (req, res) => {
     });
   } catch (err) {
     res.status(500).send({
+      isSuccess: false,
       message: '회원가입 처리 중 서버에러 발생',
     });
   }
@@ -230,63 +220,71 @@ exports.registerUser = async (req, res) => {
 // local 로그인
 // /api/user/login
 exports.login = async (req, res) => {
-  // 요청 본문의 null 검사
-  if (!req.body.email || !req.body.password) {
-    return res.status(404).send({
-      message: '요청값이 비었습니다.',
+  try {
+    // 요청 본문의 null 검사
+    if (!req.body.email || !req.body.password) {
+      return res.status(404).send({
+        isSuccess: false,
+        message: '요청값이 비었습니다.',
+      });
+    }
+
+    // 이메일과 패스워드를 받는다
+    const { email, password } = req.body;
+
+    // DB에 조회
+    const exUser = await User.findOne({
+      where: {
+        [Op.and]: [{ provider: 'local' }, { email: email }],
+      },
     });
-  }
 
-  // 이메일과 패스워드를 받는다
-  const { email, password } = req.body;
+    // 이메일 확인
+    if (!exUser) {
+      return res.status(409).send({
+        isSuccess: false,
+        message: '찾을 수 없는 이메일 입니다.',
+      });
+    }
 
-  // DB에 조회
-  const exUser = await User.findOne({
-    where: {
-      [Op.and]: [{ provider: 'local' }, { email: email }],
-    },
-  });
+    // 암호 확인
+    let passCheck = comparePassword(password, exUser.password);
+    if (!passCheck) {
+      return res.status(409).send({
+        isSuccess: false,
+        message: '패스워드 오류',
+      });
+    }
 
-  // 이메일 확인
-  if (!exUser) {
-    return res.status(409).send({
+    let userInfo = {
+      id: exUser.user_id,
+      category: exUser.category,
+      nickName: exUser.nick_name,
+      profileImg: exUser.image_path,
+      email: exUser.email,
+      statusMsg: exUser.status_message,
+      isServiceAdmin: exUser.is_admin,
+    };
+
+    // 로그인 처리를 하기위해 jwt 발급
+    const accessToken = generateJwtToken(userInfo);
+    // 리프레시 토큰 발급
+    const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
+
+    // 응답값 전송
+    res.send({
+      isSuccess: true,
+      message: '로그인 처리 성공',
+      userInfo: userInfo,
+      accessToken,
+      refreshToken,
+    });
+  } catch (err) {
+    res.status(500).send({
       isSuccess: false,
-      message: '찾을 수 없는 이메일 입니다.',
+      message: '로그인 처리 중 서버에러 발생',
     });
   }
-
-  // 암호 확인
-  let passCheck = comparePassword(password, exUser.password);
-  if (!passCheck) {
-    return res.status(409).send({
-      isSuccess: false,
-      message: '패스워드 오류',
-    });
-  }
-
-  let userInfo = {
-    id: exUser.user_id,
-    category: exUser.category,
-    nickName: exUser.nick_name,
-    profileImg: exUser.image_path,
-    email: exUser.email,
-    statusMsg: exUser.status_message,
-    isServiceAdmin: exUser.is_admin,
-  };
-
-  // 로그인 처리를 하기위해 jwt 발급
-  const accessToken = generateJwtToken(userInfo);
-  // 리프레시 토큰 발급
-  const refreshToken = generateRefreshToken(userInfo.id); // 만료 12시간
-
-  // 응답값 전송
-  res.send({
-    isSuccess: true,
-    message: '로그인 처리 성공',
-    userInfo: userInfo,
-    accessToken,
-    refreshToken,
-  });
 };
 
 // 유저 정보 수정 ( nickName, category, statusMessage )
@@ -307,6 +305,7 @@ exports.patchUser = async (req, res) => {
 
       if (isDuplicate) {
         return res.status(409).send({
+          isSuccess: false,
           msg: '닉네임이 이미 존재합니다.',
         });
       }
@@ -336,6 +335,7 @@ exports.patchUser = async (req, res) => {
 
     // 토큰과 함께 변경된 유저정보 전달
     res.status(200).send({
+      isSuccess: true,
       token: accessToken,
       userInfo,
     });
@@ -352,14 +352,17 @@ exports.patchUser = async (req, res) => {
 exports.userNickDuplicateCheck = async (req, res) => {
   try {
     // 닉네임 중복확인
-    const isDuplicate = await duplicateCheck(User, 'nick_name', req.params.nickName);
+    const result = await duplicateCheck(User, 'nick_name', req.params.nickName);
 
-    res.send(isDuplicate);
+    res.send({
+      isSuccess: true,
+      isDuplicate: result,
+    });
   } catch (error) {
+    console.err(error);
     res.status(500).send({
-      success: false,
-      msg: 'SERVER ERROR',
-      error,
+      isSuccess: false,
+      message: 'SERVER ERROR',
     });
   }
 };
