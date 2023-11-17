@@ -7,7 +7,7 @@ const { DB_ENV } = process.env;
 // config.json 파일을 불러와서 DB 연결 정보를 제공
 const config = require(__dirname + '/../config/config.json')[DB_ENV];
 const db = {};
-
+console.log(config);
 // config를 이용해서 시퀄라이즈 객체 설정 및 생성
 let sequelize = new Sequelize(config.database, config.username, config.password, config);
 const User = require('./User')(sequelize, Sequelize);
