@@ -58,14 +58,15 @@ exports.getCategoryGroups = async (req, res) => {
     // const userId = userInfo.id;
     // const userCategory = userInfo.category;
 
-    const userId = 'c306446d-738b-46a7-a30d-221551e7e244';
+    const userId = 'b626940c-3386-49f6-8990-a3f3184c1dc6';
+
     // 사용자의 카테고리를 조회
     const user = await User.findOne({
       where: { user_id: userId },
     });
     console.log('유저의 카테고리는 -> ', user.category);
     if (user) {
-      const groups = await Group.findAll({ where: { category: 'user.category' } });
+      const groups = await Group.findAll({ where: { category: `${user.category}` } });
       console.log('groups는', groups);
       if (groups.length > 0) {
         res.status(200).send({
@@ -103,7 +104,7 @@ exports.getCategoryGroupsByUser = async (req, res) => {
     // }
 
     // const userId = userInfo.id;
-    const userId = 'c306446d-738b-46a7-a30d-221551e7e244';
+    const userId = 'b626940c-3386-49f6-8990-a3f3184c1dc6';
 
     // 사용자의 그룹 ID 목록 조회
     const user = await User.findByPk(userId);
@@ -182,8 +183,7 @@ exports.joinGroupRequest = async (req, res) => {
     });
   }
 };
-
-//그룹 요청 수락 기능 함수
+//그룹요청 수락함수
 exports.acceptGroupMembershipRequest = async (req, res) => {
   // 토큰에서 현재 유저 정보 가져오기
   // const userInfo = res.locals.decoded.userInfo;
@@ -197,15 +197,28 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
   // }
 
   // const userId = userInfo.id;
-
   const { groupId, requestId } = req.params;
-  console.log('요청한 유저의 id는 ', requestId);
 
   try {
     const request = await UserGroupRelation.findOne({ where: { user_id: requestId, group_id: groupId } });
-    await request.update({ request_status: 'a' });
-    console.log(request);
-    await Notification.create({
+
+    const rowCount = await UserGroupRelation.count({ where: { group_id: groupId, request_status: 'a' } });
+    console.log(rowCount);
+
+    if (!request) {
+      return res.status(404).send({
+        isSuccess: false,
+        message: '해당 요청을 찾을 수 없습니다.',
+      });
+    }
+    const groupInfo = await Group.findOne({ where: { group_id: groupId } });
+    const memberMax = groupInfo ? groupInfo.member_max : null;
+    console.log('memberMax는', memberMax);
+    console.log('requst.lenth는', request);
+    if (rowCount < memberMax) {
+      await request.update({ request_status: 'a' });
+
+        await Notification.create({
       user_id: requestId,
       content: '그룹요청이 수락되었습니다.',
       notification_kind: 'group_approve',
@@ -215,6 +228,12 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
       isSuccess: true,
       message: '그룹 멤버십 요청을 성공적으로 수락했습니다.',
     });
+    } else {
+      return res.status(200).send({
+        isSuccess: false,
+        message: '이미 그룹 최대인원입니다.',
+      });
+    }
   } catch (err) {
     console.error(err);
 
@@ -224,6 +243,7 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
     });
   }
 };
+
 // 그룹 요청 거절 기능 함수
 exports.rejectGroupMembershipRequest = async (req, res) => {
   // 토큰에서 현재 유저 정보 가져오기
@@ -281,7 +301,7 @@ exports.postGroupInformation = async (req, res) => {
     // }
 
     // const userId = userInfo.id;
-    const userId = 'c306446d-738b-46a7-a30d-221551e7e244';
+    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
 
     // 클라이언트에서 요청으로 받은 데이터 추출
     const { name, description, category, dailyGoalTime, maximumNumberMember } = req.body;
@@ -335,7 +355,7 @@ exports.patchGroupInformation = async (req, res) => {
     // }
 
     // const userId = userInfo.id;
-    const userId = 'c306446d-738b-46a7-a30d-221551e7e244';
+    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
 
     // 요청 파라미터에서 그룹 ID를 가져옴
     const { groupId } = req.params;
@@ -470,7 +490,7 @@ exports.getPendingGroups = async (req, res) => {
     // const userId = userInfo.id;
 
     // 사용자 정보를 조회
-    const userId = 'c306446d-738b-46a7-a30d-221551e7e244';
+    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
 
     // 사용자의 "pending_groups" 배열을 가져옴
     const pendingGroups = await UserGroupRelation.findAll({
@@ -513,7 +533,7 @@ exports.cancelJoinRequest = async (req, res) => {
     // }
 
     // const userId = userInfo.id;
-    const userId = 'c306446d-738b-46a7-a30d-221551e7e244';
+    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
     const { groupId } = req.params;
 
     const canceledRequest = await UserGroupRelation.findOne({ where: { user_id: userId, group_id: groupId } });
