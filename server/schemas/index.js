@@ -38,6 +38,55 @@ const connect = () => {
   // todoDocument.save();
 
   // 몽고 연결시 에러발생 이벤트 리스너
+  const dummyData = [
+    {
+      user_id: '1',
+      total_time: 3600, // 1 hour
+      is_running: 'n',
+      daily: {
+        date: new Date(), // current date
+        data: [
+          {
+            title: 'Math',
+            timer: 1800, // 30 minutes
+          },
+          {
+            title: 'History',
+            timer: 1800, // 30 minutes
+          },
+        ],
+      },
+    },
+    {
+      user_id: '2',
+      total_time: 7200, // 2 hours
+      is_running: 'y',
+      daily: {
+        date: new Date(), // current date
+        data: [
+          {
+            title: 'Science',
+            timer: 3600, // 1 hour
+          },
+          {
+            title: 'English',
+            timer: 3600, // 1 hour
+          },
+        ],
+      },
+    },
+    // Add more dummy data as needed
+  ];
+
+  // Assuming Timer is your Mongoose model
+  Timer.insertMany(dummyData)
+    .then(result => {
+      console.log('Documents inserted successfully:', result);
+    })
+    .catch(err => {
+      console.error(err);
+    });
+
   mongoose.connection.on('error', error => {
     console.error('몽고디비 연결 에러', error);
   });
