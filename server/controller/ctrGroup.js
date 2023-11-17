@@ -1,4 +1,4 @@
-// const { User, Group, Timer, mongoose } = require('../schemas/schema');
+const { Notification } = require('../schemas/schema');
 const { User, Group, UserGroupRelation } = require('../models');
 //모든 그룹 조회
 
@@ -157,7 +157,19 @@ exports.joinGroupRequest = async (req, res) => {
       user_id: userId,
       group_id: groupId,
     });
-
+    // 그룹 리더의 정보 가져오기
+    const groupLeader = await Group.findOne({ attributes: ['leader_id'], where: { group_id: groupId } });
+    console.log('groupLeader는', groupLeader);
+    // 그룹 리더의 leader_id 가져오기
+    const leaderId = groupLeader ? groupLeader.leader_id : null;
+    console.log('leaderId는', leaderId);
+    // Notification 생성 및 저장
+    await Notification.create({
+      user_id: leaderId,
+      content: '새로운 그룹 요청이 있습니다.',
+      notification_kind: 'group_request',
+      group_id: groupId,
+    });
     return res.status(200).send({
       isSuccess: true,
       isFull: false,
@@ -189,6 +201,7 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
 
   try {
     const request = await UserGroupRelation.findOne({ where: { user_id: requestId, group_id: groupId } });
+
     const rowCount = await UserGroupRelation.count({ where: { group_id: groupId, request_status: 'a' } });
     console.log(rowCount);
 
@@ -198,7 +211,6 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
         message: '해당 요청을 찾을 수 없습니다.',
       });
     }
-
     const groupInfo = await Group.findOne({ where: { group_id: groupId } });
     const memberMax = groupInfo ? groupInfo.member_max : null;
     console.log('memberMax는', memberMax);
@@ -206,10 +218,16 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
     if (rowCount < memberMax) {
       await request.update({ request_status: 'a' });
 
-      return res.status(200).send({
-        isSuccess: true,
-        message: '그룹 멤버십 요청을 성공적으로 수락했습니다.',
-      });
+        await Notification.create({
+      user_id: requestId,
+      content: '그룹요청이 수락되었습니다.',
+      notification_kind: 'group_approve',
+      group_id: groupId,
+    });
+    return res.status(200).send({
+      isSuccess: true,
+      message: '그룹 멤버십 요청을 성공적으로 수락했습니다.',
+    });
     } else {
       return res.status(200).send({
         isSuccess: false,
@@ -248,7 +266,12 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
     const request = await UserGroupRelation.findOne({ where: { user_id: requestId, group_id: groupId } });
     await request.update({ request_status: 'r' });
     console.log(request);
-
+    await Notification.create({
+      user_id: requestId,
+      content: '그룹요청이 거절되었습니다.',
+      notification_kind: 'group_rejection',
+      group_id: groupId,
+    });
     return res.status(200).send({
       isSuccess: true,
       message: '그룹 멤버십 요청을 성공적으로 거절했습니다.',
@@ -431,6 +454,16 @@ exports.removeAllMembersFromGroup = async (req, res) => {
 
     // 그룹과 연결된 모든 행 삭제 (UserGroupRelation에 설정된 onDelete: 'CASCADE'가 작동)
     await deletedGroup.destroy();
+    await Notification.deleteMany({
+      // user_id: userId,
+      group_id: groupId,
+    });
+    await Notification.create({
+      // user_id: userId,
+      content: '내가 속한 그룹이 삭제 되었습니다.',
+      notification_kind: 'group_deletion',
+      group_id: groupId,
+    });
 
     res.status(200).send({ isSuccess: true, message: '그룹에서 모든 멤버를 삭제했습니다.' });
   } catch (err) {
@@ -507,7 +540,16 @@ exports.cancelJoinRequest = async (req, res) => {
 
     if (canceledRequest) {
       await canceledRequest.destroy();
-
+      const groupLeader = await Group.findOne({ attributes: ['leader_id'], where: { group_id: groupId } });
+      console.log('groupLeader는', groupLeader);
+      // 그룹 리더의 leader_id 가져오기
+      const leaderId = groupLeader ? groupLeader.leader_id : null;
+      console.log('leaderId는', leaderId);
+      await Notification.deleteOne({
+        user_id: leaderId,
+        notification_kind: 'group_request',
+        group_id: groupId,
+      });
       return res.status(200).send({
         isSuccess: true,
         code: 200,
