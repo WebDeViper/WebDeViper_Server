@@ -20,7 +20,7 @@ router.post('/register', controllerUser.registerUser);
 
 // local 로그인
 // /api/user/login
-router.get('/login', controllerUser.login);
+router.post('/login', controllerUser.login);
 
 // 유저 정보 수정 ( nickName, category, statusMessage )
 // 유저정보 수정하면 다시 토큰생성해서 보냄
