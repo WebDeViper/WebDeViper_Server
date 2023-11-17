@@ -12,7 +12,7 @@
        const socket = io('http://localhost:8001', { withCredentials: true });// Replace YOUR_SERVER_PORT with your actual server port
         socket.on('connect', () => {
             console.log('Connected to server');
-            socket.on('newNotification',async(data)=>{
+            socket.on('newNotice',async(data)=>{
                 console.log('공지사항 등록 알람!!',data)
             })
         });
