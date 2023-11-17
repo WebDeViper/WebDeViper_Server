@@ -246,7 +246,12 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
     const request = await UserGroupRelation.findOne({ where: { user_id: requestId, group_id: groupId } });
     await request.update({ request_status: 'r' });
     console.log(request);
-
+    await Notification.create({
+      user_id: requestId,
+      content: '그룹요청이 거절되었습니다.',
+      notification_kind: 'group_rejection',
+      group_id: groupId,
+    });
     return res.status(200).send({
       isSuccess: true,
       message: '그룹 멤버십 요청을 성공적으로 거절했습니다.',
@@ -392,7 +397,7 @@ exports.deleteGroup = async (req, res) => {
 
     // const userId = userInfo.id;
     // 요청 파라미터에서 그룹 ID를 가져옴
-    const userId = 'c306446d-738b-46a7-a30d-221551e7e244';
+    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
     const { groupId } = req.params;
 
     // 그룹 삭제 수행
@@ -429,6 +434,16 @@ exports.removeAllMembersFromGroup = async (req, res) => {
 
     // 그룹과 연결된 모든 행 삭제 (UserGroupRelation에 설정된 onDelete: 'CASCADE'가 작동)
     await deletedGroup.destroy();
+    await Notification.deleteMany({
+      // user_id: userId,
+      group_id: groupId,
+    });
+    await Notification.create({
+      // user_id: userId,
+      content: '내가 속한 그룹이 삭제 되었습니다.',
+      notification_kind: 'group_deletion',
+      group_id: groupId,
+    });
 
     res.status(200).send({ isSuccess: true, message: '그룹에서 모든 멤버를 삭제했습니다.' });
   } catch (err) {
@@ -505,7 +520,16 @@ exports.cancelJoinRequest = async (req, res) => {
 
     if (canceledRequest) {
       await canceledRequest.destroy();
-
+      const groupLeader = await Group.findOne({ attributes: ['leader_id'], where: { group_id: groupId } });
+      console.log('groupLeader는', groupLeader);
+      // 그룹 리더의 leader_id 가져오기
+      const leaderId = groupLeader ? groupLeader.leader_id : null;
+      console.log('leaderId는', leaderId);
+      await Notification.deleteOne({
+        user_id: leaderId,
+        notification_kind: 'group_request',
+        group_id: groupId,
+      });
       return res.status(200).send({
         isSuccess: true,
         code: 200,
