@@ -205,7 +205,12 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
     const request = await UserGroupRelation.findOne({ where: { user_id: requestId, group_id: groupId } });
     await request.update({ request_status: 'a' });
     console.log(request);
-
+    await Notification.create({
+      user_id: requestId,
+      content: '그룹요청이 수락되었습니다.',
+      notification_kind: 'group_approve',
+      group_id: groupId,
+    });
     return res.status(200).send({
       isSuccess: true,
       message: '그룹 멤버십 요청을 성공적으로 수락했습니다.',
