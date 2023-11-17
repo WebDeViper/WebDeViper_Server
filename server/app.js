@@ -14,11 +14,11 @@ const cors = require('cors');
 const app = express();
 
 // EJS 뷰 엔진 설정
-// app.set('views', path.join(__dirname, './views'));
-// app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, './views'));
+app.set('view engine', 'ejs');
 
 // 정적 파일 서빙
-// app.use(express.static(path.join(__dirname, 'views/client')));
+app.use(express.static(path.join(__dirname, 'views/client')));
 
 // 몽고 DB 연결
 connect();

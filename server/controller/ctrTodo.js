@@ -1,27 +1,26 @@
-const { Todo, mongoose } = require('../schemas/schema');
+const { Todo, Sequelize } = require('../models');
+
+const getUserIdFromToken = res => {
+  return res.locals.decoded.userInfo.id;
+};
+
+const checkLoginStatus = (userId, res) => {
+  if (!userId) {
+    res.status(401).send({ message: '로그인 후 이용해주세요.' });
+    return false;
+  }
+  return true;
+};
 
 exports.getTodoList = async (req, res) => {
   try {
-    // 토큰값에서 user_id 가져옴
-    const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '6544d9eeaabd61b4d1cf4bc5';
-
-    if (req.query) {
-      // console.log('query>>', req.query); // month, year
-
-      // const year = req.query.year; // 예: '2023' 형식으로 전달된다고 가정
-      // const month = req.query.month; // 예: '08' 형식으로 전달된다고 가정
-
-      const result = await Todo.find({
-        user_id: currentUserId,
-      });
-
-      const todos = result.map(todo => todo.toObject());
-      console.log(todos);
-      res.status(200).send(todos);
-    } else {
-      res.status(400).send({ message: '사용자 정보가 없습니다.' });
+    const currentUserId = getUserIdFromToken(res);
+    if (!checkLoginStatus(currentUserId, res)) {
+      return;
     }
+
+    const result = await Todo.findAll({ where: { user_id: currentUserId } });
+    res.status(200).send({ todos: result, message: 'success' });
   } catch (err) {
     console.log(err);
     res.status(500).send({ message: 'SERVER ERROR' });
@@ -30,13 +29,16 @@ exports.getTodoList = async (req, res) => {
 
 exports.postTodo = async (req, res) => {
   try {
-    const currentUserId = res.locals.decoded.userInfo.id;
+    const currentUserId = getUserIdFromToken(res);
+    if (!checkLoginStatus(currentUserId, res)) {
+      return;
+    }
 
     // 시간 설정
     const startTime = new Date(req.body.start_time);
     const endTime = new Date(req.body.end_time);
 
-    const newTodo = new Todo({
+    const newTodo = await Todo.create({
       user_id: currentUserId,
       title: req.body.title,
       content: req.body.content,
@@ -44,8 +46,7 @@ exports.postTodo = async (req, res) => {
       end_time: endTime,
     });
 
-    const result = await newTodo.save();
-    res.status(200).send({ result, message: '할 일이 성공적으로 등록되었습니다!' });
+    res.status(200).send({ result: newTodo, message: '할 일이 성공적으로 등록되었습니다!' });
   } catch (err) {
     console.log(err);
     res.status(500).send({ message: 'SERVER ERROR' });
@@ -54,35 +55,38 @@ exports.postTodo = async (req, res) => {
 
 exports.patchTodo = async (req, res) => {
   try {
-    const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '6544d9eeaabd61b4d1cf4bc5';
-    const { todo_objId } = req.query;
+    const currentUserId = getUserIdFromToken(res);
+    if (!checkLoginStatus(currentUserId, res)) {
+      return;
+    }
+
+    const { todo_id } = req.query;
     const { done, start_time, end_time, content, title } = req.body;
 
-    const startTime = new Date(req.body.start_time);
-    const endTime = new Date(req.body.end_time);
+    const startTime = new Date(start_time);
+    const endTime = new Date(end_time);
 
-    const updatedTodoData = {
-      title,
-      start_time: startTime,
-      content,
-      end_time: endTime,
-      updated_at: new Date(),
-      // done: done,
-    };
-
-    const result = await Todo.updateOne(
+    const [updatedRowCount] = await Todo.update(
       {
-        _id: todo_objId,
-        user_id: currentUserId, // Ensure the user owns this todo
+        title,
+        start_time: startTime,
+        content,
+        end_time: endTime,
+        updated_at: new Date(),
+        done: done,
       },
-      updatedTodoData
+      {
+        where: {
+          todo_id: todo_id,
+          user_id: currentUserId,
+        },
+      }
     );
-    console.log(result);
-    if (result.modifiedCount === 1) {
-      res.status(200).send({ message: 'Todo가 업데이트되었습니다.' });
-    } else if (result.modifiedCount === 0) {
-      res.status(204); //update된 게 없을 때 보냄
+
+    if (updatedRowCount > 0) {
+      res.status(200).send({ message: 'Todo가 업데이트되었습니다.', updatedRowCount });
+    } else if (updatedRowCount === 0) {
+      res.status(204).send(); // update된 게 없을 때 보냄
     } else {
       res.status(404).send({ message: '해당 Todo를 찾을 수 없습니다.' });
     }
@@ -94,19 +98,25 @@ exports.patchTodo = async (req, res) => {
 
 exports.deleteTodo = async (req, res) => {
   try {
-    const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '6544d9eeaabd61b4d1cf4bc5';
-    const result = await Todo.deleteOne({
-      _id: req.query.todo_objId,
-      user_id: currentUserId, // Ensure the user owns this todo
+    const currentUserId = getUserIdFromToken(res);
+    if (!checkLoginStatus(currentUserId, res)) {
+      return;
+    }
+
+    const deletedRowCount = await Todo.destroy({
+      where: {
+        todo_id: req.query.todo_id,
+        user_id: currentUserId,
+      },
     });
-    console.log(result);
-    if (result.deletedCount > 0) {
-      res.status(200).send({ message: '메시지가 성공적으로 삭제되었습니다.' });
+
+    if (deletedRowCount > 0) {
+      res.status(200).send({ message: '할 일이 성공적으로 삭제되었습니다.', deletedRowCount });
     } else {
-      res.status(400).send({ message: '메시지 삭제에 실패하였습니다.' });
+      res.status(400).send({ message: '할 일 삭제에 실패하였습니다.' });
     }
   } catch (err) {
-    res.status(500).send({ message: 'SERVER ERROR' });
+    console.error(err);
+    res.status(500).send({ message: '서버 오류' });
   }
 };
