@@ -1,4 +1,4 @@
-// const { User, Group, Timer, mongoose } = require('../schemas/schema');
+const { Notification } = require('../schemas/schema');
 const { User, Group, UserGroupRelation } = require('../models');
 //모든 그룹 조회
 
@@ -147,7 +147,7 @@ exports.joinGroupRequest = async (req, res) => {
 
     // const userId = userInfo.id;
 
-    const userId = 'd885213b-030f-4bb8-a196-363f44a04a4f';
+    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
 
     const { groupId } = req.params; // 가입하려는 group의 object Id
 
@@ -156,7 +156,19 @@ exports.joinGroupRequest = async (req, res) => {
       user_id: userId,
       group_id: groupId,
     });
-
+    // 그룹 리더의 정보 가져오기
+    const groupLeader = await Group.findOne({ attributes: ['leader_id'], where: { group_id: groupId } });
+    console.log('groupLeader는', groupLeader);
+    // 그룹 리더의 leader_id 가져오기
+    const leaderId = groupLeader ? groupLeader.leader_id : null;
+    console.log('leaderId는', leaderId);
+    // Notification 생성 및 저장
+    await Notification.create({
+      user_id: leaderId,
+      content: '새로운 그룹 요청이 있습니다.',
+      notification_kind: 'group_request',
+      group_id: groupId,
+    });
     return res.status(200).send({
       isSuccess: true,
       isFull: false,

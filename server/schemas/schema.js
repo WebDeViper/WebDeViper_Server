@@ -18,7 +18,6 @@ const notificationSchema = new Schema({
     type: String,
     // enum: [
     //   'chat_whisper',
-    //   'group_creation',
     //   'group_request',
     //   'group_deletion',
     //   'group_rejection',
