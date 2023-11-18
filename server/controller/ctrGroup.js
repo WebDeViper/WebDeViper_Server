@@ -46,28 +46,28 @@ exports.getGroupInfo = async (req, res) => {
 exports.getCategoryGroups = async (req, res) => {
   try {
     // 토큰에서 현재 유저 정보 가져오기
-    // const userInfo = res.locals.decoded.userInfo;
+    const userInfo = res.locals.decoded.userInfo;
 
-    // if (!userInfo) {
-    //   return res.status(400).send({
-    //     isSuccess: false,
-    //     code: 400,
-    //     error: '사용자 정보를 찾을 수 없습니다.',
-    //   });
-    // }
+    if (!userInfo) {
+      return res.status(400).send({
+        isSuccess: false,
+        code: 400,
+        error: '사용자 정보를 찾을 수 없습니다.',
+      });
+    }
 
     // const userId = userInfo.id;
-    // const userCategory = userInfo.category;
+    const userCategory = userInfo.category;
 
-    const userId = 'b626940c-3386-49f6-8990-a3f3184c1dc6';
+    // const userId = 'b626940c-3386-49f6-8990-a3f3184c1dc6';
 
     // 사용자의 카테고리를 조회
-    const user = await User.findOne({
-      where: { user_id: userId },
-    });
-    console.log('유저의 카테고리는 -> ', user.category);
+    // const user = await User.findOne({
+    //   where: { user_id: userId },
+    // });
+    // console.log('유저의 카테고리는 -> ', user.category);
     if (user) {
-      const groups = await Group.findAll({ where: { category: `${user.category}` } });
+      const groups = await Group.findAll({ where: { category: `${userCategory}` } });
       console.log('groups는', groups);
       if (groups.length > 0) {
         res.status(200).send({
@@ -137,19 +137,19 @@ exports.getCategoryGroupsByUser = async (req, res) => {
 exports.joinGroupRequest = async (req, res) => {
   try {
     // 토큰에서 현재 유저 정보 가져오기
-    // const userInfo = res.locals.decoded.userInfo;
+    const userInfo = res.locals.decoded.userInfo;
 
-    // if (!userInfo) {
-    //   return res.status(400).send({
-    //     isSuccess: false,
-    //     code: 400,
-    //     error: '사용자 정보를 찾을 수 없습니다.',
-    //   });
-    // }
+    if (!userInfo) {
+      return res.status(400).send({
+        isSuccess: false,
+        code: 400,
+        error: '사용자 정보를 찾을 수 없습니다.',
+      });
+    }
 
-    // const userId = userInfo.id;
+    const userId = userInfo.id;
 
-    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
+    // const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
 
     const { groupId } = req.params; // 가입하려는 group의 object Id
 
@@ -289,20 +289,20 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
 // 새 그룹 생성하는 함수
 exports.postGroupInformation = async (req, res) => {
   try {
-    //그룹을 생성하는 유저의 아이디 -> 그룹장
+    // 그룹을 생성하는 유저의 아이디 -> 그룹장
     // 토큰에서 현재 유저 정보 가져오기
-    // const userInfo = res.locals.decoded.userInfo;
+    const userInfo = res.locals.decoded.userInfo;
 
-    // if (!userInfo) {
-    //   return res.status(400).send({
-    //     isSuccess: false,
-    //     code: 400,
-    //     error: '사용자 정보를 찾을 수 없습니다.',
-    //   });
-    // }
+    if (!userInfo) {
+      return res.status(400).send({
+        isSuccess: false,
+        code: 400,
+        error: '사용자 정보를 찾을 수 없습니다.',
+      });
+    }
 
-    // const userId = userInfo.id;
-    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
+    const userId = userInfo.id;
+    // const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
 
     // 클라이언트에서 요청으로 받은 데이터 추출
     const { name, description, category, dailyGoalTime, maximumNumberMember } = req.body;
@@ -320,6 +320,7 @@ exports.postGroupInformation = async (req, res) => {
       name, // 그룹이름
       category, // 그룹카테고리
       leader_id: userId,
+      img_path: imagePath,
       member_max: maximumNumberMember, // 최대 회원 수
       goal_time: dailyGoalTime, // 일일 목표 시간
       description, // 그룹 설명
@@ -345,28 +346,32 @@ exports.postGroupInformation = async (req, res) => {
 exports.patchGroupInformation = async (req, res) => {
   try {
     // 토큰에서 현재 유저 정보 가져오기
-    // const userInfo = res.locals.decoded.userInfo;
+    const userInfo = res.locals.decoded.userInfo;
 
-    // if (!userInfo) {
-    //   return res.status(400).send({
-    //     isSuccess: false,
-    //     code: 400,
-    //     error: '사용자 정보를 찾을 수 없습니다.',
-    //   });
-    // }
+    if (!userInfo) {
+      return res.status(400).send({
+        isSuccess: false,
+        code: 400,
+        error: '사용자 정보를 찾을 수 없습니다.',
+      });
+    }
 
-    // const userId = userInfo.id;
-    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
+    const userId = userInfo.id;
+    // const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
 
     // 요청 파라미터에서 그룹 ID를 가져옴
     const { groupId } = req.params;
+    // 파일 업로드 확인
+    if (req.file) {
+      const { filename } = req.file;
 
+      imagePath = `/api/static/groupImg/${filename}`;
+    }
     // 요청 본문에서 그룹 정보 업데이트를 위한 필드들을 가져옴
     const {
       name, // 그룹 이름
       description, // 그룹 설명
       category, // 그룹의 카테고리 이름 (User FK 값)
-      imagePath, // 그룹 프로필 이미지 경로
       dailyGoalTime, // 일일 목표 시간
       maximumNumberMember, // 최대 회원 수
     } = req.body;
@@ -376,7 +381,7 @@ exports.patchGroupInformation = async (req, res) => {
       name,
       description,
       category,
-      // img_path: imagePath,
+      img_path: imagePath,
       goal_time: dailyGoalTime,
       member_max: maximumNumberMember,
     };
@@ -406,19 +411,19 @@ exports.patchGroupInformation = async (req, res) => {
 exports.deleteGroup = async (req, res) => {
   try {
     // 토큰에서 현재 유저 정보 가져오기
-    // const userInfo = res.locals.decoded.userInfo;
+    const userInfo = res.locals.decoded.userInfo;
 
-    // if (!userInfo) {
-    //   return res.status(400).send({
-    //     isSuccess: false,
-    //     code: 400,
-    //     error: '사용자 정보를 찾을 수 없습니다.',
-    //   });
-    // }
+    if (!userInfo) {
+      return res.status(400).send({
+        isSuccess: false,
+        code: 400,
+        error: '사용자 정보를 찾을 수 없습니다.',
+      });
+    }
 
-    // const userId = userInfo.id;
+    const userId = userInfo.id;
     // 요청 파라미터에서 그룹 ID를 가져옴
-    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
+    // const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
     const { groupId } = req.params;
 
     // 그룹 삭제 수행
@@ -487,11 +492,11 @@ exports.getAllRooms = async (req, res) => {
 exports.getPendingGroups = async (req, res) => {
   try {
     // 현재 사용자 정보를 추출
-    // const userInfo = res.locals.decoded.userInfo;
-    // const userId = userInfo.id;
+    const userInfo = res.locals.decoded.userInfo;
+    const userId = userInfo.id;
 
     // 사용자 정보를 조회
-    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
+    // const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
 
     // 사용자의 "pending_groups" 배열을 가져옴
     const pendingGroups = await UserGroupRelation.findAll({
@@ -523,18 +528,18 @@ exports.getPendingGroups = async (req, res) => {
 
 exports.cancelJoinRequest = async (req, res) => {
   try {
-    // const userInfo = res.locals.decoded.userInfo;
+    const userInfo = res.locals.decoded.userInfo;
 
-    // if (!userInfo) {
-    //   return res.status(400).send({
-    //     isSuccess: false,
-    //     code: 400,
-    //     error: '사용자 정보를 찾을 수 없습니다.',
-    //   });
-    // }
+    if (!userInfo) {
+      return res.status(400).send({
+        isSuccess: false,
+        code: 400,
+        error: '사용자 정보를 찾을 수 없습니다.',
+      });
+    }
 
-    // const userId = userInfo.id;
-    const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
+    const userId = userInfo.id;
+    // const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
     const { groupId } = req.params;
 
     const canceledRequest = await UserGroupRelation.findOne({ where: { user_id: userId, group_id: groupId } });
