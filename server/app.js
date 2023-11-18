@@ -42,6 +42,9 @@ app.use('/', indexRouter);
 app.get('/client', (req, res) => {
   res.render('client');
 });
+app.get('/timer', (req, res) => {
+  res.render('testTimer');
+});
 
 // 에러처리 하는 미들웨어를 사용하는걸로 업그레이드 해보기..
 app.get('*', (req, res) => {
@@ -52,7 +55,12 @@ app.get('*', (req, res) => {
 });
 
 const httpServer = createServer(app);
-const io = new Server(httpServer);
+const io = new Server(
+  httpServer,
+  cors({
+    origin: process.env.NODE_ENV !== 'production' ? true : ['http://13.124.233.17', 'https://13.124.233.17'],
+  })
+);
 
 // 소켓 커넥션 연결
 require('./sockets/io')(io); //채팅
