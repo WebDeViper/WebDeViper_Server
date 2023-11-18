@@ -55,12 +55,11 @@ app.get('*', (req, res) => {
 });
 
 const httpServer = createServer(app);
-const io = new Server(
-  httpServer,
-  cors({
+const io = new Server(httpServer, {
+  cors: {
     origin: process.env.NODE_ENV !== 'production' ? true : ['http://13.124.233.17', 'https://13.124.233.17'],
-  })
-);
+  },
+});
 
 // 소켓 커넥션 연결
 require('./sockets/io')(io); //채팅

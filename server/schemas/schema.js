@@ -14,6 +14,7 @@ const chatSchema = new Schema({
 const notificationSchema = new Schema({
   user_id: { type: String },
   content: { type: String },
+  content_id: { type: String },
   notification_kind: {
     type: String,
     // enum: [
