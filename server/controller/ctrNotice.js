@@ -25,12 +25,12 @@ exports.postNotice = async (req, res) => {
       });
       console.log('result', result);
       //notification스키마에 추가
-      const newNofication = new Notification({
+      const newNotification = new Notification({
         user_id: 'admin',
         content: '새로운 공지사항이 등록되었습니다.',
         notification_kind: 'new_notice',
       });
-      await newNofication.save();
+      await newNotification.save();
       res.status(201).send({ result, message: '공지사항이 성공적으로 생셩되었습니다.' });
     } else {
       res.status(403).send({ message: '공지사항 등록권한이 없습니다.' });

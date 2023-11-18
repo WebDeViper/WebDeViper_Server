@@ -1,9 +1,9 @@
 const { duplicateCheck } = require('../utils/userModelDuplicateCheck');
 const { generateJwtToken, generateRefreshToken } = require('../utils/jwt');
 const { hashPassword, comparePassword } = require('../utils/bcrypt');
-
+const { Notification, mongoose } = require('../schemas/schema');
 // 시퀄라이즈 모듈 불러오기
-const { User } = require('../models/index');
+const { User, Sequelize } = require('../models/index');
 const { Op } = require('sequelize');
 
 // 로컬 유저 이메일 중복 체크(회원가입시)
@@ -57,9 +57,16 @@ exports.getUserInfo = async (req, res) => {
 exports.getUser = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
+    // const currentUserId = '01adc61d-243c-4bf4-aec6-914b813b987c';
+    const exUser = await User.findOne({ where: { user_id: currentUserId } });
+    console.log(exUser);
+    //유저에게 필요한  notification 전체 불러오기
+    const notifications = await Notification.find({
+      $or: [{ user_id: currentUserId }, { user_id: 'admin' }],
+      is_read: 'n',
+    });
 
-    const exUser = await User.findByPk(currentUserId);
-
+    console.log(notifications);
     res.status(200).send({
       userInfo: {
         id: exUser.user_id,
@@ -69,6 +76,7 @@ exports.getUser = async (req, res) => {
         email: exUser.email,
         statusMsg: exUser.status_message,
         isServiceAdmin: exUser.is_admin,
+        alarmMessage: notifications,
       },
     });
   } catch (err) {
