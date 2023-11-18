@@ -77,45 +77,6 @@ UserGroupRelation.belongsTo(Group, { foreignKey: 'group_id', onDelete: 'CASCADE'
 // 아직 승인되지 않은 요청들을 확인할때 의미있는 데이터
 // User.belongsToMany(Group, { through: GroupRequest }); // User.belongsToMany(Group, { through: GroupRequest, as: 'group_requester' });
 // Group.belongsToMany(User, { through: GroupRequest });
-const insertDummyData = async () => {
-  try {
-    // Sync the models with the database (create tables if they don't exist)
-    await sequelize.sync(); // Without force: true, it won't drop and recreate tables
-
-    // Create dummy users
-    const user1 = await User.create({
-      email: 'user1@example.com',
-      password: 'password1',
-    });
-
-    const user2 = await User.create({
-      email: 'user2@example.com',
-      password: 'password2',
-    });
-
-    // Create dummy groups
-    const groupA = await Group.create({
-      name: 'Group A',
-      category: 'Category A',
-    });
-
-    const groupB = await Group.create({
-      name: 'Group B',
-      category: 'Category B',
-    });
-
-    // Create dummy user-group relations
-    await user1.addGroup(groupA, { through: { request_status: 'a' } });
-    await user2.addGroup(groupB, { through: { request_status: 'a' } });
-
-    console.log('Dummy data inserted successfully.');
-  } catch (error) {
-    console.error('Error inserting dummy data:', error);
-  }
-};
-
-// Call the insertDummyData function to insert dummy data
-insertDummyData();
 
 db.sequelize = sequelize; // DB연결정보를 가진 시퀄라이저
 db.Sequelize = Sequelize; // 시퀄라이저 모듈
