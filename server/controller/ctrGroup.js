@@ -16,7 +16,7 @@ exports.getGroups = async (req, res) => {
   } catch (err) {
     console.error(err);
 
-    return res.status(500).send({ isSuccess: false, message: '내부 서버 오류' });
+    return res.status(500).send({ isSuccess: false, message: '내부 서버 오류', error: err });
   }
 };
 // 그룹 아이디를 받아 그룹 정보 조회/응답
@@ -37,6 +37,7 @@ exports.getGroupInfo = async (req, res) => {
     res.status(500).send({
       isSuccess: false,
       message: '그룹 정보 조회중 서버에러 발생',
+      error: err,
     });
   }
 };
@@ -128,7 +129,7 @@ exports.getCategoryGroupsByUser = async (req, res) => {
   } catch (err) {
     console.error(err);
     // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
-    res.status(500).send({ isSuccess: false, code: 500, error: '서버에서 오류가 발생했습니다.' });
+    res.status(500).send({ isSuccess: false, code: 500, error: err });
   }
 };
 
@@ -179,7 +180,7 @@ exports.joinGroupRequest = async (req, res) => {
     console.error(err);
     res.status(500).send({
       isSuccess: false,
-      error: '서버 오류가 발생했습니다.',
+      error: err,
     });
   }
 };
@@ -218,16 +219,16 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
     if (rowCount < memberMax) {
       await request.update({ request_status: 'a' });
 
-        await Notification.create({
-      user_id: requestId,
-      content: '그룹요청이 수락되었습니다.',
-      notification_kind: 'group_approve',
-      group_id: groupId,
-    });
-    return res.status(200).send({
-      isSuccess: true,
-      message: '그룹 멤버십 요청을 성공적으로 수락했습니다.',
-    });
+      await Notification.create({
+        user_id: requestId,
+        content: '그룹요청이 수락되었습니다.',
+        notification_kind: 'group_approve',
+        group_id: groupId,
+      });
+      return res.status(200).send({
+        isSuccess: true,
+        message: '그룹 멤버십 요청을 성공적으로 수락했습니다.',
+      });
     } else {
       return res.status(200).send({
         isSuccess: false,
@@ -239,7 +240,7 @@ exports.acceptGroupMembershipRequest = async (req, res) => {
 
     return res.status(500).send({
       isSuccess: false,
-      error: '서버 오류가 발생했습니다.',
+      error: err,
     });
   }
 };
@@ -281,7 +282,7 @@ exports.rejectGroupMembershipRequest = async (req, res) => {
 
     return res.status(500).send({
       isSuccess: false,
-      error: '서버 오류가 발생했습니다.',
+      error: err,
     });
   }
 };
@@ -336,7 +337,7 @@ exports.postGroupInformation = async (req, res) => {
     });
   } catch (err) {
     // 오류 발생 시 HTTP 상태 코드 500 (Internal Server Error)와 함께 오류 정보를 클라이언트에 반환
-    res.status(500).send({ isSuccess: false, code: 500, err });
+    res.status(500).send({ isSuccess: false, code: 500, error: err });
   }
 };
 
@@ -437,7 +438,7 @@ exports.deleteGroup = async (req, res) => {
   } catch (err) {
     console.error(err);
     // 서버 오류가 발생한 경우 (상태코드 500과 에러 메시지 반환)
-    res.status(500).send({ isSuccess: false, code: 500, error: '서버 오류가 발생했습니다.' });
+    res.status(500).send({ isSuccess: false, code: 500, error: err });
   }
 };
 //그룹장이 그룹 삭제
@@ -468,7 +469,7 @@ exports.removeAllMembersFromGroup = async (req, res) => {
     res.status(200).send({ isSuccess: true, message: '그룹에서 모든 멤버를 삭제했습니다.' });
   } catch (err) {
     console.error(err);
-    res.status(500).send({ isSuccess: false, error: '서버 오류가 발생했습니다.' });
+    res.status(500).send({ isSuccess: false, error: err });
   }
 };
 //모든 그룹 조회
@@ -479,7 +480,7 @@ exports.getAllRooms = async (req, res) => {
     return res.status(200).send({ isSuccess: true, data: roomList });
   } catch (err) {
     console.error(err);
-    return res.status(500).send({ isSuccess: false, error: '서버 오류가 발생했습니다.' });
+    return res.status(500).send({ isSuccess: false, error: err });
   }
 };
 
@@ -516,7 +517,7 @@ exports.getPendingGroups = async (req, res) => {
   } catch (err) {
     // 에러 발생 시 에러 메시지를 로깅하고 클라이언트에 에러 상태 코드로 응답을 보냄
     console.error(err);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: err });
   }
 };
 
@@ -566,7 +567,7 @@ exports.cancelJoinRequest = async (req, res) => {
     console.error(err);
     res.status(500).send({
       isSuccess: false,
-      error: '서버 오류가 발생했습니다.',
+      error: err,
     });
   }
 };
