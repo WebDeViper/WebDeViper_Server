@@ -23,11 +23,12 @@ exports.postNotice = async (req, res) => {
         content: req.body.content,
         date: Date.now(),
       });
-      console.log('result', result);
+      console.log('result', result.dataValues);
       //notification스키마에 추가
       const newNotification = new Notification({
         user_id: 'admin',
         content: '새로운 공지사항이 등록되었습니다.',
+        content_id: result.dataValues.notice_id,
         notification_kind: 'new_notice',
       });
       await newNotification.save();
