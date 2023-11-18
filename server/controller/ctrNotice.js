@@ -13,7 +13,7 @@ exports.getNotice = async (req, res) => {
 exports.postNotice = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '2';
+    // const currentUserId = '308814e1-9ff7-4846-b01b-64e290c40c1f';
     const user = await User.findOne({ where: { user_id: currentUserId } });
     console.log(user);
     if (user.is_admin === 'y') {
@@ -42,7 +42,7 @@ exports.postNotice = async (req, res) => {
 exports.patchNotice = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '1';
+    // const currentUserId = '308814e1-9ff7-4846-b01b-64e290c40c1f';
     const user = await User.findOne({ where: { user_id: currentUserId } });
 
     console.log(req.query.notice_id);
@@ -74,7 +74,7 @@ exports.patchNotice = async (req, res) => {
 exports.deleteNotice = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '1';
+    // const currentUserId = '308814e1-9ff7-4846-b01b-64e290c40c1f';
     const user = await User.findOne({ where: { user_id: currentUserId } });
     console.log(req.query.notice_id);
     if (user.is_admin === 'y') {
@@ -96,11 +96,16 @@ exports.deleteNotice = async (req, res) => {
 };
 exports.getNoticeDetail = async (req, res) => {
   try {
-    // console.log(req.params);
     const noticeDetailInfo = await Notice.findOne({ where: { notice_id: req.params.notice_id } });
-    // console.log(noticeDetailInfo);
-    res.status(200).send(noticeDetailInfo);
+
+    if (noticeDetailInfo) {
+      res.status(200).send(noticeDetailInfo);
+    } else {
+      res.status(400).send({ message: '존재하지 않는 공지사항입니다.' });
+    }
   } catch (err) {
     console.log(err);
+    // 에러 처리 로직 추가
+    res.status(500).send({ message: '서버 오류가 발생했습니다.' });
   }
 };
