@@ -94,18 +94,18 @@ exports.getCategoryGroups = async (req, res) => {
 exports.getCategoryGroupsByUser = async (req, res) => {
   try {
     // 토큰에서 현재 유저 정보 가져오기
-    // const userInfo = res.locals.decoded.userInfo;
+    const userInfo = res.locals.decoded.userInfo;
 
-    // if (!userInfo) {
-    //   return res.status(400).send({
-    //     isSuccess: false,
-    //     code: 400,
-    //     error: '사용자 정보를 찾을 수 없습니다.',
-    //   });
-    // }
+    if (!userInfo) {
+      return res.status(400).send({
+        isSuccess: false,
+        code: 400,
+        error: '사용자 정보를 찾을 수 없습니다.',
+      });
+    }
 
-    // const userId = userInfo.id;
-    const userId = 'b626940c-3386-49f6-8990-a3f3184c1dc6';
+    const userId = userInfo.id;
+    // const userId = 'b626940c-3386-49f6-8990-a3f3184c1dc6';
 
     // 사용자의 그룹 ID 목록 조회
     const user = await User.findByPk(userId);
