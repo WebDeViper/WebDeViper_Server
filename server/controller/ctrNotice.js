@@ -43,30 +43,31 @@ exports.postNotice = async (req, res) => {
 exports.patchNotice = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '308814e1-9ff7-4846-b01b-64e290c40c1f';
+    // const currentUserId = '01adc61d-243c-4bf4-aec6-914b813b987c';
     const user = await User.findOne({ where: { user_id: currentUserId } });
 
-    console.log(req.query.notice_id);
+    console.log(req.params.notice_id);
     console.log(req.body);
     if (user.is_admin === 'y') {
-      if (req.query.notice_id) {
-        const result = await Notice.update(
-          { title: req.body.title, content: req.body.content },
-          {
-            where: {
-              notice_id: req.query.notice_id,
-            },
-          }
-        );
-        const data = await Notice.findOne({ where: { notice_id: req.query.notice_id } });
+      const result = await Notice.update(
+        { title: req.body.title, content: req.body.content },
+        {
+          where: {
+            notice_id: req.params.notice_id,
+          },
+        }
+      );
+      console.log(result);
+      if (result > 0) {
+        const data = await Notice.findOne({ where: { notice_id: req.params.notice_id } });
 
         // console.log('과연 찾았을까?', result);
         res.status(201).send({ status: 'success', data, message: '공지사항이 성공적으로 업데이트 되었습니다.' });
       } else {
-        res.status(403).send({ message: '공지사항 수정 권한이 없습니다.' });
+        res.status(400).send({ status: 'fail', message: '존재하지 않는 공지사항입니다.' });
       }
     } else {
-      res.status(400).send({ status: 'fail', message: '존재하지 않는 공지사항입니다.' });
+      res.status(403).send({ message: '공지사항 수정 권한이 없습니다.' });
     }
   } catch (err) {
     console.log(err);
@@ -75,12 +76,12 @@ exports.patchNotice = async (req, res) => {
 exports.deleteNotice = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '308814e1-9ff7-4846-b01b-64e290c40c1f';
+    // const currentUserId = '01adc61d-243c-4bf4-aec6-914b813b987c';
     const user = await User.findOne({ where: { user_id: currentUserId } });
-    console.log(req.query.notice_id);
+    console.log(req.params.notice_id);
     if (user.is_admin === 'y') {
-      if (req.query.notice_id) {
-        const result = await Notice.destroy({ where: { notice_id: req.query.notice_id } });
+      if (req.params.notice_id) {
+        const result = await Notice.destroy({ where: { notice_id: req.params.notice_id } });
         if (result) {
           res.status(200).send({ message: '공지사항이 성공적으로 삭제되었습니다!' });
         } else {
