@@ -12,6 +12,7 @@ const Notice = (Sequelize, DataTypes) => {
       },
       content: {
         type: DataTypes.TEXT('medium'),
+
       },
     },
     {
