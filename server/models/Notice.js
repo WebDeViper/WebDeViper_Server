@@ -11,7 +11,7 @@ const Notice = (Sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       content: {
-        type: DataTypes.STRING,
+        type: DataTypes.Text('medium'),
       },
     },
     {
