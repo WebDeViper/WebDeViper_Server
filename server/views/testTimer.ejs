@@ -1,0 +1,211 @@
+<!-- views/timer.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타이머 페이지</title>
+
+    <!-- 타이머 UI 스타일 -->
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .timer-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .timer-wrapper {
+            margin-right: 20px;
+            text-align: center;
+        }
+
+        .timer {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        button {
+            font-size: 1em;
+            padding: 10px 20px;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    
+    <!-- 국어 타이머 -->
+    <div class="timer-container">
+        <div class="timer-wrapper">
+            <div class="timer" id="koreanTimer">00:00:00</div>
+            <div class="subject">국어</div>
+        </div>
+        <div class="controls">
+            <button class="toggleButton" data-subject="korean">시작</button>
+            <button class="resetButton" data-subject="korean">리셋</button>
+        </div>
+    </div>
+
+    <!-- 수학 타이머 -->
+    <div class="timer-container">
+        <div class="timer-wrapper">
+            <div class="timer" id="mathTimer">00:00:00</div>
+            <div class="subject">수학</div>
+        </div>
+        <div class="controls">
+            <button class="toggleButton" data-subject="math">시작</button>
+            <button class="resetButton" data-subject="math">리셋</button>
+        </div>
+    </div>
+
+    <!-- 영어 타이머 -->
+    <div class="timer-container">
+        <div class="timer-wrapper">
+            <div class="timer" id="englishTimer">00:00:00</div>
+            <div class="subject">영어</div>
+        </div>
+        <div class="controls">
+            <button class="toggleButton" data-subject="english">시작</button>
+            <button class="resetButton" data-subject="english">리셋</button>
+        </div>
+    </div>
+<script>
+    const socket = io('localhost:8001/stopwatch');
+    socket.on('connect', () => {
+        console.log('Connected to the server!',socket.id);
+        
+       
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+        const timers = {
+            korean: { interval: null, running: false, elapsedTime: 0, element: document.getElementById('koreanTimer'), startButton: document.querySelector('.toggleButton[data-subject="korean"]') },
+            math: { interval: null, running: false, elapsedTime: 0, element: document.getElementById('mathTimer'), startButton: document.querySelector('.toggleButton[data-subject="math"]') },
+            english: { interval: null, running: false, elapsedTime: 0, element: document.getElementById('englishTimer'), startButton: document.querySelector('.toggleButton[data-subject="english"]') },
+        };
+
+        // 토글 및 리셋 버튼에 이벤트 리스너 추가
+        document.querySelectorAll('.toggleButton').forEach(button => {
+            button.addEventListener('click', () => {
+                const subject = button.getAttribute('data-subject');
+                toggleTimer(subject);
+            });
+        });
+
+        document.querySelectorAll('.resetButton').forEach(button => {
+            button.addEventListener('click', () => {
+                const subject = button.getAttribute('data-subject');
+                resetTimer(subject);
+            });
+        });
+
+        // 토글 처리 함수
+        function toggleTimer(subject) {
+            const timer = timers[subject];
+            if (!timer.running) {
+                startTimer(timer);
+                disableStartButtonsExcept(timer); // 해당 과목 이외의 시작 버튼 비활성화
+                timer.startButton.textContent = '일시정지'; // 해당 과목 시작 버튼 텍스트 변경
+            } else {
+                pauseTimer(timer);
+                enableStartButtons(); // 모든 시작 버튼 활성화
+                timer.startButton.textContent = '시작'; // 해당 과목 시작 버튼 텍스트 초기화
+            }
+        }
+
+        // 리셋 처리 함수
+        function resetTimer(subject) {
+            const timer = timers[subject];
+            clearInterval(timer.interval);
+            timer.elapsedTime = 0;
+            updateTimer(timer);
+            timer.running = false;
+            enableStartButtons(); // 리셋 시 모든 시작 버튼 활성화
+            timer.startButton.textContent = '시작'; // 해당 과목 시작 버튼 텍스트 초기화
+   
+
+            
+        }
+
+        // 타이머 시작 함수
+        function startTimer(timer) {
+    timer.interval = setInterval(() => updateTimer(timer), 1000);
+    timer.running = true;
+
+    const subject = timer.element.closest('.timer-container').querySelector('.subject').textContent.trim();
+    const time = timer.elapsedTime;
+    const is_running = timer.running;
+
+    // 데이터를 객체로 만들어 전송
+    socket.emit('start', { subject, time, is_running });
+
+    // 아래는 전송된 데이터를 콘솔에 출력하는 것입니다. 실제로는 필요에 따라 다른 로직으로 대체하세요.
+    console.log('스탑워치 스타트!', { subject, time, is_running });
+}
+
+        // 타이머 일시정지 함수
+        function pauseTimer(timer) {
+            clearInterval(timer.interval);
+            timer.running = false;
+            const subject = timer.element.closest('.timer-container').querySelector('.subject').textContent.trim();
+    const time = timer.elapsedTime;
+    const is_running = timer.running;
+    socket.emit('pause', { subject, time, is_running });
+    console.log('스탑워치 일시정지!', { subject, time, is_running });
+        }
+
+        // 타이머 업데이트 함수
+        function updateTimer(timer) {
+            timer.elapsedTime++;
+            timer.element.textContent = formatTime(timer.elapsedTime);
+        }
+
+        // 시간 포맷팅 함수
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secondsPart = seconds % 60;
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secondsPart).padStart(2, '0')}`;
+        }
+
+        // 모든 시작 버튼을 활성화
+        function enableStartButtons() {
+            document.querySelectorAll('.toggleButton').forEach(button => {
+                button.disabled = false;
+            });
+        }
+
+        // 해당 과목 이외의 시작 버튼을 비활성화
+        function disableStartButtonsExcept(timer) {
+            document.querySelectorAll('.toggleButton').forEach(button => {
+                if (button !== timer.startButton) {
+                    button.disabled = true;
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
+</body>
+</html>

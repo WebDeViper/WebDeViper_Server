@@ -63,6 +63,7 @@ exports.getUser = async (req, res) => {
     //유저에게 필요한  notification 전체 불러오기
     const notifications = await Notification.find({
       $or: [{ user_id: currentUserId }, { user_id: 'admin' }],
+      read_user_id: { $ne: currentUserId }, // read_user_id에 currentUserId가 없는 경우 선택
       is_read: 'n',
     });
 

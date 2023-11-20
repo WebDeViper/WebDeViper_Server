@@ -15,6 +15,7 @@ const notificationSchema = new Schema({
   user_id: { type: String },
   content: { type: String },
   content_id: { type: String },
+  read_user_id: { type: Array, default: null },
   notification_kind: {
     type: String,
     // enum: [
