@@ -5,46 +5,27 @@ const { User, Group, UserGroupRelation } = require('../models');
 exports.getGroups = async (req, res) => {
   try {
     const allGroup = await Group.findAll({});
-    const modifiedGroups = await Promise.all(
+    const combinedResult = await Promise.all(
       allGroup.map(async group => {
         // leader_id 수정
         const user = await User.findByPk(group.leader_id);
         group.leader_id = user ? user.nick_name : null;
 
-        console.log('그룹은', group);
-        return group;
-      })
-    );
-
-    // members 추가
-    const counts = await Promise.all(
-      modifiedGroups.map(async group => {
-        const membersCount = await UserGroupRelation.count({
+        const members = await UserGroupRelation.findAll({
           where: { group_id: group.group_id, request_status: 'a' },
+          attributes: ['user_id'],
         });
-        group['member_count'] = membersCount;
-        console.log('@@membersCount:', membersCount);
-        return membersCount; // 필요에 따라 결과 반환
+
+        // members 속성에는 user_id만 배열로 저장
+        const groupWithMembers = {
+          ...group.toJSON(),
+          members: members.map(member => member.user_id),
+        };
+
+        return groupWithMembers;
       })
     );
-
-    // modifiedGroups와 counts를 사용하여 필요한 작업 수행
-    // 예를 들어, 두 배열을 합쳐서 최종 결과를 만들거나 다른 작업을 수행할 수 있음
-    const combinedResult = modifiedGroups.map((group, index) => ({
-      ...group.toJSON(), // toJSON()을 추가하여 Sequelize 모델을 일반 객체로 변환
-      member_count: counts[index],
-    }));
-
-    console.log('@@@:', combinedResult);
-
-    // 그룹을 찾았는지 확인합니다.
-    if (allGroup && allGroup.length > 0) {
-      // 그룹을 찾았다면, 그룹을 JSON으로 포함하여 200 (OK) 상태 코드로 응답합니다.
-      return res.status(200).send({ isSuccess: true, data: combinedResult });
-    } else {
-      // 그룹을 찾지 못했다면
-      return res.status(200).send({ isSuccess: true, data: false, message: '그룹이 존재하지 않습니다.' });
-    }
+    return res.status(200).send({ isSuccess: true, data: combinedResult });
   } catch (err) {
     console.error(err);
 
@@ -60,11 +41,23 @@ exports.getGroupInfo = async (req, res) => {
     const GroupInfo = await Group.findOne({
       where: { group_id: targetGroup },
     });
-    console.log('조회한 그룹 정보 >>', GroupInfo);
+
+    const members = await UserGroupRelation.findAll({
+      where: { group_id: targetGroup, request_status: 'a' },
+      attributes: ['user_id'],
+    });
+
+    // members 속성에는 user_id만 배열로 저장
+    const groupWithMembers = {
+      ...GroupInfo.toJSON(),
+      members: members.map(member => member.user_id),
+    };
+
+    console.log('조회한 그룹 정보 >>', groupWithMembers);
     res.send({
       isSuccess: true,
       message: '그룹 정보 조회 성공',
-      GroupInfo,
+      groupWithMembers,
     });
   } catch (err) {
     res.status(500).send({
@@ -551,11 +544,11 @@ exports.getPendingGroups = async (req, res) => {
 
     // 그룹 정보를 로깅하고 클라이언트에 응답을 보냄
     console.log(groupInfoArray);
-    res.status(200).send({ pendingGroups: groupInfoArray });
+    res.status(200).send({ isSuccess: true, pendingGroups: groupInfoArray });
   } catch (err) {
     // 에러 발생 시 에러 메시지를 로깅하고 클라이언트에 에러 상태 코드로 응답을 보냄
     console.error(err);
-    res.status(500).send({ error: err });
+    res.status(500).send({ isSuccess: false, error: err });
   }
 };
 
