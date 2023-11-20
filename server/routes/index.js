@@ -7,6 +7,7 @@ const routerTodo = require('./routerTodo');
 const routerCategory = require('./routerCategory');
 const groupRouter = require('./routerGroup');
 const routerTimer = require('./routerTimer');
+const routerNotification = require('./routerNotification');
 // (스터디)그룹 라우터
 router.use('/api/group', groupRouter);
 
@@ -27,5 +28,8 @@ router.use('/api/auth', routerAuth);
 
 // 랭킹 라우터
 router.use('/api', routerCategory);
+
+//알림 라우터
+router.use('/api', routerNotification);
 
 module.exports = router;

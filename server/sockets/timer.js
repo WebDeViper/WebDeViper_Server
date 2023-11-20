@@ -1,9 +1,10 @@
 const timerController = require('../controller/ctrTimer');
-const { User, Timer, mongoose } = require('../schemas/schema');
+const { Timer, mongoose } = require('../schemas/schema');
 
 module.exports = function (io) {
   const timerSpace = io.of('/stopwatch'); //timer 네임스페이스 지정
   timerSpace.on('connection', async socket => {
+    console.log('소켓 아이디는?', socket.id);
     //1시간마다 소켓이벤트를 발생시킨 걸 백에서 받아서 처리
     timerSpace.on('updateTimer', async data => {
       const { userId, subject, time } = data;
@@ -21,12 +22,12 @@ module.exports = function (io) {
     });
     console.log('client is connected in stopwatch!', socket.id);
     const userId = socket.handshake.auth.userId;
-    const userGroupIds = await timerController.getUserGroups(userId);
-    const userNickName = await timerController.getUserNickName(userId);
-    console.log('내 닉네임은???', userNickName);
-    console.log('내 그룹 목록??', userGroupIds);
-    const groupMemberTimerInfo = await timerController.getGroupMemberTimerInfo(userGroupIds);
-    timerSpace.emit('welcome', userGroupIds); //배열로 유저가 속한 그룹의 objId를 보냄
+    // const userGroupIds = await timerController.getUserGroups(userId);
+    // const userNickName = await timerController.getUserNickName(userId);
+    // console.log('내 닉네임은???', userNickName);
+    // console.log('내 그룹 목록??', userGroupIds);
+    // const groupMemberTimerInfo = await timerController.getGroupMemberTimerInfo(userGroupIds);
+    timerSpace.emit('welcome'); //배열로 유저가 속한 그룹의 objId를 보냄
     // console.log('과연 유저의 그룹을 가져왔을까!!!', userGroups);
     // socket.on('welcome', async userGroupIds => {
     //   console.log('User', socket.id, 'joined groups:', userGroupIds);
@@ -61,7 +62,14 @@ module.exports = function (io) {
       socket.emit('groupJoined', groupMemberTimerInfo);
       // 이제 클라이언트가 그룹에 가입할 수 있도록 필요한 작업을 수행하세요.
     });
-
+    socket.on('start', async data => {
+      console.log('start event!!', data);
+      await timerController.updateStopWatch(data);
+    });
+    socket.on('pause', async data => {
+      console.log('pause_event!!', data);
+      await timerController.updateStopwatch(data);
+    });
     socket.on('start_watch', async data => {
       const groupMembers = await timerController.getGroupMembers(userGroupIds);
       // 여기서 data 안에 userNickname 및 roomNickname이 포함되어 있다고 가정

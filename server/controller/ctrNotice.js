@@ -82,6 +82,7 @@ exports.deleteNotice = async (req, res) => {
     if (user.is_admin === 'y') {
       if (req.params.notice_id) {
         const result = await Notice.destroy({ where: { notice_id: req.params.notice_id } });
+        await Notification.deleteOne({ notification_kind: 'new_notice', content_id: req.params.notice_id });
         if (result) {
           res.status(200).send({ message: '공지사항이 성공적으로 삭제되었습니다!' });
         } else {
