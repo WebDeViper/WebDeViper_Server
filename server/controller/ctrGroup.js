@@ -57,7 +57,7 @@ exports.getGroupInfo = async (req, res) => {
     res.send({
       isSuccess: true,
       message: '그룹 정보 조회 성공',
-      groupWithMembers,
+      groupInfo: groupWithMembers,
     });
   } catch (err) {
     res.status(500).send({
