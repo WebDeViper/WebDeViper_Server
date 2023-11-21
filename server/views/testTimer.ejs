@@ -89,11 +89,11 @@
         </div>
     </div>
 <script>
-    const socket = io('localhost:8001/stopwatch');
+    const socket = io('localhost:8001/stopwatch',{
+  auth: {userId:'01adc61d-243c-4bf4-aec6-914b813b987c'},
+});
     socket.on('connect', () => {
         console.log('Connected to the server!',socket.id);
-        
-       
     });
     document.addEventListener('DOMContentLoaded', () => {
         const timers = {

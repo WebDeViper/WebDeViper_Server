@@ -77,3 +77,70 @@ async function getTimerInfo(userId, date) {
 
   return timerInfo;
 }
+exports.updateStopWatch = async (data, userId) => {
+  console.log('ctrTimer@@', data, userId);
+  const { subject, time, is_running } = data;
+
+  const result = await Timer.findOne({
+    user_id: userId,
+    'daily.date': today, // 오늘 날짜
+  });
+
+  console.log(result);
+
+  if (!result) {
+    // Case 1: 해당 유저의 날짜에 대한 Timer 도큐먼트가 없는 경우
+    const newTimer = await Timer.create({
+      user_id: userId,
+      'daily.date': today,
+      'daily.data': [
+        {
+          title: subject,
+          timer: time, // 초기값으로 설정할 타이머 값
+        },
+      ],
+      total_time: time, // 새로운 타이머가 추가될 때 total_time에 초기값으로 설정
+    });
+    console.log(newTimer);
+  } else {
+    const existingSubjectIndex = result.daily.data.findIndex(item => item.title === subject);
+
+    if (existingSubjectIndex === -1) {
+      // Case 2: 도큐먼트는 있지만 과목은 없어서 배열에 추가해야하는 경우
+      const updatedTimer = await Timer.updateOne(
+        {
+          user_id: userId,
+          'daily.date': today,
+        },
+        {
+          $push: {
+            'daily.data': {
+              title: subject,
+              timer: time,
+            },
+          },
+          $inc: { total_time: time }, // total_time에 time 값을 더함
+        }
+      );
+
+      console.log('Timer Updated:', updatedTimer);
+    } else {
+      // Case 3: 타이머에 과목이 있어서 time을 업데이트 해야하는 경우
+      const updatedTimer = await Timer.updateOne(
+        {
+          user_id: userId,
+          'daily.data.title': subject,
+          'daily.date': today,
+        },
+        {
+          $set: {
+            'daily.data.$.timer': time,
+          },
+          $inc: { total_time: time }, // total_time에 time 값을 더함
+        }
+      );
+
+      console.log('Timer Updated:', updatedTimer);
+    }
+  }
+};

@@ -27,7 +27,7 @@ exports.postNotice = async (req, res) => {
       //notification스키마에 추가
       const newNotification = new Notification({
         user_id: 'admin',
-        content: '새로운 공지사항이 등록되었습니다.',
+        content: req.body.title,
         content_id: result.dataValues.notice_id,
         notification_kind: 'new_notice',
       });
