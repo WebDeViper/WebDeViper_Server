@@ -13,8 +13,8 @@ exports.getMyCategoryRank = async (req, res) => {
     // console.log(req.query.category);
     //토큰 값에서 현재 유저 카테고리 정보 가져오기
     // const userCategory=res.locals.decoded.userCategory
-    // const userId = res.locals.decoded.userInfo.id;
-    const userId = '02264a3f-ddfb-47c2-b7b5-d3ffaf136e99';
+    const userId = res.locals.decoded.userInfo.id;
+    // const userId = '02264a3f-ddfb-47c2-b7b5-d3ffaf136e99';
     if (!userId) {
       console.log('유저 로그인 안된상태에서 카테고리 보낼 수 있을까??');
     }
