@@ -100,9 +100,14 @@ exports.deleteNotice = async (req, res) => {
 exports.getNoticeDetail = async (req, res) => {
   try {
     const noticeDetailInfo = await Notice.findOne({ where: { notice_id: req.params.notice_id } });
-
+    const notificationInfo = await Notification.findOne({
+      content_id: req.params.notice_id,
+      notification_kind: 'new_notice',
+    });
+    console.log('@@@', notificationInfo);
+    const { notice_id, title, content, createdAt, updatedAt } = noticeDetailInfo;
     if (noticeDetailInfo) {
-      res.status(200).send(noticeDetailInfo);
+      res.status(200).send({ notice_id, title, content, createdAt, updatedAt, notification_id: notificationInfo._id });
     } else {
       res.status(400).send({ message: '존재하지 않는 공지사항입니다.' });
     }
