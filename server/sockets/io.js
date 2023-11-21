@@ -1,4 +1,4 @@
-// const userController = require('../controller/ctrChat'); // 사용자 컨트롤러를 가져옵니다.
+const userController = require('../controller/ctrChat'); // 사용자 컨트롤러를 가져옵니다.
 const { User, Group, Room, mongoose } = require('../schemas/schema');
 
 module.exports = function (io) {
@@ -7,23 +7,23 @@ module.exports = function (io) {
   chatSpace.on('connection', async socket => {
     console.log('client is connected', socket.id);
     // 사용자 로그인을 처리합니다.
-    socket.on('login', async (userName, cb) => {
-      try {
-        name = userName;
-        const user = await userController.saveUser(userName, socket.id);
-        console.log('소켓서버측 로그인 응답위한 user', user);
-        if (user) {
-          // 사용자가 성공적으로 저장된 경우 성공 응답을 보냅니다.
-          cb({ isOk: true, data: user });
-        } else {
-          // 사용자가 null인 경우 오류 응답을 보냅니다.
-          cb({ isOk: false, message: '유효하지 않은 접근입니다.' });
-        }
-      } catch (error) {
-        // 오류를 처리하고 오류 응답을 보냅니다.
-        cb({ isOk: false, error: error.message });
-      }
-    });
+    // socket.on('login', async (userName, cb) => {
+    //   try {
+    //     name = userName;
+    //     const user = await userController.saveUser(userName, socket.id);
+    //     console.log('소켓서버측 로그인 응답위한 user', user);
+    //     if (user) {
+    //       // 사용자가 성공적으로 저장된 경우 성공 응답을 보냅니다.
+    //       cb({ isOk: true, data: user });
+    //     } else {
+    //       // 사용자가 null인 경우 오류 응답을 보냅니다.
+    //       cb({ isOk: false, message: '유효하지 않은 접근입니다.' });
+    //     }
+    //   } catch (error) {
+    //     // 오류를 처리하고 오류 응답을 보냅니다.
+    //     cb({ isOk: false, error: error.message });
+    //   }
+    // });
 
     // 사용자가 채팅방에 참여하는 것을 처리합니다.
     socket.on('joinRoom', async (joinUser, rid, cb) => {

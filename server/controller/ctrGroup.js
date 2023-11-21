@@ -82,15 +82,15 @@ exports.getCategoryGroups = async (req, res) => {
       });
     }
 
-    // const userId = userInfo.id;
+    const userId = userInfo.id;
     const userCategory = userInfo.category;
 
     // const userId = 'b626940c-3386-49f6-8990-a3f3184c1dc6';
 
     // 사용자의 카테고리를 조회
-    // const user = await User.findOne({
-    //   where: { user_id: userId },
-    // });
+    const user = await User.findOne({
+      where: { user_id: userId },
+    });
     // console.log('유저의 카테고리는 -> ', user.category);
     if (user) {
       const groups = await Group.findAll({ where: { category: `${userCategory}` } });
@@ -131,27 +131,32 @@ exports.getCategoryGroupsByUser = async (req, res) => {
     }
 
     const userId = userInfo.id;
-    // const userId = 'b626940c-3386-49f6-8990-a3f3184c1dc6';
 
     // 사용자의 그룹 ID 목록 조회
     const user = await User.findByPk(userId);
     const userGroups = await user.getGroups();
     console.log(userGroups, 'user의 그룹!!');
 
-    if (userGroups) {
-      // 그룹 ID 목록을 사용하여 그룹 정보 조회
-      // groups = await Group.findAll({ where:{} });
+    const groupDetails = await Promise.all(
+      userGroups.map(async group => {
+        const leader = await User.findByPk(group.leader_id);
+        group.leader_id = leader ? leader.nick_name : null;
 
-      res.status(200).send({ isSuccess: true, code: 200, study_groups: userGroups });
-    } else {
-      console.log('해당 유저가 속한 그룹이 없습니다.');
-      // 사용자를 찾지 못한 경우에 대한 처리
-      res.status(200).send({
-        isSuccess: false,
-        code: 204,
-        message: '해당 유저가 속한 그룹이 없습니다.',
-      });
-    }
+        const members = await UserGroupRelation.findAll({
+          where: { group_id: group.group_id, request_status: 'a' },
+          attributes: ['user_id'],
+        });
+
+        const groupWithMembers = {
+          ...group.toJSON(),
+          members: members.map(member => member.user_id),
+        };
+
+        return groupWithMembers;
+      })
+    );
+
+    res.status(200).send({ isSuccess: true, code: 200, study_groups: groupDetails });
   } catch (err) {
     console.error(err);
     // 에러가 발생한 경우 서버 오류 메시지와 HTTP 상태 코드 500 반환
