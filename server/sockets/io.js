@@ -4,6 +4,8 @@ const { User, Group, Room, mongoose } = require('../schemas/schema');
 module.exports = function (io) {
   const chatSpace = io.of('/chat');
   let name; // 사용자의 이름을 저장하는 변수
+  const nickObjs = {}; //{socket.id:nick1,socket.id:nick2}
+
   function updateList() {
     io.emit('updateNicks', nickObjs); // 전체 사용자 닉네임 모음 객체 전달
   }
@@ -28,7 +30,6 @@ module.exports = function (io) {
     //   }
     // });
     //사용자 닉네임 모음 객체
-    const nickObjs = {}; //{socket.id:nick1,socket.id:nick2}
     // 사용자가 채팅방에 참여하는 것을 처리
     socket.on('joinRoom', async (joinUser, rid, cb) => {
       try {
@@ -73,22 +74,22 @@ module.exports = function (io) {
     });
 
     // 채팅 메시지를 보내는 것을 처리합니다.
-    socket.on('sendMessage', async (rid, name, whisper, receivedMessage, cb) => {
+    socket.on('sendMessage', async (rid, name, receivedMessage, cb) => {
       try {
         console.log('rid는', rid);
         const user = await userController.checkUser(name);
-        let dmSocketId = whisper.who;
+        // let dmSocketId = whisper.who;
         let receiver;
         if (user) {
-          if (whisper.who === 'all') {
-            const message = await userController.saveChat(rid, receiver, receivedMessage, user);
-            chatSpace.to(rid.toString()).emit('message', message);
-          } else {
-            receiver = nickObjs[dmSocketId];
-            const message = await userController.saveChat(rid, receiver, receivedMessage, user);
-            chatSpace.to(dmSocketId).emit('dm', message);
-            chatSpace.to(socket.id).emit('dm', message);
-          }
+          // if (whisper.who === 'all') {
+          const message = await userController.saveChat(rid, receiver, receivedMessage, user);
+          chatSpace.to(rid.toString()).emit('message', message);
+          // } else {
+          //   receiver = nickObjs[dmSocketId];
+          //   const message = await userController.saveChat(rid, receiver, receivedMessage, user);
+          //   chatSpace.to(dmSocketId).emit('dm', message);
+          //   chatSpace.to(socket.id).emit('dm', message);
+          // }
           return cb({ isOk: true });
         }
       } catch (error) {
