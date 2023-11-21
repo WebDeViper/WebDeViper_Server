@@ -133,6 +133,7 @@ exports.saveChat = async (rid, receiver, message, user) => {
         room_id: rid,
       });
       await newMessage.save();
+      return newMessage;
     } else {
       const receiveId = await User.findOne({
         where: { nick_name: receiver },
@@ -146,13 +147,13 @@ exports.saveChat = async (rid, receiver, message, user) => {
         room_id: rid,
       });
       await newMessage.save();
+      return newMessage;
     }
 
-    const msg = {
-      chat: message,
-      user: { id: null, name: user.nick_name },
-    };
-    return msg;
+    // const msg = {
+    //   chat: message,
+    //   user: { id: null, name: user.nick_name },
+    // };
   } catch (err) {
     console.error(err);
   }
