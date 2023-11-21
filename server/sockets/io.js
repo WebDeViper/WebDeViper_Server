@@ -82,6 +82,7 @@ module.exports = function (io) {
         if (user) {
           if (whisper.who === 'all') {
             const message = await userController.saveChat(rid, receiver, receivedMessage, user);
+            // const chatLog = await userController.getChatLog(rid);
             chatSpace.to(rid.toString()).emit('message', message);
           } else {
             receiver = nickObjs[dmSocketId];
