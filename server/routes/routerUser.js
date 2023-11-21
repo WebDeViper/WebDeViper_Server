@@ -63,6 +63,6 @@ router.post(
 
 // 받은 유저아이디로 유저정보를 반환하는 API
 // api/user/:userId
-router.get('/:userId', verifyJwtToken, controllerUser.getUserInfo);
+router.get('/:userId', controllerUser.getUserInfo);
 
 module.exports = router;

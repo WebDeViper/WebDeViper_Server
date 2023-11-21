@@ -5,13 +5,17 @@ exports.patchNoticeNotification = async (req, res) => {
     const currentUserId = res.locals.decoded.userInfo.id;
     // const currentUserId = '5f612ac1-1c96-4b6a-90dc-0ccaca5c4787';
 
+
     const result = await Notification.updateOne({ _id: req.body._id }, { $addToSet: { read_user_id: currentUserId } });
+
 
     console.log(result);
     if (result.modifiedCount === 1) {
       const notificationInfo = await Notification.findOne({
+
         _id: req.body._id,
         // notification_kind: req.body.notification_kind,
+
       });
       console.log('업데이트 성공: 값이 배열에 추가되었습니다.', notificationInfo._id);
       res.status(200).send({ isSuccess: true, _id: notificationInfo._id });
