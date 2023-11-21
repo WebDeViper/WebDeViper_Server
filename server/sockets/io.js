@@ -81,6 +81,7 @@ module.exports = function (io) {
         // let dmSocketId = whisper.who;
         let receiver;
         if (user) {
+
           // if (whisper.who === 'all') {
           const message = await userController.saveChat(rid, receiver, receivedMessage, user);
           chatSpace.to(rid.toString()).emit('message', message);
@@ -90,6 +91,7 @@ module.exports = function (io) {
           //   chatSpace.to(dmSocketId).emit('dm', message);
           //   chatSpace.to(socket.id).emit('dm', message);
           // }
+
           return cb({ isOk: true });
         }
       } catch (error) {
