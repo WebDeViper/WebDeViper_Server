@@ -71,7 +71,7 @@ exports.deleteUser = async socketId => {
 exports.checkUser = async joinUser => {
   try {
     console.log('check User함수에서 nick_name은', joinUser);
-    const user = await User.findOne({ nick_name: joinUser });
+    const user = await User.findOne({ where: { nick_name: joinUser } });
     if (!user) throw new Error('사용자를 찾을 수 없음');
     console.log(user);
     return user;
@@ -83,8 +83,9 @@ exports.checkUser = async joinUser => {
 // 사용자가 채팅방에 참여하는 함수
 exports.joinRoom = async (roomId, user) => {
   try {
-    console.log(roomId);
-    const room = await Group.findByPK(roomId);
+    console.log('roomId는 @@@@@@', roomId);
+    console.log('user는 @@@@@@', user);
+    const room = await Group.findByPk(roomId);
     if (!room) {
       throw new Error('해당 방이 없습니다.');
     }
@@ -93,7 +94,7 @@ exports.joinRoom = async (roomId, user) => {
     });
 
     if (!isMember) {
-      console.log('해당 그룹의 유저가 아닙니다.');
+      console.log('해당 그룹의 유저가 아닙니다.', user);
       return false;
     } else {
       return true;
