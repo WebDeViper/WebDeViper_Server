@@ -42,7 +42,7 @@ app.use('/', indexRouter);
 app.get('/client', (req, res) => {
   res.render('client');
 });
-app.get('/timer', (req, res) => {
+app.get('/stopwatch', (req, res) => {
   res.render('testTimer');
 });
 
