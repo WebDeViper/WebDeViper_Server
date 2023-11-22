@@ -1,4 +1,5 @@
 const { User, Group, Timer, mongoose } = require('../schemas/schema');
+
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 exports.getTimerByUser = async (req, res) => {
