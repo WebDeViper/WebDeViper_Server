@@ -1,4 +1,5 @@
 const { User, Group, Timer, mongoose } = require('../schemas/schema');
+
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 exports.getTimerByUser = async (req, res) => {
@@ -92,6 +93,7 @@ exports.updateStopWatch = async (data, userId) => {
     // Case 1: 해당 유저의 날짜에 대한 Timer 도큐먼트가 없는 경우
     const newTimer = await Timer.create({
       user_id: userId,
+      is_running,
       'daily.date': today,
       'daily.data': [
         {

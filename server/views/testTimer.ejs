@@ -95,6 +95,7 @@
     socket.on('connect', () => {
         console.log('Connected to the server!',socket.id);
     });
+    socket.on('On the hour',()=>console.log('정각이다!!'))
     document.addEventListener('DOMContentLoaded', () => {
         const timers = {
             korean: { interval: null, running: false, elapsedTime: 0, element: document.getElementById('koreanTimer'), startButton: document.querySelector('.toggleButton[data-subject="korean"]') },
