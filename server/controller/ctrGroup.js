@@ -6,6 +6,7 @@ const { Op } = require('sequelize');
 
 exports.getGroups = async (req, res) => {
   try {
+    let isEnd;
     const { groupId } = req.params;
 
     let allGroups;
@@ -18,7 +19,7 @@ exports.getGroups = async (req, res) => {
             createdAt: { [Op.gt]: targetGroup.createdAt },
           },
           order: [['createdAt']],
-          limit: 20,
+          limit: 21,
         });
       } else {
         console.log('해당 그룹아이디를 가진 그룹이 존재하지 않습니다. ');
@@ -28,8 +29,15 @@ exports.getGroups = async (req, res) => {
       }
     } else {
       // groupId가 없는 경우
-      allGroups = await Group.findAll({ order: [['createdAt']], limit: 20 });
+      allGroups = await Group.findAll({ order: [['createdAt']], limit: 21 });
     }
+    if (allGroups.length <= 20) {
+      console.log('마지막 그룹 배열입니다.');
+      isEnd = true;
+    } else {
+      isEnd = false;
+    }
+    allGroups.pop();
     const combinedResult = await Promise.all(
       allGroups.map(async group => {
         // leader_id 수정
@@ -50,7 +58,7 @@ exports.getGroups = async (req, res) => {
         return groupWithMembers;
       })
     );
-    return res.status(200).send({ isSuccess: true, data: combinedResult });
+    return res.status(200).send({ isSuccess: true, data: combinedResult, isEnd });
   } catch (err) {
     console.error(err);
 
