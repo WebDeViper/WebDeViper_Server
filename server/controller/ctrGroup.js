@@ -1,12 +1,37 @@
 const { Notification } = require('../schemas/schema');
 const { User, Group, UserGroupRelation } = require('../models');
+const { Op } = require('sequelize');
+
 //모든 그룹 조회
 
 exports.getGroups = async (req, res) => {
   try {
-    const allGroup = await Group.findAll({});
+    const { groupId } = req.params;
+
+    let allGroups;
+    if (groupId) {
+      const targetGroup = await Group.findByPk(groupId);
+
+      if (targetGroup) {
+        allGroups = await Group.findAll({
+          where: {
+            createdAt: { [Op.gt]: targetGroup.createdAt },
+          },
+          order: [['createdAt']],
+          limit: 20,
+        });
+      } else {
+        console.log('해당 그룹아이디를 가진 그룹이 존재하지 않습니다. ');
+        return res
+          .status(500)
+          .send({ isSuccess: false, message: '해당 그룹아이디를 가진 그룹이 존재하지 않습니다.', error: err });
+      }
+    } else {
+      // groupId가 없는 경우
+      allGroups = await Group.findAll({ order: [['createdAt']], limit: 20 });
+    }
     const combinedResult = await Promise.all(
-      allGroup.map(async group => {
+      allGroups.map(async group => {
         // leader_id 수정
         const user = await User.findByPk(group.leader_id);
         group.leader_id = user ? user.nick_name : null;
