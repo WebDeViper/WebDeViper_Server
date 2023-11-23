@@ -7,7 +7,7 @@ const { groupImgUploader } = require('../middlewares/multer/multerConfig'); // �
 
 //현재 그룹조회
 // router.get('/all', verifyJwtToken, controller.getGroups);
-router.get('/all', controller.getGroups);
+router.get('/all/:groupId?', controller.getGroups);
 //현재 로그인한 유저의 카테고리내에서 그룹조회
 router.get('/studyGroups', verifyJwtToken, controller.getCategoryGroups);
 // router.get('/studyGroups', controller.getCategoryGroups);
