@@ -1,20 +1,50 @@
 const notificationController = require('../controller/ctrNotice');
 const { Notification } = require('../schemas/schema');
 module.exports = function (io) {
-  //Notification 등록시 소켓 이벤트 발생
-  const notificationChangeStream = Notification.watch([], { fullDocument: 'updateLookup' });
-
-  // $match stage를 사용하여 notification_kind가 'new_notification'인 변경 사항만 감지
-  const matchStage = {
+  // Notification 등록시 소켓 이벤트 발생
+  const newNoticeNotification = {
     $match: {
       'fullDocument.notification_kind': 'new_notice',
       operationType: 'insert',
     },
   };
-  notificationChangeStream.on('change', change => {
+  const notificationChangeStreamOfNotice = Notification.watch([newNoticeNotification], {
+    fullDocument: 'updateLookup',
+  });
+  notificationChangeStreamOfNotice.on('change', change => {
     if (change.operationType === 'insert') {
       const newNotification = change.fullDocument;
       io.emit('newNotice', newNotification);
+    }
+  });
+  const newGroupRequest = {
+    $match: {
+      'fullDocument.notification_kind': 'group_request',
+      operationType: 'insert',
+    },
+  };
+  const notificationChangeStreamOfGroupRequest = Notification.watch([newGroupRequest], {
+    fullDocument: 'updateLookup',
+  });
+  notificationChangeStreamOfGroupRequest.on('change', change => {
+    if (change.operationType === 'insert') {
+      const newNotification = change.fullDocument;
+      io.emit('newGroupRequest', newNotification); //리더이게만 보내는 로직 추가해야 함
+    }
+  });
+  const groupApprove = {
+    $match: {
+      'fullDocument.notification_kind': 'group_approve',
+      operationType: 'insert',
+    },
+  };
+  const notificationChangeStreamOfGroupApprove = Notification.watch([groupApprove], {
+    fullDocument: 'updateLookup',
+  });
+  notificationChangeStreamOfGroupApprove.on('change', change => {
+    if (change.operationType === 'insert') {
+      const newNotification = change.fullDocument;
+      io.emit('newGroupRequest', newNotification); //그룹승인받은 유저에게만 보내는 로직 추가해야 함
     }
   });
 };
