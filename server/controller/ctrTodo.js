@@ -60,7 +60,8 @@ exports.patchTodo = async (req, res) => {
       return;
     }
 
-    const { todo_id } = req.query;
+    // const { todo_id } = req.query;
+    const { todo_id } = req.params;
     const { done, start_time, end_time, content, title } = req.body;
 
     const startTime = new Date(start_time);
@@ -105,7 +106,7 @@ exports.deleteTodo = async (req, res) => {
 
     const deletedRowCount = await Todo.destroy({
       where: {
-        todo_id: req.query.todo_id,
+        todo_id: req.params.todo_id,
         user_id: currentUserId,
       },
     });
