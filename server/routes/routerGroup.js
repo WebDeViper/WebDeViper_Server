@@ -6,26 +6,27 @@ const multer = require('multer');
 const { groupImgUploader } = require('../middlewares/multer/multerConfig'); // 그룹이미지 업로드임
 
 //현재 그룹조회
-// router.get('/all', verifyJwtToken, controller.getGroups);
 router.get('/all/:groupId?', controller.getGroups);
+
 //현재 로그인한 유저의 카테고리내에서 그룹조회
 router.get('/studyGroups', verifyJwtToken, controller.getCategoryGroups);
-// router.get('/studyGroups', controller.getCategoryGroups);
+
 // 현재 로그인한 유저가 속한 스터디 그룹을 조회
 router.get('/studyGroups/users', verifyJwtToken, controller.getCategoryGroupsByUser);
 
-// router.get('/studyGroups/users', controller.getCategoryGroupsByUser);
+// 현재 로그인한 유저의 join_request 조회
+router.get('/getJoinRequest', verifyJwtToken, controller.getJoinRequest);
+
 // 현재 로그인한 유저의 pending_group 조회
 router.get('/pendingGroups', verifyJwtToken, controller.getPendingGroups);
-// router.get('/pendingGroups', controller.getPendingGroups);
+
 //그룹 요청 기능
 router.post('/studyGroup/:groupId/join', verifyJwtToken, controller.joinGroupRequest);
-// router.post('/studyGroup/:groupId/join', controller.joinGroupRequest);
+
 //그룹 요청 수락 기능
-// router.post('/studyGroup/:groupId/:requestId/requests/accept', verifyJwtToken, controller.acceptGroupMembershipRequest);
 router.post('/studyGroup/:groupId/:requestId/requests/accept', controller.acceptGroupMembershipRequest);
+
 //그룹 요청 거절 기능
-// router.post('/studyGroup/:groupId/:requestId/requests/reject', verifyJwtToken, controller.rejectGroupMembershipRequest);
 router.post('/studyGroup/:groupId/:requestId/requests/reject', controller.rejectGroupMembershipRequest);
 
 //그룹 생성 기능
@@ -51,7 +52,7 @@ router.post(
   },
   controller.postGroupInformation
 );
-// router.post('/studyGroup', controller.postGroupInformation);
+
 //그룹 옵션 수정 기능
 router.patch(
   '/studyGroup/:groupId',
@@ -75,20 +76,19 @@ router.patch(
   },
   controller.patchGroupInformation
 );
-// router.patch('/studyGroup/:groupId', controller.patchGroupInformation);
+
 //그룹 탈퇴 기능
 router.delete('/studyGroup/:groupId', verifyJwtToken, controller.deleteGroup);
-// router.delete('/studyGroup/:groupId', controller.deleteGroup);
+
 //그룹장이 그룹을 삭제했을 때
 router.delete('/studyGroup/:groupId/members', controller.removeAllMembersFromGroup);
+
 //그룹 가입 요청 취소 기능
 router.delete('/studyGroup/:groupId/joinRequests', verifyJwtToken, controller.cancelJoinRequest);
-// router.delete('/studyGroup/:groupId/joinRequests', controller.cancelJoinRequest);
 
 router.get('/rooms', controller.getAllRooms);
 
 // 그룹 아이디를 받아 그룹 정보 조회/응답
 // api/group/find/:groupId
-// router.get('/find/:groupId', verifyJwtToken, controller.getGroupInfo);
 router.get('/find/:groupId', controller.getGroupInfo);
 module.exports = router;

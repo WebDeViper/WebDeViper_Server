@@ -552,15 +552,76 @@ exports.getAllRooms = async (req, res) => {
     return res.status(500).send({ isSuccess: false, error: err });
   }
 };
+exports.getJoinRequest = async (req, res) => {
+  try {
+    const userInfo = res.locals.decoded.userInfo;
+    const userId = userInfo.id;
+    // 해당 사용자가 리더인 그룹 목록 가져오기
+    const groups = await Group.findAll({
+      where: { leader_id: userId },
+      attributes: ['group_id'],
+    });
+
+    let responseSent = false;
+    // 각 그룹에 대해 실행
+    for (const group of groups) {
+      // 해당 그룹의 대기 중인 가입 요청 목록 가져오기
+      const joinRequests = await UserGroupRelation.findAll({
+        where: { group_id: group.group_id, request_status: 'w' },
+      });
+      // 대기 중인 가입 요청이 있을 경우
+      if (joinRequests.length !== 0) {
+        console.log('joinRequests @@ -> ', joinRequests);
+        // 대기 중인 가입 요청 정보를 저장할 배열
+        const userIdNickNames = [];
+        // 각 가입 요청에 대해 실행
+        for (const user of joinRequests) {
+          // 가입 요청한 사용자의 닉네임 가져오기
+          const userNickName = await User.findByPk(user.user_id);
+          // 해당 그룹의 정보 가져오기
+          const groupInfo = await Group.findOne({ where: { group_id: user.group_id } });
+
+          // 그룹 정보 업데이트 (leader_id를 닉네임으로 변경) ->  해당 그룹의 리더의 닉네임은 로그인한 유저의 닉네임
+          groupInfo.leader_id = userInfo.nickName;
+
+          // 각 가입 요청 정보를 userIdNickNames 배열에 추가
+          userIdNickNames.push({
+            ...groupInfo.dataValues,
+            nickName: userNickName ? userNickName.nick_name : null,
+          });
+        }
+        // 해당 그룹의 가입 승인된 멤버 목록 가져오기
+        const members = await UserGroupRelation.findAll({
+          where: { group_id: group.group_id, request_status: 'a' },
+          attributes: ['user_id'],
+        });
+
+        const groupWithMembers = {
+          joinRequests: await Promise.all(userIdNickNames),
+          members: members.map(member => member.user_id),
+        };
+
+        console.log('@@@@@groupWithMembers ', groupWithMembers);
+        res.status(200).send({ isSuccess: true, data: groupWithMembers });
+        responseSent = true;
+        break;
+      }
+    }
+    // 대기 중인 가입 요청이 하나도 없을 경우
+    if (!responseSent) {
+      res.status(200).send({ isSuccess: true, data: '대기중인 그룹요청이 없습니다.' });
+    }
+  } catch (err) {
+    console.error('가입 요청을 가져오는 중 오류 발생:', err);
+    res.status(500).send({ isSuccess: false, error: err.message });
+  }
+};
 
 exports.getPendingGroups = async (req, res) => {
   try {
     // 현재 사용자 정보를 추출
     const userInfo = res.locals.decoded.userInfo;
     const userId = userInfo.id;
-
-    // 사용자 정보를 조회
-    // const userId = '1e363d6d-0e7e-4cd0-b088-1a66f39b99e0';
 
     // 사용자의 "pending_groups" 배열을 가져옴
     const pendingGroups = await UserGroupRelation.findAll({
