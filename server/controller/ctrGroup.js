@@ -597,12 +597,12 @@ exports.getJoinRequest = async (req, res) => {
         });
 
         const groupWithMembers = {
-          joinRequests: await Promise.all(userIdNickNames),
+          data: await Promise.all(userIdNickNames),
           members: members.map(member => member.user_id),
         };
 
         console.log('@@@@@groupWithMembers ', groupWithMembers);
-        res.status(200).send({ isSuccess: true, data: groupWithMembers });
+        res.status(200).send({ isSuccess: true, groupWithMembers });
         responseSent = true;
         break;
       }
