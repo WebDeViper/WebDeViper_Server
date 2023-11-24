@@ -38,7 +38,7 @@ const User = (Sequelize, DataTypes) => {
         defaultValue: '/api/static/profileImg/defaultProfile.jpeg',
       },
       password: DataTypes.STRING,
-      socket_id: DataTypes.STRING,
+      socket_id: { type: DataTypes.STRING, defaultValue: null },
     },
     {
       underscored: true, // 스네이크 케이스
