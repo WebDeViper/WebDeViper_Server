@@ -156,10 +156,10 @@
     const is_running = timer.running;
 
     // 데이터를 객체로 만들어 전송
-    socket.emit('start', { subject, time, is_running });
+    socket.emit('start', { subject, time, is_running:'y' });
 
     // 아래는 전송된 데이터를 콘솔에 출력하는 것입니다. 실제로는 필요에 따라 다른 로직으로 대체하세요.
-    console.log('스탑워치 스타트!', { subject, time, is_running });
+    console.log('스탑워치 스타트!', { subject, time, is_running:'y' });
 }
 
         // 타이머 일시정지 함수
@@ -169,8 +169,8 @@
             const subject = timer.element.closest('.timer-container').querySelector('.subject').textContent.trim();
     const time = timer.elapsedTime;
     const is_running = timer.running;
-    socket.emit('pause', { subject, time, is_running });
-    console.log('스탑워치 일시정지!', { subject, time, is_running });
+    socket.emit('pause', { subject, time, is_running:'n' });
+    console.log('스탑워치 일시정지!', { subject, time, is_running:'n' });
         }
 
         // 타이머 업데이트 함수

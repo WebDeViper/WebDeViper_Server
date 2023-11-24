@@ -49,7 +49,7 @@ exports.getTimerByUser = async (req, res) => {
           const memberInfo = {
             _id: member._id,
             nick_name: member.nick_name,
-            is_running: timerInfo ? timerInfo.is_running : false,
+            is_running: timerInfo ? timerInfo.is_running : 'y',
             total_time: timerInfo ? timerInfo.total_time : 0,
             // This is where you can extract the member's total_time
             // Modify this part based on your schema structure
@@ -108,7 +108,7 @@ exports.updateStopWatch = async (data, userId) => {
     const existingSubjectIndex = result.daily.data.findIndex(item => item.title === subject);
 
     if (existingSubjectIndex === -1) {
-      // Case 2: 도큐먼트는 있지만 과목은 없어서 배열에 추가해야하는 경우
+      // Case 2: Document exists but the subject is not present in the array
       const updatedTimer = await Timer.updateOne(
         {
           user_id: userId,
@@ -121,13 +121,14 @@ exports.updateStopWatch = async (data, userId) => {
               timer: time,
             },
           },
-          $inc: { total_time: time }, // total_time에 time 값을 더함
+          $inc: { total_time: time },
         }
       );
 
       console.log('Timer Updated:', updatedTimer);
     } else {
-      // Case 3: 타이머에 과목이 있어서 time을 업데이트 해야하는 경우
+      const oldTimerValue = result.daily.data[existingSubjectIndex].timer;
+
       const updatedTimer = await Timer.updateOne(
         {
           user_id: userId,
@@ -138,7 +139,7 @@ exports.updateStopWatch = async (data, userId) => {
           $set: {
             'daily.data.$.timer': time,
           },
-          $inc: { total_time: time }, // total_time에 time 값을 더함
+          $inc: { total_time: time - oldTimerValue },
         }
       );
 
