@@ -2,14 +2,57 @@
 
 ### 학습자를 위한 웹 서비스로 스탑워치/타이머 기능을 통해 실시간으로 공부시간을 기록하고, 가입한 그룹 내에 공부량을 시각화하여 보여주는 웹사이트 구현 프로젝트 (10/19 - 11/10)
 
+
+## 시작 가이드
+
+### Requirements
+
+- [Node.js 20.7.0](https://www.npmjs.com/package/node/v/20.7.0)
+- [Npm 10.2.0](https://www.npmjs.com/package/npm/v/10.2.0)
+
+### Installation
+
+#### Front-End
+
+```bash
+$ git clone https://github.com/WebDeViper/WebDeViper_Client.git
+```
+
+```
+$ npm i
+$ npm run build
+$ npm run dev
+```
+
+#### Back-End
+
+```bash
+$ git clone https://github.com/WebDeViper/WebDeViper_Server.git
+```
+
+```
+$ npm i
+$ node app
+```
+
 ## 팀 소개
-|팀원명💁‍♂️|역할(파일명 기준)|
+### 🧑‍🤝‍🧑 팀 구성
+
+| 프론트 개발                                                                           | 프론트 개발                                                                           | 백엔드 개발                                                                           | 백엔드 개발                                                                           | 백엔드 개발                                                                           |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| <img src="./readme/img/profile1.jpeg" width="100px" height="100px" alt="문석민"> | <img src="./readme/img/profile1.jpeg" width="100px" height="100px" alt="김태훈"> | <img src="./readme/img/profile1.jpeg" width="100px" height="100px" alt="홍민영"> | <img src="./readme/img/profile1.jpeg" width="100px" height="100px" alt="김세은"> | <img src="./readme/img/profile1.jpeg" width="100px" height="100px" alt="김태균"> |
+| [@seokmin](https://github.com/msm0748)                                                 | [@taehoon](https://github.com/hoonsdev)                                               | [@minyeong](https://github.com/HongMinYeong)                                          | [@seeun](https://github.com/seeun0210)                                                | [@taegyun](https://github.com/hotdog7778)                                             |
+| 문석민                                                                                | 김태훈                                                                                | 홍민영                                                                                | 김세은                                                                                | 김태균                                                                                |
+
+&nbsp;
+|팀원명 💁‍♂️💁‍♂️|역할(파일명 기준)|
 |:--:|:--|
-[김태훈](https://github.com/hoonsdev)| Front) ChatPage, CreateGroupPage, DetailGroupPage, MainPage, NoticePage, StudyPage, 와이어프레임설계, 발표|
-|[문석민](https://github.com/msm0748)| Front) AlarmPage, CreateNoticePage, DetailNoticePage, RankingPage, SignupPage, 와이어프레임설계 |
-|[김세은](https://github.com/seeun0210)| Back) CategoryRank(카테고리별/개인별 랭크 기능), Notice(공지사항 CRUD), Notification(알림 기능), Timer(타이머 기능), Todo(todo CRUD), models, schemas, DB설계, ppt, 발표|
-|[김태균](https://github.com/hotdog7778)| Back) Auth(토큰 기반 인증 기능), User(소셜 로그인 기능), models, schemas, 배포, DB설계, ppt, 발표 |
-|[홍민영](https://github.com/HongMinYeong)| Back) Chat(그룹별 채팅 기능), Group(Group 관련 CRUD), models, schemas, DB설계, ppt     |
+[김태훈 ](https://github.com/hoonsdev)| Front) ChatPage, CreateGroupPage, DetailGroupPage, MainPage, NoticePage, StudyPage, 와이어프레임설계, 발표|
+|[문석민 ](https://github.com/msm0748)| Front) AlarmPage, CreateNoticePage, DetailNoticePage, RankingPage, SignupPage, 와이어프레임설계 |
+|[김세은 ](https://github.com/seeun0210)| Back) CategoryRank(카테고리별/개인별 랭크 기능), Notice(공지사항 CRUD), Notification(알림 기능), Timer(타이머 기능), Todo(todo CRUD), models, schemas, DB설계, ppt, 발표|
+|[김태균 ](https://github.com/hotdog7778)| Back) Auth(토큰 기반 인증 기능), User(소셜 로그인 기능), models, schemas, 배포, DB설계, ppt, 발표 |
+|[홍민영 ](https://github.com/HongMinYeong)| Back) Chat(그룹별 채팅 기능), Group(Group 관련 CRUD), models, schemas, DB설계, ppt     |
+
 
 ### 팀원별 역할
 사진으로 넣을 예정 
