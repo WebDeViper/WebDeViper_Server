@@ -15,6 +15,12 @@
             socket.on('newNotice',async(data)=>{
                 console.log('공지사항 등록 알람!!',data)
             })
+            socket.on('newGroupRequest',async(data)=>{
+                console.log('그룹 요청 알림!!',data)
+            })
+            socket.on('newGroupApprove',async(data)=>{
+                console.log('그룹 수락 알림!!',data)
+            })
         });
     </script>
 </body>

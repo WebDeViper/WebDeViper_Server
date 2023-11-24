@@ -10,7 +10,7 @@ module.exports = function (io) {
     io.emit('updateNicks', nickObjs); // 전체 사용자 닉네임 모음 객체 전달
   }
   chatSpace.on('connection', async socket => {
-    console.log('client is connected', socket.id);
+    console.log('client is connected in chat!!', socket.id);
     // 사용자 로그인을 처리합니다.
     // socket.on('login', async (userName, cb) => {
     //   try {
@@ -81,7 +81,6 @@ module.exports = function (io) {
         // let dmSocketId = whisper.who;
         let receiver;
         if (user) {
-
           // if (whisper.who === 'all') {
           const message = await userController.saveChat(rid, receiver, receivedMessage, user);
           chatSpace.to(rid.toString()).emit('message', message);
