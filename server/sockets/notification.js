@@ -2,7 +2,7 @@ const notificationController = require('../controller/ctrNotice');
 const { Notification } = require('../schemas/schema');
 const { verifyJwtToken } = require('../middlewares/jwt/jwt');
 const jwt = require('jsonwebtoken');
-const { User, Sequelize } = require('../models');
+const { User, Group, UserGroupRelation, Sequelize } = require('../models');
 
 module.exports = function (io) {
   io.on('connection', socket => {
@@ -66,9 +66,24 @@ module.exports = function (io) {
       const newNotification = change.fullDocument;
       console.log('%%%%%%그룹요청%%%%%%', newNotification);
       const leaderId = newNotification.user_id;
+      const groupId = newNotification.group_id;
       const leaderInfo = await User.findOne({ where: { user_id: leaderId } });
-      console.log(leaderInfo, '<<<<<<<<<');
+      const requestUser = await UserGroupRelation.findAll({
+        where: { group_id: groupId, request_status: 'w' },
+        order: [['updatedAt', 'DESC']], // updatedAt 기준으로 내림차순 정렬
+        limit: 1, // 결과를 1개로 제한
+      });
+      const requestUserId = requestUser[0].dataValues.user_id;
+      console.log('대기중인 유저###', requestUserId);
+      const requestUserInfo = await User.findOne({ where: { user_id: requestUserId } });
+
+      // console.log(leaderInfo, '<<<<<<<<<');
       const leaderSocketId = leaderInfo.dataValues.socket_id;
+      newNotification.user_id = requestUserInfo.dataValues.nick_name;
+
+      console.log('새로운 그룹요청 정보!!!', newNotification);
+      // console.log('#######',newNotificaiton.user_id)
+
       io.to(leaderSocketId).emit('newGroupRequest', newNotification); //리더이게만 보내는 로직 추가해야 함
     }
   });
