@@ -3,7 +3,7 @@ const { generateJwtToken, generateRefreshToken } = require('../utils/jwt');
 const { hashPassword, comparePassword } = require('../utils/bcrypt');
 const { Notification, mongoose } = require('../schemas/schema');
 // 시퀄라이즈 모듈 불러오기
-const { User, Sequelize } = require('../models/index');
+const { User, UserGroupRelation, Sequelize } = require('../models/index');
 const { Op } = require('sequelize');
 
 // 로컬 유저 이메일 중복 체크(회원가입시)
@@ -57,17 +57,34 @@ exports.getUserInfo = async (req, res) => {
 exports.getUser = async (req, res) => {
   try {
     const currentUserId = res.locals.decoded.userInfo.id;
-    // const currentUserId = '01adc61d-243c-4bf4-aec6-914b813b987c';
     const exUser = await User.findOne({ where: { user_id: currentUserId } });
-    console.log(exUser);
-    //유저에게 필요한  notification 전체 불러오기
+
+    // 유저에게 필요한 notification 전체 불러오기
     const notifications = await Notification.find({
       $or: [{ user_id: currentUserId }, { user_id: 'admin' }],
-      read_user_id: { $ne: currentUserId }, // read_user_id에 currentUserId가 없는 경우 선택
+      read_user_id: { $ne: currentUserId },
       is_read: 'n',
     });
 
-    console.log(notifications);
+    // 'group_request'인 경우 user_id를 변경
+    const modifiedNotifications = await Promise.all(
+      notifications.map(async notification => {
+        if (notification.notification_kind === 'group_request') {
+          const requestUser = await UserGroupRelation.findAll({
+            where: { group_id: notification.group_id, request_status: 'w' },
+            order: [['updatedAt', 'DESC']],
+            limit: 1,
+          });
+          const requestUserId = requestUser[0]?.dataValues.user_id;
+          const requestUserInfo = await User.findOne({ where: { user_id: requestUserId } });
+
+          notification.user_id = requestUserInfo?.dataValues.nick_name;
+        }
+        return notification;
+      })
+    );
+
+    console.log(modifiedNotifications);
     res.status(200).send({
       userInfo: {
         id: exUser.user_id,
@@ -77,10 +94,11 @@ exports.getUser = async (req, res) => {
         email: exUser.email,
         statusMsg: exUser.status_message,
         isServiceAdmin: exUser.is_admin,
-        alarmMessage: notifications,
+        alarmMessage: modifiedNotifications,
       },
     });
   } catch (err) {
+    console.error(err);
     res.status(500).send({
       code: 500,
       msg: 'SERVER ERROR',
