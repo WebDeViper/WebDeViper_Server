@@ -35,6 +35,7 @@ module.exports = function (io) {
     await User.update({ socket_id: socketId }, { where: { user_id: userId } });
     console.log(`사용자 ${userId}의 소켓 아이디를 ${socketId}로 업데이트합니다.`);
   };
+
   // Notification 등록시 소켓 이벤트 발생
   const newNoticeNotification = {
     $match: {
@@ -60,10 +61,15 @@ module.exports = function (io) {
   const notificationChangeStreamOfGroupRequest = Notification.watch([newGroupRequest], {
     fullDocument: 'updateLookup',
   });
-  notificationChangeStreamOfGroupRequest.on('change', change => {
+  notificationChangeStreamOfGroupRequest.on('change', async change => {
     if (change.operationType === 'insert') {
       const newNotification = change.fullDocument;
-      io.emit('newGroupRequest', newNotification); //리더이게만 보내는 로직 추가해야 함
+      console.log('%%%%%%그룹요청%%%%%%', newNotification);
+      const leaderId = newNotification.user_id;
+      const leaderInfo = await User.findOne({ where: { user_id: leaderId } });
+      console.log(leaderInfo, '<<<<<<<<<');
+      const leaderSocketId = leaderInfo.dataValues.socket_id;
+      io.to(leaderSocketId).emit('newGroupRequest', newNotification); //리더이게만 보내는 로직 추가해야 함
     }
   });
   const groupApprove = {
@@ -75,10 +81,13 @@ module.exports = function (io) {
   const notificationChangeStreamOfGroupApprove = Notification.watch([groupApprove], {
     fullDocument: 'updateLookup',
   });
-  notificationChangeStreamOfGroupApprove.on('change', change => {
+  notificationChangeStreamOfGroupApprove.on('change', async change => {
     if (change.operationType === 'insert') {
       const newNotification = change.fullDocument;
-      io.emit('newGroupApprove', newNotification); //그룹승인받은 유저에게만 보내는 로직 추가해야 함
+      const requestId = newNotification.user_id;
+      const requestUserInfo = await User.findOne({ where: { user_id: requestId } });
+      const requestUserSocketId = requestUserInfo.dataValues.socket_id;
+      io.to(requestUserSocketId).emit('newGroupApprove', newNotification); //그룹승인받은 유저에게만 보내는 로직 추가해야 함
     }
   });
 };
