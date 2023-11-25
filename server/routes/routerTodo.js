@@ -9,7 +9,7 @@ router.patch('/todo_lists/:todo_id', verifyJwtToken, controller.patchTodo);
 router.delete('/todo_list/:todo_id', verifyJwtToken, controller.deleteTodo);
 // router.get('/todo_lists', controller.getTodoList);
 // router.post('/todo_list', controller.postTodo);
-// router.patch('/todo_lists', controller.patchTodo);
-// router.delete('/todo_list', controller.deleteTodo);
+// router.patch('/todo_lists/:todo_id', controller.patchTodo);
+// router.delete('/todo_list/:todo_id', controller.deleteTodo);
 
 module.exports = router;
