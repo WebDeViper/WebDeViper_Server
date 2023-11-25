@@ -29,6 +29,7 @@ exports.getTodoList = async (req, res) => {
 
 exports.postTodo = async (req, res) => {
   try {
+    // const currentUserId = '2ea46256-fa06-49f4-8318-357361caaf43';
     const currentUserId = getUserIdFromToken(res);
     if (!checkLoginStatus(currentUserId, res)) {
       return;
@@ -59,6 +60,7 @@ exports.patchTodo = async (req, res) => {
     if (!checkLoginStatus(currentUserId, res)) {
       return;
     }
+    // const currentUserId = '2ea46256-fa06-49f4-8318-357361caaf43';
 
     // const { todo_id } = req.query;
     const { todo_id } = req.params;
@@ -83,9 +85,12 @@ exports.patchTodo = async (req, res) => {
         },
       }
     );
-
+    const updatedResult = await Todo.findOne({ where: { todo_id } });
+    console.log(updatedResult.dataValues);
     if (updatedRowCount > 0) {
-      res.status(200).send({ message: 'Todo가 업데이트되었습니다.', updatedRowCount });
+      res
+        .status(200)
+        .send({ message: 'Todo가 업데이트되었습니다.', updatedRowCount, updatedResult: updatedResult.dataValues });
     } else if (updatedRowCount === 0) {
       res.status(204).send(); // update된 게 없을 때 보냄
     } else {
@@ -103,6 +108,7 @@ exports.deleteTodo = async (req, res) => {
     if (!checkLoginStatus(currentUserId, res)) {
       return;
     }
+    // const currentUserId = '2ea46256-fa06-49f4-8318-357361caaf43';
 
     const deletedRowCount = await Todo.destroy({
       where: {
