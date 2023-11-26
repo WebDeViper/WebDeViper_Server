@@ -3,7 +3,7 @@ const { generateJwtToken, generateRefreshToken } = require('../utils/jwt');
 const { hashPassword, comparePassword } = require('../utils/bcrypt');
 const { Notification, mongoose } = require('../schemas/schema');
 // 시퀄라이즈 모듈 불러오기
-const { User, UserGroupRelation, Sequelize } = require('../models/index');
+const { User, UserGroupRelation, Sequelize, Group } = require('../models/index');
 const { Op } = require('sequelize');
 
 // 로컬 유저 이메일 중복 체크(회원가입시)
@@ -66,7 +66,7 @@ exports.getUser = async (req, res) => {
       is_read: 'n',
     });
 
-    // 'group_request'인 경우 user_id를 변경
+    // 'group_request', 'group_approve', 'group_rejection'인 경우 user_id를 변경
     const modifiedNotifications = await Promise.all(
       notifications.map(async notification => {
         if (notification.notification_kind === 'group_request') {
@@ -79,6 +79,17 @@ exports.getUser = async (req, res) => {
           const requestUserInfo = await User.findOne({ where: { user_id: requestUserId } });
 
           notification.user_id = requestUserInfo?.dataValues.nick_name;
+        } else if (
+          notification.notification_kind === 'group_approve' ||
+          notification.notification_kind === 'group_rejection'
+        ) {
+          // 'group_approve' 또는 'group_rejection'인 경우에 대한 처리
+          const requestGroupInfo = await Group.findOne({ where: { group_id: notification.groupId } });
+          const requestGroupLeaderInfo = await User.findOne({
+            where: { user_id: requestGroupInfo.dataValues.leader_id },
+          });
+          const requestGroupLeaderNickname = requestGroupInfo.dataValues.nick_name;
+          notification.user_id = requestGroupLeaderNickname;
         }
         return notification;
       })

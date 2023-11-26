@@ -83,10 +83,49 @@ module.exports = function (io) {
     notificationChangeStreamOfGroupApprove.on('change', async change => {
       if (change.operationType === 'insert') {
         const newNotification = change.fullDocument;
+        //소켓이벤트를 그룹신청을 한 유저에게만 보내기 위한 로직
         const requestId = newNotification.user_id;
         const requestUserInfo = await User.findOne({ where: { user_id: requestId } });
+        //해당 유저의 소켓 아이디
         const requestUserSocketId = requestUserInfo.dataValues.socket_id;
-        io.to(requestUserSocketId).emit('newGroupApprove', newNotification); //그룹승인받은 유저에게만 보내는 로직 추가해야 함
+        //보내는 사람:그룹리더로 바꾸기 위한 로직
+        const requestGroupId = newNotification.groupId;
+        const requestGroupInfo = await Group.findOne({ where: { group_id: requestGroupId } });
+        const requestGroupLeaderInfo = await User.findOne({
+          where: { user_id: requestGroupInfo.dataValues.leader_id },
+        });
+        const requestGroupLeaderNickname = requestGroupLeaderInfo.dataValues.nick_name;
+        newNotification.user_id = requestGroupLeaderNickname;
+        io.to(requestUserSocketId).emit('newGroupApprove', newNotification);
+      }
+    });
+    const groupRejection = {
+      $match: {
+        'fullDocument.notification_kind': 'group_rejection',
+        operationType: 'insert',
+      },
+    };
+    const notificationChangeStreamOfGroupRejection = Notification.watch([groupRejection], {
+      fullDocument: 'updateLookup',
+    });
+    notificationChangeStreamOfGroupRejection.on('change', async change => {
+      if (change.operationType === 'insert') {
+        const newNotification = change.fullDocument;
+        //그룹 신청을 한 유저에게만 소켓이벤트를 보내기 위해 해당 유저의 소켓 아이디를 찾는 로직
+        const requestId = newNotification.user_id;
+        const requestUserInfo = await User.findOne({ where: { user_id: requestId } });
+        //해당 유저의 소켓 아이디
+        const requestUserSocketId = requestUserInfo.dataValues.socket_id;
+        //보내는 사람:그룹리더로 바꾸기 위한 로직
+        const requestGroupId = newNotification.groupId;
+        const requestGroupInfo = await Group.findOne({ where: { group_id: requestGroupId } });
+        const requestGroupLeaderInfo = await User.findOne({
+          where: { user_id: requestGroupInfo.dataValues.leader_id },
+        });
+        const requestGroupLeaderNickname = requestGroupLeaderInfo.dataValues.nick_name;
+        newNotification.user_id = requestGroupLeaderNickname;
+
+        io.to(requestUserSocketId).emit('newGroupRejection', newNotification);
       }
     });
   });
