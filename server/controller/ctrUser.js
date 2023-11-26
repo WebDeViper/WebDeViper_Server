@@ -355,7 +355,7 @@ exports.patchUser = async (req, res) => {
     if (statusMsg) {
       user.status_message = statusMsg;
     }
-
+    await user.save();
     const userInfo = {
       id: user.user_id,
       category: user.category,
