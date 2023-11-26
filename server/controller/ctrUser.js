@@ -340,7 +340,7 @@ exports.patchUser = async (req, res) => {
     if (nickName) {
       // 닉네임 중복검사
       const isDuplicate = await duplicateCheck(User, 'nick_name', nickName);
-
+      console.log('중복임? @@', isDuplicate);
       if (isDuplicate) {
         return res.status(409).send({
           isSuccess: false,
@@ -350,22 +350,20 @@ exports.patchUser = async (req, res) => {
       user.nick_name = nickName;
     }
     if (category) {
-      user.user_category_name = category;
+      user.category = category;
     }
     if (statusMsg) {
       user.status_message = statusMsg;
     }
 
-    const result = await user.save();
-
     const userInfo = {
-      id: result.user_id,
-      category: result.category,
-      nickName: result.nick_name,
-      profileImg: result.image_path,
-      email: result.email,
-      statusMsg: result.status_message,
-      isServiceAdmin: result.is_admin,
+      id: user.user_id,
+      category: user.category,
+      nickName: user.nick_name,
+      profileImg: user.image_path,
+      email: user.email,
+      statusMsg: user.status_message,
+      isServiceAdmin: user.is_admin,
     };
 
     // 변경된 userInfo로 jwt 재생성
