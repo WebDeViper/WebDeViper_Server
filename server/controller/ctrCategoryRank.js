@@ -65,86 +65,163 @@ exports.getMyCategoryRank = async (req, res) => {
   }
 };
 
+// async function getUserRanking(userCategory, date) {
+//   const sameCategoryUsers = await User.findAll({ where: { category: userCategory } });
+//   return getRankingData(sameCategoryUsers, date);
+// }
 async function getUserRanking(userCategory, date) {
-  const sameCategoryUsers = await User.findAll({ where: { category: userCategory } });
-  return getRankingData(sameCategoryUsers, date);
+  const sameCategoryUsersPromise = User.findAll({ where: { category: userCategory } });
+  const rankingDataPromise = sameCategoryUsersPromise.then(users => getRankingData(users, date));
+
+  const [sameCategoryUsers, rankingData] = await Promise.all([sameCategoryUsersPromise, rankingDataPromise]);
+  return rankingData;
 }
+
+// async function getGroupRanking(userCategory, date) {
+//   const userCategoryGroups = await Group.findAll({ where: { category: userCategory } });
+//   console.log(userCategoryGroups);
+//   const groupRankingData = [];
+
+//   for (const group of userCategoryGroups) {
+//     const groupData = {
+//       group_name: group.name,
+//       membersTime: [],
+//       group_image_path: group.image_path,
+//     };
+
+//     const members = await User.findAll({
+//       include: [
+//         {
+//           model: Group,
+//           through: { model: UserGroupRelation, where: { group_id: group.group_id, request_status: 'a' } },
+//           // attributes: [], // Exclude attributes from the UserGroupRelation model
+//         },
+//       ],
+//     });
+//     console.log('members', members.length > 0 ? members : 'No members found');
+
+//     for (const member of members) {
+//       const memberInfo = await User.findOne({ where: { user_id: member.user_id } });
+//       console.log(memberInfo.user_id, '멤버아이디');
+//       const memberTimer = await Timer.find({
+//         user_id: memberInfo.user_id,
+//         'daily.date': date,
+//       });
+
+//       if (memberTimer.length > 0) {
+//         const totalMemberTime = memberTimer[0].total_time;
+//         groupData.membersTime.push({ member_id: memberInfo.user_id, total_time: totalMemberTime });
+//       } else {
+//         groupData.membersTime.push({ member_id: memberInfo.user_id, total_time: 0 });
+//       }
+//     }
+
+//     // 평균 total_time 계산
+//     if (groupData.membersTime.length > 0) {
+//       const totalTimes = groupData.membersTime.map(member => member.total_time);
+//       const averageTime = totalTimes.reduce((acc, time) => acc + time, 0) / totalTimes.length;
+//       groupData.averageTime = averageTime;
+//     } else {
+//       groupData.averageTime = 0;
+//     }
+
+//     groupRankingData.push(groupData);
+//   }
+
+//   // 그룹을 평균 total_time 기준으로 내림차순으로 정렬
+//   groupRankingData.sort((a, b) => b.averageTime - a.averageTime);
+
+//   return groupRankingData.slice(0, 10);
+// }
 
 async function getGroupRanking(userCategory, date) {
-  const userCategoryGroups = await Group.findAll({ where: { category: userCategory } });
-  console.log(userCategoryGroups);
-  const groupRankingData = [];
+  const userCategoryGroupsPromise = Group.findAll({ where: { category: userCategory } });
 
-  for (const group of userCategoryGroups) {
-    const groupData = {
-      group_name: group.name,
-      membersTime: [],
-      group_image_path: group.image_path,
-    };
+  const [userCategoryGroups] = await Promise.all([userCategoryGroupsPromise]);
+  const groupRankingData = await Promise.all(
+    userCategoryGroups.map(async group => {
+      const groupData = {
+        group_name: group.name,
+        membersTime: [],
+        group_image_path: group.image_path,
+      };
 
-    const members = await User.findAll({
-      include: [
-        {
-          model: Group,
-          through: { model: UserGroupRelation, where: { group_id: group.group_id, request_status: 'a' } },
-          // attributes: [], // Exclude attributes from the UserGroupRelation model
-        },
-      ],
-    });
-    console.log('members', members.length > 0 ? members : 'No members found');
-
-    for (const member of members) {
-      const memberInfo = await User.findOne({ where: { user_id: member.user_id } });
-      console.log(memberInfo.user_id, '멤버아이디');
-      const memberTimer = await Timer.find({
-        user_id: memberInfo.user_id,
-        'daily.date': date,
+      const members = await User.findAll({
+        include: [
+          {
+            model: Group,
+            through: { model: UserGroupRelation, where: { group_id: group.group_id, request_status: 'a' } },
+          },
+        ],
       });
 
-      if (memberTimer.length > 0) {
-        const totalMemberTime = memberTimer[0].total_time;
-        groupData.membersTime.push({ member_id: memberInfo.user_id, total_time: totalMemberTime });
+      await Promise.all(
+        members.map(async member => {
+          const memberInfo = await User.findOne({ where: { user_id: member.user_id } });
+          const memberTimer = await Timer.find({
+            user_id: memberInfo.user_id,
+            'daily.date': date,
+          });
+
+          if (memberTimer.length > 0) {
+            const totalMemberTime = memberTimer[0].total_time;
+            groupData.membersTime.push({ member_id: memberInfo.user_id, total_time: totalMemberTime });
+          } else {
+            groupData.membersTime.push({ member_id: memberInfo.user_id, total_time: 0 });
+          }
+        })
+      );
+
+      if (groupData.membersTime.length > 0) {
+        const totalTimes = groupData.membersTime.map(member => member.total_time);
+        const averageTime = totalTimes.reduce((acc, time) => acc + time, 0) / totalTimes.length;
+        groupData.averageTime = averageTime;
       } else {
-        groupData.membersTime.push({ member_id: memberInfo.user_id, total_time: 0 });
+        groupData.averageTime = 0;
       }
-    }
 
-    // 평균 total_time 계산
-    if (groupData.membersTime.length > 0) {
-      const totalTimes = groupData.membersTime.map(member => member.total_time);
-      const averageTime = totalTimes.reduce((acc, time) => acc + time, 0) / totalTimes.length;
-      groupData.averageTime = averageTime;
-    } else {
-      groupData.averageTime = 0;
-    }
+      return groupData;
+    })
+  );
 
-    groupRankingData.push(groupData);
-  }
-
-  // 그룹을 평균 total_time 기준으로 내림차순으로 정렬
-  groupRankingData.sort((a, b) => b.averageTime - a.averageTime);
-
-  return groupRankingData.slice(0, 10);
+  return groupRankingData.sort((a, b) => b.averageTime - a.averageTime).slice(0, 10);
 }
+
+// async function getRankingData(data, date) {
+//   const rankingData = [];
+//   for (const item of data) {
+//     const userInfo = await User.findOne({ where: { user_id: item.user_id } });
+//     const nickname = userInfo.nick_name;
+//     const user_profile_image_path = userInfo.image_path;
+//     const total_time = await Timer.find({ user_id: item.user_id, 'daily.date': date });
+//     const userData = {
+//       user_nickname: nickname,
+//       user_total_time: total_time.length > 0 ? total_time[0].total_time : 0,
+//       user_profile_image_path,
+//     };
+//     rankingData.push(userData);
+//   }
+//   rankingData.sort((a, b) => b.user_total_time - a.user_total_time);
+//   return rankingData.slice(0, 10);
+// }
 
 async function getRankingData(data, date) {
-  const rankingData = [];
-  for (const item of data) {
-    const userInfo = await User.findOne({ where: { user_id: item.user_id } });
-    const nickname = userInfo.nick_name;
-    const user_profile_image_path = userInfo.image_path;
-    const total_time = await Timer.find({ user_id: item.user_id, 'daily.date': date });
-    const userData = {
-      user_nickname: nickname,
-      user_total_time: total_time.length > 0 ? total_time[0].total_time : 0,
-      user_profile_image_path,
-    };
-    rankingData.push(userData);
-  }
-  rankingData.sort((a, b) => b.user_total_time - a.user_total_time);
-  return rankingData.slice(0, 10);
-}
+  const rankingData = await Promise.all(
+    data.map(async item => {
+      const userInfo = await User.findOne({ where: { user_id: item.user_id } });
+      const nickname = userInfo.nick_name;
+      const user_profile_image_path = userInfo.image_path;
+      const total_time = await Timer.find({ user_id: item.user_id, 'daily.date': date });
+      return {
+        user_nickname: nickname,
+        user_total_time: total_time.length > 0 ? total_time[0].total_time : 0,
+        user_profile_image_path,
+      };
+    })
+  );
 
+  return rankingData.sort((a, b) => b.user_total_time - a.user_total_time).slice(0, 10);
+}
 exports.getCategoryRank = async (req, res) => {
   console.log('토큰이 없지롱');
   //가장 많은 유저가 속한 카테고리를 찾는다.
