@@ -67,35 +67,40 @@ exports.getUser = async (req, res) => {
     });
 
     // 'group_request', 'group_approve', 'group_rejection'인 경우 user_id를 변경
-    const modifiedNotifications = await Promise.all(
-      notifications.map(async notification => {
-        if (notification.notification_kind === 'group_request') {
-          const requestUser = await UserGroupRelation.findAll({
-            where: { group_id: notification.group_id, request_status: 'w' },
-            order: [['updatedAt', 'DESC']],
-            limit: 1,
-          });
-          const requestUserId = requestUser[0]?.dataValues.user_id;
-          const requestUserInfo = await User.findOne({ where: { user_id: requestUserId } });
+    // const modifiedNotifications = await Promise.all(
+    //   notifications.map(async notification => {
+    //     if (notification.notification_kind === 'group_request') {
+    //       const requestUser = await UserGroupRelation.findAll({
+    //         where: { group_id: notification.group_id, request_status: 'w' },
+    //         order: [['updatedAt', 'DESC']],
+    //         limit: 1,
+    //       });
+    //       if (requestUser) {
+    //         console.log(requestUser, '요청한 유저!');
+    //         const requestUserId = requestUser[0].dataValues.user_id;
+    //         console.log('^^^^^', requestUserId);
+    //         const requestUserInfo = await User.findOne({ where: { user_id: requestUserId } });
+    //         console.log(requestUserInfo, 'adfafda');
+    //         notification.user_id = requestUserInfo.dataValues.nick_name;
+    //         console.log('notification.user_id ', notification.user_id);
+    //       }
+    //     } else if (
+    //       notification.notification_kind === 'group_approve' ||
+    //       notification.notification_kind === 'group_rejection'
+    //     ) {
+    //       // 'group_approve' 또는 'group_rejection'인 경우에 대한 처리
+    //       const requestGroupInfo = await Group.findOne({ where: { group_id: notification.group_id } });
+    //       const requestGroupLeaderInfo = await User.findOne({
+    //         where: { user_id: requestGroupInfo.dataValues.leader_id },
+    //       });
+    //       const requestGroupLeaderNickname = requestGroupInfo.dataValues.nick_name;
+    //       notification.user_id = requestGroupLeaderNickname;
+    //     }
+    //     return notification;
+    //   })
+    // );
 
-          notification.user_id = requestUserInfo?.dataValues.nick_name;
-        } else if (
-          notification.notification_kind === 'group_approve' ||
-          notification.notification_kind === 'group_rejection'
-        ) {
-          // 'group_approve' 또는 'group_rejection'인 경우에 대한 처리
-          const requestGroupInfo = await Group.findOne({ where: { group_id: notification.group_id } });
-          const requestGroupLeaderInfo = await User.findOne({
-            where: { user_id: requestGroupInfo.dataValues.leader_id },
-          });
-          const requestGroupLeaderNickname = requestGroupInfo.dataValues.nick_name;
-          notification.user_id = requestGroupLeaderNickname;
-        }
-        return notification;
-      })
-    );
-
-    console.log(modifiedNotifications);
+    // console.log(modifiedNotifications);
     res.status(200).send({
       userInfo: {
         id: exUser.user_id,
@@ -105,7 +110,7 @@ exports.getUser = async (req, res) => {
         email: exUser.email,
         statusMsg: exUser.status_message,
         isServiceAdmin: exUser.is_admin,
-        alarmMessage: modifiedNotifications,
+        alarmMessage: notifications,
       },
     });
   } catch (err) {

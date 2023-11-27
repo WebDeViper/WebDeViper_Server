@@ -107,7 +107,7 @@ exports.getNoticeDetail = async (req, res) => {
     console.log('@@@', notificationInfo);
     const { notice_id, title, content, createdAt, updatedAt } = noticeDetailInfo;
     if (noticeDetailInfo) {
-      res.status(200).send({ notice_id, title, content, createdAt, updatedAt, notification_id: notificationInfo._id });
+      res.status(200).send({ notice_id, title, content, createdAt, updatedAt, notification_id: notificationInfo?._id });
     } else {
       res.status(400).send({ message: '존재하지 않는 공지사항입니다.' });
     }
