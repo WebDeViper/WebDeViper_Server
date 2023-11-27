@@ -554,9 +554,9 @@ exports.getAllRooms = async (req, res) => {
 };
 exports.getJoinRequest = async (req, res) => {
   try {
-    // const userInfo = res.locals.decoded.userInfo;
-    // const userId = userInfo.id;
-    const userId = '9766f20d-3285-4a44-80e4-be2dccda55ff';
+    const userInfo = res.locals.decoded.userInfo;
+    const userId = userInfo.id;
+
     const groupInfoArray = [];
 
     // 해당 사용자가 리더인 그룹 목록 가져오기
