@@ -18,8 +18,8 @@ router.get('/studyGroups/users', verifyJwtToken, controller.getCategoryGroupsByU
 router.get('/getJoinRequest', verifyJwtToken, controller.getJoinRequest);
 
 // 현재 로그인한 유저의 pending_group 조회
-// router.get('/pendingGroups', verifyJwtToken, controller.getPendingGroups);
-router.get('/pendingGroups', controller.getPendingGroups);
+router.get('/pendingGroups', verifyJwtToken, controller.getPendingGroups);
+// router.get('/pendingGroups', controller.getPendingGroups);
 
 //그룹 요청 기능
 router.post('/studyGroup/:groupId/join', verifyJwtToken, controller.joinGroupRequest);
