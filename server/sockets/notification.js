@@ -105,6 +105,7 @@ module.exports = function (io) {
         const requestGroupLeaderInfo = await User.findOne({
           where: { user_id: requestGroupInfo.dataValues.leader_id },
         });
+        console.log('승인한 그룹의 리더????', requestGroupLeaderInfo);
         const requestGroupLeaderNickname = requestGroupLeaderInfo.dataValues.nick_name;
         newNotification.user_id = requestGroupLeaderNickname;
         io.to(requestUserSocketId).emit('newGroupApprove', newNotification);
