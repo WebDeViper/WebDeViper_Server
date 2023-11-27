@@ -556,6 +556,7 @@ exports.getJoinRequest = async (req, res) => {
   try {
     const userInfo = res.locals.decoded.userInfo;
     const userId = userInfo.id;
+
     const groupInfoArray = [];
 
     // 해당 사용자가 리더인 그룹 목록 가져오기
@@ -586,10 +587,11 @@ exports.getJoinRequest = async (req, res) => {
                   where: { user_id: member.user_id },
                 });
                 console.log('user는 @@ ->', user);
-                return user ? user.nick_name : null;
+                return user ? { nickName: user.nick_name, userId: member.user_id } : null;
               })
             )
           );
+
           const nickNames = await Promise.all(nickNamePromises);
 
           console.log('nickName은 -> @@', nickNames);
