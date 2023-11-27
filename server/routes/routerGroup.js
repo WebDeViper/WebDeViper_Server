@@ -15,7 +15,8 @@ router.get('/studyGroups', verifyJwtToken, controller.getCategoryGroups);
 router.get('/studyGroups/users', verifyJwtToken, controller.getCategoryGroupsByUser);
 
 // 현재 로그인한 유저의 join_request 조회
-router.get('/getJoinRequest', verifyJwtToken, controller.getJoinRequest);
+// router.get('/getJoinRequest', verifyJwtToken, controller.getJoinRequest);
+router.get('/getJoinRequest', controller.getJoinRequest);
 
 // 현재 로그인한 유저의 pending_group 조회
 router.get('/pendingGroups', verifyJwtToken, controller.getPendingGroups);
