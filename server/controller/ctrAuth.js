@@ -2,7 +2,8 @@ const axios = require('axios');
 const { NAVER_CLIENT_ID, NAVER_CLIENT_SECRET } = process.env;
 // const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URL } = process.env;
 const { generateJwtToken, generateRefreshToken } = require('../utils/jwt');
-const { User, mongoose } = require('../schemas/schema');
+// const { User, mongoose } = require('../schemas/schema');
+const { User } = require('../models/index');
 
 // 프론트한테 요청받고 네이버 유저정보 가져와서 프론트로 전달
 // 네이버는 프론트에서 처리하면 CORS떠서 어쩔수 없이 만듬
@@ -46,15 +47,17 @@ exports.refreshAccessToken = async (req, res) => {
 
     // 새로운 액세스 토큰을 발급해서 응답값으로 넘겨주기
     const userId = res.locals.decoded.userInfo;
-    const exUser = await User.findById(userId);
+    // console.log('단계 1 @@@@@@', userId);
+    const exUser = await User.findOne({ where: { user_id: userId.userId } });
+    // console.log('단계 2 @@@@@@', exUser);
     const userInfo = {
-      id: exUser._id,
-      category: exUser.user_category_name,
+      id: exUser.user_id,
+      category: exUser.category,
       nickName: exUser.nick_name,
-      profileImg: exUser.user_profile_image_path,
+      profileImg: exUser.image_path,
       email: exUser?.email,
       statusMsg: exUser.status_message,
-      isServiceAdmin: exUser.is_service_admin,
+      isServiceAdmin: exUser.is_admin,
     };
 
     // 액세스 토큰 재발급
