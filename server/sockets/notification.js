@@ -3,7 +3,42 @@ const { Notification } = require('../schemas/schema');
 const { verifyJwtToken } = require('../middlewares/jwt/jwt');
 const jwt = require('jsonwebtoken');
 const { User, Group, UserGroupRelation, Sequelize } = require('../models');
-
+const newNoticeNotification = {
+  $match: {
+    'fullDocument.notification_kind': 'new_notice',
+    operationType: 'insert',
+  },
+};
+const notificationChangeStreamOfNotice = Notification.watch([newNoticeNotification], {
+  fullDocument: 'updateLookup',
+});
+const newGroupRequest = {
+  $match: {
+    'fullDocument.notification_kind': 'group_request',
+    operationType: 'insert',
+  },
+};
+const notificationChangeStreamOfGroupRequest = Notification.watch([newGroupRequest], {
+  fullDocument: 'updateLookup',
+});
+const groupApprove = {
+  $match: {
+    'fullDocument.notification_kind': 'group_approve',
+    operationType: 'insert',
+  },
+};
+const notificationChangeStreamOfGroupApprove = Notification.watch([groupApprove], {
+  fullDocument: 'updateLookup',
+});
+const groupRejection = {
+  $match: {
+    'fullDocument.notification_kind': 'group_rejection',
+    operationType: 'insert',
+  },
+};
+const notificationChangeStreamOfGroupRejection = Notification.watch([groupRejection], {
+  fullDocument: 'updateLookup',
+});
 module.exports = function (io) {
   io.on('connection', socket => {
     const token = socket.handshake.auth.userId;
@@ -15,36 +50,18 @@ module.exports = function (io) {
     console.log(socket.id, '$$$$유저의 소켓 아이디$$$$');
 
     // 필요한 경우 더 많은 연결 이벤트 처리 로직 추가
-    const newNoticeNotification = {
-      $match: {
-        'fullDocument.notification_kind': 'new_notice',
-        operationType: 'insert',
-      },
-    };
-    const notificationChangeStreamOfNotice = Notification.watch([newNoticeNotification], {
-      fullDocument: 'updateLookup',
-    });
 
     // 기존에 등록된 모든 'change' 이벤트 리스너를 제거
     // notificationChangeStreamOfNotice.removeAllListeners('change');
 
     notificationChangeStreamOfNotice.on('change', change => {
-      notificationChangeStreamOfNotice.removeAllListeners('change');
+      // notificationChangeStreamOfNotice.removeAllListeners('change');
       if (change.operationType === 'insert') {
         const newNotification = change.fullDocument;
         io.to(socket.id).emit('newNotice', newNotification);
       }
     });
 
-    const newGroupRequest = {
-      $match: {
-        'fullDocument.notification_kind': 'group_request',
-        operationType: 'insert',
-      },
-    };
-    const notificationChangeStreamOfGroupRequest = Notification.watch([newGroupRequest], {
-      fullDocument: 'updateLookup',
-    });
     notificationChangeStreamOfGroupRequest.on('change', async change => {
       if (change.operationType === 'insert') {
         const newNotification = change.fullDocument;
@@ -71,15 +88,7 @@ module.exports = function (io) {
         io.to(leaderSocketId).emit('newGroupRequest', newNotification); //리더이게만 보내는 로직 추가해야 함
       }
     });
-    const groupApprove = {
-      $match: {
-        'fullDocument.notification_kind': 'group_approve',
-        operationType: 'insert',
-      },
-    };
-    const notificationChangeStreamOfGroupApprove = Notification.watch([groupApprove], {
-      fullDocument: 'updateLookup',
-    });
+
     notificationChangeStreamOfGroupApprove.on('change', async change => {
       if (change.operationType === 'insert') {
         const newNotification = change.fullDocument;
@@ -99,15 +108,7 @@ module.exports = function (io) {
         io.to(requestUserSocketId).emit('newGroupApprove', newNotification);
       }
     });
-    const groupRejection = {
-      $match: {
-        'fullDocument.notification_kind': 'group_rejection',
-        operationType: 'insert',
-      },
-    };
-    const notificationChangeStreamOfGroupRejection = Notification.watch([groupRejection], {
-      fullDocument: 'updateLookup',
-    });
+
     notificationChangeStreamOfGroupRejection.on('change', async change => {
       if (change.operationType === 'insert') {
         const newNotification = change.fullDocument;

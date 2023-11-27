@@ -84,7 +84,7 @@ exports.getUser = async (req, res) => {
           notification.notification_kind === 'group_rejection'
         ) {
           // 'group_approve' 또는 'group_rejection'인 경우에 대한 처리
-          const requestGroupInfo = await Group.findOne({ where: { group_id: notification.groupId } });
+          const requestGroupInfo = await Group.findOne({ where: { group_id: notification.group_id } });
           const requestGroupLeaderInfo = await User.findOne({
             where: { user_id: requestGroupInfo.dataValues.leader_id },
           });
