@@ -75,7 +75,7 @@ exports.getUser = async (req, res) => {
             order: [['updatedAt', 'DESC']],
             limit: 1,
           });
-          if (requestUser) {
+          if (requestUser.length) {
             console.log(requestUser, '요청한 유저!');
             const requestUserId = requestUser[0].dataValues.user_id;
             console.log('^^^^^', requestUserId);
