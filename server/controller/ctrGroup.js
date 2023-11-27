@@ -620,8 +620,9 @@ exports.getJoinRequest = async (req, res) => {
 exports.getPendingGroups = async (req, res) => {
   try {
     // 현재 사용자 정보를 추출
-    const userInfo = res.locals.decoded.userInfo;
-    const userId = userInfo.id;
+    // const userInfo = res.locals.decoded.userInfo;
+    // const userId = userInfo.id;
+    const userId = 'fc0d99ad-b2ba-4365-99b8-9297497aa88a';
 
     // 사용자의 "pending_groups" 배열을 가져옴
     const pendingGroups = await UserGroupRelation.findAll({
@@ -631,23 +632,30 @@ exports.getPendingGroups = async (req, res) => {
     // 그룹 정보를 담을 배열 초기화
     const groupInfoArray = [];
 
-    // "pendingGroups" 배열 내의 그룹에 대한 그룹 정보를 가져옴
-    for (const item of pendingGroups) {
-      const group = await Group.findByPk(item.group_id);
+    await Promise.all(
+      pendingGroups.map(async item => {
+        const group = await Group.findByPk(item.group_id);
 
-      // 그룹이 존재하는 경우에만 정보를 추가
-      if (group) {
-        groupInfoArray.push(group);
-      }
-    }
+        if (group) {
+          const members = await UserGroupRelation.findAll({
+            where: { group_id: group.group_id, request_status: 'a' },
+            attributes: ['user_id'],
+          });
 
-    // 그룹 정보를 로깅하고 클라이언트에 응답을 보냄
-    console.log(groupInfoArray);
-    res.status(200).send({ isSuccess: true, pendingGroups: groupInfoArray });
+          const groupWithMembers = {
+            ...group.toJSON(),
+            members: members.map(member => member.user_id),
+          };
+
+          groupInfoArray.push(groupWithMembers);
+        }
+      })
+    );
+
+    return res.status(200).send({ isSuccess: true, pendingGroups: groupInfoArray });
   } catch (err) {
-    // 에러 발생 시 에러 메시지를 로깅하고 클라이언트에 에러 상태 코드로 응답을 보냄
     console.error(err);
-    res.status(500).send({ isSuccess: false, error: err });
+    return res.status(500).send({ isSuccess: false, error: err.message });
   }
 };
 
