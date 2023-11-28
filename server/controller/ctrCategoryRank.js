@@ -225,43 +225,56 @@ async function getRankingData(data, date) {
 exports.getCategoryRank = async (req, res) => {
   console.log('토큰이 없지롱');
   //가장 많은 유저가 속한 카테고리를 찾는다.
+  if (req.query.category) {
+    const userRanking = await getUserRanking(req.query.category, yesterday);
+    const groupRanking = await getGroupRanking(req.query.category, yesterday);
+    if (!userRanking.length && !groupRanking.length) {
+      return res.status(200).send({ message: '유저 및 스터디 그룹 없음' });
+    } else if (!userRanking.length) {
+      return res.status(200).send({ message: '유저 없음', topGroups: groupRanking });
+    } else if (!groupRanking.length) {
+      return res.status(200).send({ message: '스터디 그룹 없음', topUsers: userRanking });
+    } else {
+      return res.status(200).send({ topUsers: userRanking, topGroups: groupRanking });
+    }
+  } else {
+    const findMostCommonCategory = async () => {
+      try {
+        // 카테고리별로 사용자 수를 카운트하고 내림차순으로 정렬
+        const result = await User.findAll({
+          attributes: ['category', [Sequelize.fn('COUNT', Sequelize.col('category')), 'userCount']],
+          group: ['category'],
+          order: [[Sequelize.literal('userCount'), 'DESC']],
+          limit: 1, // 결과 중에서 가장 많은 하나의 카테고리만 가져옴
+        });
 
-  const findMostCommonCategory = async () => {
-    try {
-      // 카테고리별로 사용자 수를 카운트하고 내림차순으로 정렬
-      const result = await User.findAll({
-        attributes: ['category', [Sequelize.fn('COUNT', Sequelize.col('category')), 'userCount']],
-        group: ['category'],
-        order: [[Sequelize.literal('userCount'), 'DESC']],
-        limit: 1, // 결과 중에서 가장 많은 하나의 카테고리만 가져옴
-      });
-
-      if (result && result.length > 0) {
-        const mostCommonCategory = result[0].category;
-        return mostCommonCategory;
-      } else {
-        console.log('No users or categories found.');
+        if (result && result.length > 0) {
+          const mostCommonCategory = result[0].category;
+          return mostCommonCategory;
+        } else {
+          console.log('No users or categories found.');
+          return null;
+        }
+      } catch (error) {
+        console.error('Error finding most common category:', error);
         return null;
       }
-    } catch (error) {
-      console.error('Error finding most common category:', error);
-      return null;
-    }
-  };
+    };
 
-  // 호출
-  const mostCommonCategory = await findMostCommonCategory();
-  console.log(mostCommonCategory);
-  const userRanking = await getUserRanking(mostCommonCategory, yesterday);
-  console.log('유저랭킹????', userRanking);
-  const groupRanking = await getGroupRanking(mostCommonCategory, yesterday);
-  if (!userRanking.length && !groupRanking.length) {
-    return res.status(200).send({ message: '유저 및 스터디 그룹 없음' });
-  } else if (!userRanking.length) {
-    return res.status(200).send({ message: '유저 없음', topGroups: groupRanking });
-  } else if (!groupRanking.length) {
-    return res.status(200).send({ message: '스터디 그룹 없음', topUsers: userRanking });
-  } else {
-    return res.status(200).send({ topUsers: userRanking, topGroups: groupRanking });
+    // 호출
+    const mostCommonCategory = await findMostCommonCategory();
+    console.log(mostCommonCategory);
+    const userRanking = await getUserRanking(mostCommonCategory, yesterday);
+    console.log('유저랭킹????', userRanking);
+    const groupRanking = await getGroupRanking(mostCommonCategory, yesterday);
+    if (!userRanking.length && !groupRanking.length) {
+      return res.status(200).send({ message: '유저 및 스터디 그룹 없음' });
+    } else if (!userRanking.length) {
+      return res.status(200).send({ message: '유저 없음', topGroups: groupRanking });
+    } else if (!groupRanking.length) {
+      return res.status(200).send({ message: '스터디 그룹 없음', topUsers: userRanking });
+    } else {
+      return res.status(200).send({ topUsers: userRanking, topGroups: groupRanking });
+    }
   }
 };
