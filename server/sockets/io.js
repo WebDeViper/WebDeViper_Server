@@ -11,38 +11,41 @@ module.exports = function (io) {
   }
   chatSpace.on('connection', async socket => {
     console.log('client is connected in chat!!', socket.id);
-    // 사용자 로그인을 처리합니다.
-    // socket.on('login', async (userName, cb) => {
-    //   try {
-    //     name = userName;
-    //     const user = await userController.saveUser(userName, socket.id);
-    //     console.log('소켓서버측 로그인 응답위한 user', user);
-    //     if (user) {
-    //       // 사용자가 성공적으로 저장된 경우 성공 응답을 보냅니다.
-    //       cb({ isOk: true, data: user });
-    //     } else {
-    //       // 사용자가 null인 경우 오류 응답을 보냅니다.
-    //       cb({ isOk: false, message: '유효하지 않은 접근입니다.' });
-    //     }
-    //   } catch (error) {
-    //     // 오류를 처리하고 오류 응답을 보냅니다.
-    //     cb({ isOk: false, error: error.message });
-    //   }
-    // });
-    //사용자 닉네임 모음 객체
-    // 사용자가 채팅방에 참여하는 것을 처리
+
     socket.on('joinRoom', async (joinUser, rid, cb) => {
       try {
         const user = await userController.checkUser(joinUser);
+
         const isMember = await userController.joinRoom(rid, user);
         if (!isMember) {
           cb({ isOk: false, msg: '해당 그룹의 멤버가 아닙니다.' });
         } else {
-          nickObjs[socket.id] = joinUser;
           socket.join(rid.toString());
+          if (!nickObjs[rid]) {
+            nickObjs[rid] = []; // 배열이 없으면 초기화
+          }
+
+          // 소켓 ID가 이미 존재하는지 확인
+          const existingUserIndex = nickObjs[rid].findIndex(data => data.userId === user.user_id);
+
+          if (existingUserIndex === -1) {
+            // 존재하지 않으면 새 항목 추가
+            nickObjs[rid].push({
+              userId: user.user_id,
+              nickName: joinUser,
+              userProfile: user.image_path,
+            });
+          }
+          // 소켓 ID에 해당하는 nickName을 업데이트하고 싶다면 아래 부분이 필요
+          // else {
+          //   // If present, update the existing entry
+          //   nickObjs[rid][existingUserIndex].nickName = joinUser;
+          // }
           const chatLog = await userController.getChatLog(rid);
           updateList();
           cb({ isOk: true, data: chatLog });
+          chatSpace.to(rid).emit('getUsers', nickObjs[rid]);
+          console.log(user, 'nickObjsnickObjs');
         }
 
         // const welcomeMessage = {
@@ -54,18 +57,12 @@ module.exports = function (io) {
         cb({ isOk: false, error: error.message });
       }
     });
-    // chatSpace.to(user.rooms.toString()).emit('message', [welcomeMessage]);
 
     // 사용자가 채팅방을 나가는 것을 처리합니다.
     socket.on('leaveRoom', async (name, rid, cb) => {
       try {
         const user = await userController.checkUser(name);
-        // await userController.leaveRoom(user);
-        // const leaveMessage = {
-        //   chat: `${user.nick_name}님이 나가셨습니다.`,
-        //   user: { id: null, name: 'system' },
-        // };
-        // socket.broadcast.to(user.rooms.toString()).emit('message', leaveMessage);
+
         socket.leave(rid.toString());
         cb({ isOk: true });
       } catch (error) {
@@ -78,18 +75,10 @@ module.exports = function (io) {
       try {
         console.log('rid는', rid);
         const user = await userController.checkUser(name);
-        // let dmSocketId = whisper.who;
         let receiver;
         if (user) {
-          // if (whisper.who === 'all') {
           const message = await userController.saveChat(rid, receiver, receivedMessage, user);
           chatSpace.to(rid.toString()).emit('message', message);
-          // } else {
-          //   receiver = nickObjs[dmSocketId];
-          //   const message = await userController.saveChat(rid, receiver, receivedMessage, user);
-          //   chatSpace.to(dmSocketId).emit('dm', message);
-          //   chatSpace.to(socket.id).emit('dm', message);
-          // }
 
           return cb({ isOk: true });
         }
