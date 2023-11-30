@@ -59,14 +59,17 @@ module.exports = function (io) {
     });
 
     // 사용자가 채팅방을 나가는 것을 처리합니다.
-    socket.on('leaveRoom', async (name, rid, cb) => {
+    socket.on('leaveRoom', async (name, rid, userId) => {
       try {
         const user = await userController.checkUser(name);
-
+        const arrayToRemoveFrom = nickObjs[rid];
+        const updatedArray = arrayToRemoveFrom.filter(item => item.userId !== userId);
+        nickObjs[rid] = updatedArray;
+        chatSpace.to(rid).emit('getUsers', nickObjs[rid]);
         socket.leave(rid.toString());
-        cb({ isOk: true });
+        // cb({ isOk: true });
       } catch (error) {
-        cb({ isOk: false, message: error.message });
+        // cb({ isOk: false, message: error.message });
       }
     });
 
