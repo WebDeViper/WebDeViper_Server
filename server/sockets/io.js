@@ -13,6 +13,9 @@ module.exports = function (io) {
   }
   groupSpace.on('connection', async socket => {
     console.log('client is connected in chat!!', socket.id);
+    const userId = socket.handshake.auth.userId;
+    const groupId = socket.handshake.auth.groupId;
+    console.log('>>>>>', userId, groupId);
     const chatModuleInstance = chatModule(socket, userController, nickObjs, updateList);
 
     socket.on('joinRoom', async (joinUser, rid, cb) => {
@@ -59,7 +62,7 @@ module.exports = function (io) {
         cb({ isOk: false, error: error.message });
       }
     });
-    chatModule(socket, userController, nickObjs, updateList);
+
     timerModule(socket);
     // 사용자가 채팅방을 나가는 것을 처리합니다.
     socket.on('leaveRoom', async (name, rid, userId) => {
