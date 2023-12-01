@@ -1,16 +1,19 @@
 const userController = require('../controller/ctrChat'); // 사용자 컨트롤러를 가져옵니다.
 const { User, Group, Room, mongoose } = require('../schemas/schema');
-
+const chatModule = require('./chat');
+const timerModule = require('./timer');
 module.exports = function (io) {
-  const chatSpace = io.of('/chat');
+  //group(chat, timer) namespace
+  const groupSpace = io.of('/chat');
   let name; // 사용자의 이름을 저장하는 변수
   const nickObjs = {}; //{socket.id:nick1,socket.id:nick2}
 
   function updateList() {
     io.emit('updateNicks', nickObjs); // 전체 사용자 닉네임 모음 객체 전달
   }
-  chatSpace.on('connection', async socket => {
+  groupSpace.on('connection', async socket => {
     console.log('client is connected in chat!!', socket.id);
+    const chatModuleInstance = chatModule(socket, userController, nickObjs, updateList);
 
     socket.on('joinRoom', async (joinUser, rid, cb) => {
       try {
@@ -41,10 +44,9 @@ module.exports = function (io) {
           //   // If present, update the existing entry
           //   nickObjs[rid][existingUserIndex].nickName = joinUser;
           // }
-          const chatLog = await userController.getChatLog(rid);
-          updateList();
-          cb({ isOk: true, data: chatLog });
-          chatSpace.to(rid).emit('getUsers', nickObjs[rid]);
+
+          chatModuleInstance.handleJoinRoom(joinUser, rid, cb);
+          groupSpace.to(rid).emit('getUsers', nickObjs[rid]);
           console.log(user, 'nickObjsnickObjs');
         }
 
@@ -57,7 +59,8 @@ module.exports = function (io) {
         cb({ isOk: false, error: error.message });
       }
     });
-
+    chatModule(socket, userController, nickObjs, updateList);
+    timerModule(socket);
     // 사용자가 채팅방을 나가는 것을 처리합니다.
     socket.on('leaveRoom', async (name, rid, userId) => {
       try {
@@ -74,21 +77,21 @@ module.exports = function (io) {
     });
 
     // 채팅 메시지를 보내는 것을 처리합니다.
-    socket.on('sendMessage', async (rid, name, receivedMessage, cb) => {
-      try {
-        console.log('rid는', rid);
-        const user = await userController.checkUser(name);
-        let receiver;
-        if (user) {
-          const message = await userController.saveChat(rid, receiver, receivedMessage, user);
-          chatSpace.to(rid.toString()).emit('message', message);
+    // socket.on('sendMessage', async (rid, name, receivedMessage, cb) => {
+    //   try {
+    //     console.log('rid는', rid);
+    //     const user = await userController.checkUser(name);
+    //     let receiver;
+    //     if (user) {
+    //       const message = await userController.saveChat(rid, receiver, receivedMessage, user);
+    //       chatSpace.to(rid.toString()).emit('message', message);
 
-          return cb({ isOk: true });
-        }
-      } catch (error) {
-        cb({ isOk: false, error: error.message });
-      }
-    });
+    //       return cb({ isOk: true });
+    //     }
+    //   } catch (error) {
+    //     cb({ isOk: false, error: error.message });
+    //   }
+    // });
 
     // 사용자가 연결을 해제하는 것을 처리합니다.
     socket.on('disconnect', async () => {
