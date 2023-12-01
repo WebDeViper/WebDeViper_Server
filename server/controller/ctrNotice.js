@@ -2,11 +2,24 @@ const { Notice, User, Sequelize } = require('../models');
 const { Notification, mongoose } = require('../schemas/schema');
 exports.getNotice = async (req, res) => {
   try {
-    const result = await Notice.findAll();
-    console.log(result);
-    res.status(200).send(result);
+    const currentPage = req.query.currentPage || 1;
+    const itemsPerPage = 10;
+    const offset = (currentPage - 1) * itemsPerPage;
+
+    const result = await Notice.findAll({
+      limit: itemsPerPage,
+      offset,
+    });
+    //총 공지사항 갯수
+    const total = await Notice.count();
+
+    console.log(result, '총 공지사항');
+    console.log(total, '공지사항 갯수');
+    console.log('>>>>', req.query.currentPage);
+
+    res.status(200).send({ notices: result, total });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).send('SERVER ERROR');
   }
 };
