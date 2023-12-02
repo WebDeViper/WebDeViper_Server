@@ -16,10 +16,10 @@ module.exports = function (io) {
     const userId = socket.handshake.auth.userId;
     const groupId = socket.handshake.auth.groupId;
     const userNickName = socket.handshake.auth.userNickName;
-    console.log('>>>>>', userId, groupId, userNickName, 'userNickName');
-    const chatModuleInstance = chatModule(socket, userController, groupId, userNickName);
 
-    socket.on('joinRoom', async cb => {
+    chatModule(socket, userController, groupId, userNickName);
+
+    socket.on('joinRoom', async () => {
       try {
         const user = await userController.checkUser(userNickName);
 
@@ -43,21 +43,8 @@ module.exports = function (io) {
               userProfile: user.image_path,
             });
           }
-
-          // 소켓 ID에 해당하는 nickName을 업데이트하고 싶다면 아래 부분이 필요
-          // else {
-          //   // If present, update the existing entry
-          //   nickObjs[rid][existingUserIndex].nickName = joinUser;
-          // }
-          chatModuleInstance.handleJoinRoom(cb);
           groupSpace.to(groupId).emit('getUsers', nickObjs[groupId]);
         }
-
-        // const welcomeMessage = {
-        //   chat: `${user.nick_name}님이 입장하셨습니다.`,
-        //   user: { id: null, name: 'system' },
-        // };
-        // console.log('환영', welcomeMessage);
       } catch (error) {
         cb({ isOk: false, error: error.message });
       }
@@ -99,6 +86,7 @@ module.exports = function (io) {
     // 사용자가 연결을 해제하는 것을 처리합니다.
     socket.on('disconnect', async () => {
       const user = await userController.deleteUser(socket.id);
+      socket.emit('test', 'byebye');
       console.log('사용자가 소켓 연결을 해제했습니다');
     });
   });
