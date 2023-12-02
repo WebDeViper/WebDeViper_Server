@@ -436,3 +436,64 @@ exports.userProfileImgUpload = async (req, res) => {
     });
   }
 };
+
+//로그인한 유저의 상태메시지를 조회
+exports.userStatus = async (req, res) => {
+  try {
+    // const currentUserId = res.locals.decoded.userInfo.id;
+    const currentUserId = 'd4cfc232-da15-4919-8ac7-b3e183d05c35';
+
+    const userInfo = await User.findByPk(currentUserId);
+
+    if (userInfo && userInfo.status_message) {
+      res.status(200).send({
+        isSuccess: true,
+        statusMessage: userInfo.status_message,
+      });
+    } else {
+      //상태메시지 없을 때
+      res.status(200).send({
+        isSuccess: true,
+        statusMessage: null,
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      isSuccess: false,
+      msg: 'SERVER ERROR',
+      err,
+    });
+  }
+};
+
+//로그인한 유저의 상태메시지를 업데이트
+exports.updateStatus = async (req, res) => {
+  try {
+    const currentUserId = res.locals.decoded.userInfo.id;
+    const userInfo = await User.findByPk(currentUserId);
+
+    if (!userInfo) {
+      return res.status(404).json({
+        isSuccess: false,
+        msg: 'User not found',
+      });
+    }
+
+    const { statusMessage } = req.body;
+    userInfo.status_message = statusMessage;
+    await userInfo.save();
+
+    res.status(200).send({
+      isSuccess: true,
+      msg: 'User status updated successfully',
+      data: userInfo,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      isSuccess: false,
+      msg: 'SERVER ERROR',
+      err,
+    });
+  }
+};

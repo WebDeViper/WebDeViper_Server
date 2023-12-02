@@ -65,4 +65,12 @@ router.post(
 // api/user/:userId
 router.get('/:userId', controllerUser.getUserInfo);
 
+//로그인한 유저의 상태메시지를 조회하는 API
+// api/user/status
+router.get('/user/status', verifyJwtToken, controllerUser.userStatus);
+
+//로그인한 유저의 상태메시지를 업데이트하는 API
+// api/user/status
+router.patch('/status/message', verifyJwtToken, controllerUser.updateStatus);
+
 module.exports = router;
