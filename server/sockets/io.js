@@ -12,7 +12,7 @@ module.exports = function (io) {
   //   io.emit('updateNicks', nickObjs); // 전체 사용자 닉네임 모음 객체 전달
   // }
   groupSpace.on('connection', async socket => {
-    console.log('client is connected in chat!!', socket.id);
+    console.log('사용자 소켓 연결하였씁니다.---------------', socket.id);
     const userId = socket.handshake.auth.userId;
     const groupId = socket.handshake.auth.groupId;
     const userNickName = socket.handshake.auth.userNickName;
@@ -43,6 +43,7 @@ module.exports = function (io) {
               userProfile: user.image_path,
             });
           }
+          console.log(nickObjs, 'nickObjs1');
           groupSpace.to(groupId).emit('getUsers', nickObjs[groupId]);
         }
       } catch (error) {
@@ -50,43 +51,22 @@ module.exports = function (io) {
       }
     });
 
-    timerModule(socket);
-    // 사용자가 채팅방을 나가는 것을 처리합니다.
-    socket.on('leaveRoom', async (name, rid, userId) => {
-      try {
-        const user = await userController.checkUser(name);
-        const arrayToRemoveFrom = nickObjs[rid];
-        const updatedArray = arrayToRemoveFrom.filter(item => item.userId !== userId);
-        nickObjs[rid] = updatedArray;
-        chatSpace.to(rid).emit('getUsers', nickObjs[rid]);
-        socket.leave(rid.toString());
-        // cb({ isOk: true });
-      } catch (error) {
-        // cb({ isOk: false, message: error.message });
-      }
-    });
+    timerModule(socket, userId, groupId);
 
-    // 채팅 메시지를 보내는 것을 처리합니다.
-    // socket.on('sendMessage', async (rid, name, receivedMessage, cb) => {
-    //   try {
-    //     console.log('rid는', rid);
-    //     const user = await userController.checkUser(name);
-    //     let receiver;
-    //     if (user) {
-    //       const message = await userController.saveChat(rid, receiver, receivedMessage, user);
-    //       chatSpace.to(rid.toString()).emit('message', message);
-
-    //       return cb({ isOk: true });
-    //     }
-    //   } catch (error) {
-    //     cb({ isOk: false, error: error.message });
-    //   }
-    // });
+    console.log(nickObjs, 'nickObjs2');
 
     // 사용자가 연결을 해제하는 것을 처리합니다.
     socket.on('disconnect', async () => {
       const user = await userController.deleteUser(socket.id);
-      socket.emit('test', 'byebye');
+
+      // 유저가 떠날 때 nickObjs 값에서 삭제
+      const arrayToRemoveFrom = nickObjs[groupId];
+      if (arrayToRemoveFrom && arrayToRemoveFrom.length > 0) {
+        const updatedArray = arrayToRemoveFrom.filter(item => item.userId !== userId);
+        nickObjs[groupId] = updatedArray;
+        groupSpace.to(groupId).emit('leaveRoom', nickObjs[groupId]);
+      }
+
       console.log('사용자가 소켓 연결을 해제했습니다');
     });
   });
