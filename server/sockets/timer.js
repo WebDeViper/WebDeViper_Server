@@ -23,4 +23,16 @@ const cron = require('node-cron');
 //     });
 //   });
 // };
-module.exports = function (socket) {};
+module.exports = function (socket, userId, groupId) {
+  console.log(userId, groupId, 'timer module!!');
+  socket.on('setTimer', async data => {
+    try {
+      console.log('setTimer!!!');
+      const groupTimer = await timerController.getGroupTimer(groupId);
+      console.log(groupTimer, ':::');
+      socket.emit('getTimer', groupTimer);
+    } catch (err) {
+      console.log(err);
+    }
+  });
+};
