@@ -8,49 +8,49 @@ module.exports = function (io) {
   let name; // 사용자의 이름을 저장하는 변수
   const nickObjs = {}; //{socket.id:nick1,socket.id:nick2}
 
-  function updateList() {
-    io.emit('updateNicks', nickObjs); // 전체 사용자 닉네임 모음 객체 전달
-  }
+  // function updateList() {
+  //   io.emit('updateNicks', nickObjs); // 전체 사용자 닉네임 모음 객체 전달
+  // }
   groupSpace.on('connection', async socket => {
     console.log('client is connected in chat!!', socket.id);
     const userId = socket.handshake.auth.userId;
     const groupId = socket.handshake.auth.groupId;
-    console.log('>>>>>', userId, groupId);
-    const chatModuleInstance = chatModule(socket, userController, nickObjs, updateList);
+    const userNickName = socket.handshake.auth.userNickName;
+    console.log('>>>>>', userId, groupId, userNickName, 'userNickName');
+    const chatModuleInstance = chatModule(socket, userController, groupId, userNickName);
 
-    socket.on('joinRoom', async (joinUser, rid, cb) => {
+    socket.on('joinRoom', async cb => {
       try {
-        const user = await userController.checkUser(joinUser);
+        const user = await userController.checkUser(userNickName);
 
-        const isMember = await userController.joinRoom(rid, user);
+        const isMember = await userController.joinRoom(groupId, user);
         if (!isMember) {
           cb({ isOk: false, msg: '해당 그룹의 멤버가 아닙니다.' });
         } else {
-          socket.join(rid.toString());
-          if (!nickObjs[rid]) {
-            nickObjs[rid] = []; // 배열이 없으면 초기화
+          socket.join(groupId);
+          if (!nickObjs[groupId]) {
+            nickObjs[groupId] = []; // 배열이 없으면 초기화
           }
 
           // 소켓 ID가 이미 존재하는지 확인
-          const existingUserIndex = nickObjs[rid].findIndex(data => data.userId === user.user_id);
+          const existingUserIndex = nickObjs[groupId].findIndex(data => data.userId === userId);
 
           if (existingUserIndex === -1) {
             // 존재하지 않으면 새 항목 추가
-            nickObjs[rid].push({
-              userId: user.user_id,
-              nickName: joinUser,
+            nickObjs[groupId].push({
+              userId: userId,
+              userNickName: userNickName,
               userProfile: user.image_path,
             });
           }
+
           // 소켓 ID에 해당하는 nickName을 업데이트하고 싶다면 아래 부분이 필요
           // else {
           //   // If present, update the existing entry
           //   nickObjs[rid][existingUserIndex].nickName = joinUser;
           // }
-
-          chatModuleInstance.handleJoinRoom(joinUser, rid, cb);
-          groupSpace.to(rid).emit('getUsers', nickObjs[rid]);
-          console.log(user, 'nickObjsnickObjs');
+          chatModuleInstance.handleJoinRoom(cb);
+          groupSpace.to(groupId).emit('getUsers', nickObjs[groupId]);
         }
 
         // const welcomeMessage = {
