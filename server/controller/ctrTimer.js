@@ -148,8 +148,21 @@ exports.updateStopWatch = async (data, userId) => {
     }
   }
 };
+exports.getUserTimer = async userId => {
+  try {
+    const isTimer = await getTimerInfo(userId, today);
+    if (result) {
+      return result;
+    } else {
+      const newTimer = await Timer.create({ user_id: userId, 'daily.date': today });
+      return newTimer;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-exports.getGroupTimer = async (groupId, today) => {
+exports.getGroupTimer = async groupId => {
   try {
     const userRelations = await UserGroupRelation.findAll({
       attributes: ['user_id'],

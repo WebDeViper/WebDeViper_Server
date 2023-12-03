@@ -1,4 +1,5 @@
 const userController = require('../controller/ctrChat'); // 사용자 컨트롤러를 가져옵니다.
+const timerController = require('../controller/ctrTimer');
 const { User, Group, Room, mongoose } = require('../schemas/schema');
 const chatModule = require('./chat');
 const timerModule = require('./timer');
@@ -31,7 +32,7 @@ module.exports = function (io) {
     socket.on('joinRoom', async () => {
       try {
         const user = await userController.checkUser(userNickName);
-
+        const groupTimer = await timerController.getGroupTimer(groupId);
         const isMember = await userController.joinRoom(groupId, user);
         if (!isMember) {
           cb({ isOk: false, msg: '해당 그룹의 멤버가 아닙니다.' });
@@ -50,6 +51,7 @@ module.exports = function (io) {
               userId: userId,
               userNickName: userNickName,
               userProfile: user.image_path,
+              groupId: groupTimer,
             });
           }
           groupSpace.to(groupId).emit('getUsers', nickObjs[groupId]);
@@ -66,7 +68,7 @@ module.exports = function (io) {
       socket.broadcast.emit('user-connected', peerId);
     });
 
-    timerModule(socket, userId, groupId);
+    timerModule(socket, userId, groupId, nickObjs);
 
     // console.log(nickObjs, 'nickObjs2');
 
