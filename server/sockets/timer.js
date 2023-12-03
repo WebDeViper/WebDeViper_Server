@@ -23,14 +23,17 @@ const cron = require('node-cron');
 //     });
 //   });
 // };
-module.exports = function (socket, userId, groupId) {
+module.exports = function (socket, userId, groupId, nickObjs) {
   console.log(userId, groupId, 'timer module!!');
   socket.on('setTimer', async data => {
     try {
       console.log('setTimer!!!');
-      const groupTimer = await timerController.getGroupTimer(groupId);
+      const updateUserTimer = await timerController.updateStopWatch(data, userId);
+      const updateGroupTimer = await timerController.getGroupTimer(groupId);
+      console.log(updateGroupTimer, '업데이트된 그룹 타이머!!');
       console.log(groupTimer, ':::');
-      socket.emit('getTimer', groupTimer);
+      nickObjs.grouId = updateGroupTimer;
+      socket.emit('getTimer', nickObjs);
     } catch (err) {
       console.log(err);
     }
