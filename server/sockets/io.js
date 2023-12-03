@@ -7,6 +7,7 @@ module.exports = function (io) {
   const groupSpace = io.of('/chat');
   let name; // 사용자의 이름을 저장하는 변수
   const nickObjs = {}; //{socket.id:nick1,socket.id:nick2}
+  const webRTCObjs = {};
 
   // function updateList() {
   //   io.emit('updateNicks', nickObjs); // 전체 사용자 닉네임 모음 객체 전달
@@ -16,6 +17,14 @@ module.exports = function (io) {
     const userId = socket.handshake.auth.userId;
     const groupId = socket.handshake.auth.groupId;
     const userNickName = socket.handshake.auth.userNickName;
+
+    // // webRTC
+    // socket.on('join-zoom', cb => {
+    //   // console.log('>>>>>joinZoomjoinZoom', data);
+    //   console.log(cb);
+    //   // socket.join(groupId);
+    //   // socket.broadcast.to(groupId).emit('user-connected', userId);
+    // });
 
     chatModule(socket, userController, groupId, userNickName);
 
@@ -43,17 +52,23 @@ module.exports = function (io) {
               userProfile: user.image_path,
             });
           }
-          console.log(nickObjs, 'nickObjs1');
           groupSpace.to(groupId).emit('getUsers', nickObjs[groupId]);
+
+          // socket.broadcast.to(groupId).emit('user-connected', userId);
         }
+        // socket.broadcast.emit('user-connected', userId);
       } catch (error) {
         cb({ isOk: false, error: error.message });
       }
     });
 
+    socket.on('zoomJoin', peerId => {
+      socket.broadcast.emit('user-connected', peerId);
+    });
+
     timerModule(socket, userId, groupId);
 
-    console.log(nickObjs, 'nickObjs2');
+    // console.log(nickObjs, 'nickObjs2');
 
     // 사용자가 연결을 해제하는 것을 처리합니다.
     socket.on('disconnect', async () => {
