@@ -32,7 +32,7 @@ module.exports = function (io) {
     socket.on('joinRoom', async () => {
       try {
         const user = await userController.checkUser(userNickName);
-        const groupTimer = await timerController.getGroupTimer(groupId);
+
         const isMember = await userController.joinRoom(groupId, user);
         if (!isMember) {
           cb({ isOk: false, msg: '해당 그룹의 멤버가 아닙니다.' });
@@ -49,6 +49,10 @@ module.exports = function (io) {
             // 존재하지 않으면 새 항목 추가
             //이 경우 user의 타이머도 함께 불러온다
             const userTimerInfo = await timerController.getUserTimer(userId);
+            // const userTimerInfo = await timerController.updateStopWatch(
+            //   { subject: '수학', time: 70, is_running: 'y' },
+            //   userId
+            // );
 
             console.log('유저의 타이머 인포!!', userTimerInfo);
             nickObjs[groupId].push({

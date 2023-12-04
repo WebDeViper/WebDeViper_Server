@@ -24,17 +24,25 @@ const cron = require('node-cron');
 //   });
 // };
 module.exports = function (socket, userId, groupId, nickObjs) {
-  console.log(userId, groupId, 'timer module!!');
+  console.log(userId, groupId, nickObjs, 'timer module!!');
   socket.on('setTimer', async data => {
     try {
       console.log('setTimer!!!');
+
       const updateUserTimer = await timerController.updateStopWatch(data, userId);
-      // const updateGroupTimer = await timerController.getGroupTimer(groupId);
       console.log(updateUserTimer, '업데이트된 유저 타이머!!');
-      console.log(groupTimer, ':::');
-      nickObjs.totalTime = updateUserTimer.total_time;
-      nickObjs.is_running = updateUserTimer.is_running;
-      socket.emit('getTimer', nickObjs);
+      // Update totalTime and isRunning for the specific user
+      if (!nickObjs[groupId]) return;
+      const newNickObjs = nickObjs[groupId].map(user => {
+        if (user.userId === userId) {
+          return { ...user, isRunning: updateUserTimer.is_running, totalTime: updateUserTimer.total_time };
+        }
+        return user;
+      });
+      nickObjs[groupId] = newNickObjs;
+      console.log(nickObjs[groupId], '^^^^^');
+
+      socket.emit('updateUser', nickObjs[groupId]);
     } catch (err) {
       console.log(err);
     }
