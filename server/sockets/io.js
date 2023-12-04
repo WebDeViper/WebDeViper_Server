@@ -61,6 +61,7 @@ module.exports = function (io) {
               userProfile: user.image_path,
               totalTime: userTimerInfo.total_time,
               isRunning: userTimerInfo.is_running,
+              startTime: userTimerInfo.start_time,
             });
           }
           groupSpace.to(groupId).emit('getUsers', nickObjs[groupId]);

@@ -37,6 +37,7 @@ const timerSchema = new Schema({
   user_id: { type: String },
   total_time: { type: Number, default: 0 },
   is_running: { type: String, default: 'n', maxlength: 1 }, // Change Boolean to String
+  start_time: { type: Date, default: Date.now },
   daily: {
     date: { type: Date, default: Date.now }, // 오늘 날짜
     data: [

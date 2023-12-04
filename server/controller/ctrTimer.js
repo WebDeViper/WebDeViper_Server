@@ -81,7 +81,7 @@ async function getTimerInfo(userId, date) {
 }
 exports.updateStopWatch = async (data, userId) => {
   console.log('ctrTimer@@', data, userId);
-  const { subject, time, is_running } = data;
+  const { subject, time, is_running, startTime } = data;
 
   const result = await Timer.findOne({
     user_id: userId,
@@ -104,8 +104,12 @@ exports.updateStopWatch = async (data, userId) => {
       ],
       total_time: time, // 새로운 타이머가 추가될 때 total_time에 초기값으로 설정
     });
+
     console.log(newTimer);
     const timerInfo = await Timer.findOne({ user_id: userId, 'daily.data.title': subject, 'daily.date': today });
+    if (startTime) {
+      timerInfo.start_time = startTime;
+    }
     return timerInfo;
   } else {
     const existingSubjectIndex = result.daily.data.findIndex(item => item.title === subject);
@@ -128,6 +132,9 @@ exports.updateStopWatch = async (data, userId) => {
         }
       );
       const timerInfo = await Timer.findOne({ user_id: userId, 'daily.data.title': subject, 'daily.date': today });
+      if (startTime) {
+        timerInfo.start_time = startTime;
+      }
       console.log('Timer Updated:', timerInfo);
       return timerInfo;
     } else {
@@ -142,6 +149,7 @@ exports.updateStopWatch = async (data, userId) => {
         },
         {
           $set: {
+            start_time: startTime,
             'daily.data.$.timer': time,
             is_running,
           },
@@ -151,6 +159,9 @@ exports.updateStopWatch = async (data, userId) => {
 
       console.log('Timer Updated:', updatedTimer);
       const timerInfo = await Timer.findOne({ user_id: userId, 'daily.data.title': subject, 'daily.date': today });
+      if (startTime) {
+        timerInfo.start_time = startTime;
+      }
       return timerInfo;
     }
   }
