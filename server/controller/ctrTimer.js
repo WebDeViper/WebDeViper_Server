@@ -111,7 +111,7 @@ exports.updateStopWatch = async (data, userId) => {
     const existingSubjectIndex = result.daily.data.findIndex(item => item.title === subject);
 
     if (existingSubjectIndex === -1) {
-      // Case 2: Document exists but the subject is not present in the array
+      // Case 2: 타이머는 있지만 해당 과목이 없는 경우
       const updatedTimer = await Timer.updateOne(
         {
           user_id: userId,
@@ -131,6 +131,7 @@ exports.updateStopWatch = async (data, userId) => {
       console.log('Timer Updated:', timerInfo);
       return timerInfo;
     } else {
+      //해당과목의 타이머가 있는 경우
       const oldTimerValue = result.daily.data[existingSubjectIndex].timer;
 
       const updatedTimer = await Timer.updateOne(
@@ -142,6 +143,7 @@ exports.updateStopWatch = async (data, userId) => {
         {
           $set: {
             'daily.data.$.timer': time,
+            is_running,
           },
           $inc: { total_time: time - oldTimerValue },
         }
