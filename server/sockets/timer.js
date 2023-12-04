@@ -35,7 +35,12 @@ module.exports = function (socket, userId, groupId, nickObjs, groupSpace) {
       if (!nickObjs[groupId]) return;
       const newNickObjs = nickObjs[groupId].map(user => {
         if (user.userId === userId) {
-          return { ...user, isRunning: updateUserTimer.is_running, totalTime: updateUserTimer.total_time };
+          return {
+            ...user,
+            isRunning: updateUserTimer.is_running,
+            totalTime: updateUserTimer.total_time,
+            startTime: updateUserTimer.start_time,
+          };
         }
         return user;
       });
