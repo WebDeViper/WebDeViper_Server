@@ -47,11 +47,16 @@ module.exports = function (io) {
 
           if (existingUserIndex === -1) {
             // 존재하지 않으면 새 항목 추가
+            //이 경우 user의 타이머도 함께 불러온다
+            const userTimerInfo = await timerController.getUserTimer(userId);
+
+            console.log('유저의 타이머 인포!!', userTimerInfo);
             nickObjs[groupId].push({
               userId: userId,
               userNickName: userNickName,
               userProfile: user.image_path,
-              groupId: groupTimer,
+              totalTime: userTimerInfo.total_time,
+              isRunning: userTimerInfo.is_running,
             });
           }
           groupSpace.to(groupId).emit('getUsers', nickObjs[groupId]);

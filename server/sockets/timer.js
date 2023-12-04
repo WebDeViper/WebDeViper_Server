@@ -29,10 +29,11 @@ module.exports = function (socket, userId, groupId, nickObjs) {
     try {
       console.log('setTimer!!!');
       const updateUserTimer = await timerController.updateStopWatch(data, userId);
-      const updateGroupTimer = await timerController.getGroupTimer(groupId);
-      console.log(updateGroupTimer, '업데이트된 그룹 타이머!!');
+      // const updateGroupTimer = await timerController.getGroupTimer(groupId);
+      console.log(updateUserTimer, '업데이트된 유저 타이머!!');
       console.log(groupTimer, ':::');
-      nickObjs.grouId = updateGroupTimer;
+      nickObjs.totalTime = updateUserTimer.total_time;
+      nickObjs.is_running = updateUserTimer.is_running;
       socket.emit('getTimer', nickObjs);
     } catch (err) {
       console.log(err);
