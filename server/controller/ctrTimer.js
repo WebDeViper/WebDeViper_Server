@@ -105,6 +105,8 @@ exports.updateStopWatch = async (data, userId) => {
       total_time: time, // 새로운 타이머가 추가될 때 total_time에 초기값으로 설정
     });
     console.log(newTimer);
+    const timerInfo = await Timer.findOne({ user_id: userId, 'daily.data.title': subject, 'daily.date': today });
+    return timerInfo;
   } else {
     const existingSubjectIndex = result.daily.data.findIndex(item => item.title === subject);
 
@@ -125,8 +127,9 @@ exports.updateStopWatch = async (data, userId) => {
           $inc: { total_time: time },
         }
       );
-
-      console.log('Timer Updated:', updatedTimer);
+      const timerInfo = await Timer.findOne({ user_id: userId, 'daily.data.title': subject, 'daily.date': today });
+      console.log('Timer Updated:', timerInfo);
+      return timerInfo;
     } else {
       const oldTimerValue = result.daily.data[existingSubjectIndex].timer;
 
@@ -145,14 +148,16 @@ exports.updateStopWatch = async (data, userId) => {
       );
 
       console.log('Timer Updated:', updatedTimer);
+      const timerInfo = await Timer.findOne({ user_id: userId, 'daily.data.title': subject, 'daily.date': today });
+      return timerInfo;
     }
   }
 };
 exports.getUserTimer = async userId => {
   try {
-    const isTimer = await getTimerInfo(userId, today);
-    if (result) {
-      return result;
+    const timer = await getTimerInfo(userId, today);
+    if (timer) {
+      return timer;
     } else {
       const newTimer = await Timer.create({ user_id: userId, 'daily.date': today });
       return newTimer;
