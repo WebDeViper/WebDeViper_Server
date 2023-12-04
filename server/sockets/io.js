@@ -77,7 +77,7 @@ module.exports = function (io) {
       socket.broadcast.emit('user-connected', peerId);
     });
 
-    timerModule(socket, userId, groupId, nickObjs);
+    timerModule(socket, userId, groupId, nickObjs, groupSpace);
 
     // console.log(nickObjs, 'nickObjs2');
 

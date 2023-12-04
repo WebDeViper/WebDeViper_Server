@@ -23,7 +23,7 @@ const cron = require('node-cron');
 //     });
 //   });
 // };
-module.exports = function (socket, userId, groupId, nickObjs) {
+module.exports = function (socket, userId, groupId, nickObjs, groupSpace) {
   console.log(userId, groupId, nickObjs, 'timer module!!');
   socket.on('setTimer', async data => {
     try {
@@ -42,7 +42,7 @@ module.exports = function (socket, userId, groupId, nickObjs) {
       nickObjs[groupId] = newNickObjs;
       console.log(nickObjs[groupId], '^^^^^');
 
-      socket.emit('updateUser', nickObjs[groupId]);
+      groupSpace.to(groupId).emit('updateUser', nickObjs[groupId]);
     } catch (err) {
       console.log(err);
     }
