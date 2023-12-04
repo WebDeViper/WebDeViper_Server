@@ -35,10 +35,18 @@ module.exports = function (socket, userId, groupId, nickObjs, groupSpace) {
       if (!nickObjs[groupId]) return;
       const newNickObjs = nickObjs[groupId].map(user => {
         if (user.userId === userId) {
+          let totalTime;
+
+          if (updateUserTimer.is_running === 'y') {
+            totalTime = updateUserTimer.total_time + (Date.now() - updateUserTimer.start_time) / 1000;
+          } else {
+            totalTime = updateUserTimer.total_time;
+          }
+
           return {
             ...user,
             isRunning: updateUserTimer.is_running,
-            totalTime: updateUserTimer.total_time,
+            totalTime: totalTime,
             startTime: updateUserTimer.start_time,
           };
         }
