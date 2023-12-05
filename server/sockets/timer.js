@@ -35,10 +35,37 @@ module.exports = function (socket, userId, groupId, nickObjs, groupSpace) {
       if (!nickObjs[groupId]) return;
       const newNickObjs = nickObjs[groupId].map(user => {
         if (user.userId === userId) {
+          return {
+            ...user,
+            isRunning: updateUserTimer.is_running,
+            totalTime: updateUserTimer.total_time,
+            startTime: updateUserTimer.start_time,
+          };
+        }
+        return user;
+      });
+      nickObjs[groupId] = newNickObjs;
+
+      groupSpace.to(groupId).emit('updateUser', nickObjs[groupId]);
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  socket.on('initTimer', async data => {
+    try {
+      console.log('initTimer!!!');
+
+      const updateUserTimer = await timerController.updateStopWatch(data, userId);
+      console.log(updateUserTimer, '업데이트된 유저 타이머!!');
+      // Update totalTime and isRunning for the specific user
+      if (!nickObjs[groupId]) return;
+      const newNickObjs = nickObjs[groupId].map(user => {
+        if (user.userId === userId) {
           let totalTime;
 
           if (updateUserTimer.is_running === 'y') {
-            totalTime = updateUserTimer.total_time + (Date.now() - updateUserTimer.start_time) / 1000;
+            totalTime = updateUserTimer.total_time + (+new Date() - +updateUserTimer.start_time) / 1000;
           } else {
             totalTime = updateUserTimer.total_time;
           }
@@ -53,7 +80,6 @@ module.exports = function (socket, userId, groupId, nickObjs, groupSpace) {
         return user;
       });
       nickObjs[groupId] = newNickObjs;
-      console.log(nickObjs[groupId], '^^^^^');
 
       groupSpace.to(groupId).emit('updateUser', nickObjs[groupId]);
     } catch (err) {
