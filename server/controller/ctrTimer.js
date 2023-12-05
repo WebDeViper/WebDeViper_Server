@@ -3,7 +3,7 @@ const { User, Group, UserGroupRelation, Sequelize } = require('../models');
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
-// exports.getTimerByUser = async (req, res) => {
+
 //   try {
 //     // const currentId = '654a7551267f25b768be3178';
 //     const currentId = res.locals.decoded.userInfo.id;
@@ -88,11 +88,9 @@ exports.updateStopWatch = async (data, userId) => {
     'daily.date': today, // 오늘 날짜
   });
 
-  console.log(result);
-
   if (!result) {
     // Case 1: 해당 유저의 날짜에 대한 Timer 도큐먼트가 없는 경우
-    const newTimer = await Timer.create({
+    const newTimerData = {
       user_id: userId,
       is_running,
       'daily.date': today,
@@ -103,13 +101,14 @@ exports.updateStopWatch = async (data, userId) => {
         },
       ],
       total_time: time, // 새로운 타이머가 추가될 때 total_time에 초기값으로 설정
-    });
+    };
 
+    // Include startTime if it exists in the data, otherwise use a default value
+    newTimerData.start_time = startTime ? new Date(startTime) : new Date(); // Use current time as default
+
+    const newTimer = await Timer.create(newTimerData);
     console.log(newTimer);
     const timerInfo = await Timer.findOne({ user_id: userId, 'daily.data.title': subject, 'daily.date': today });
-    if (startTime) {
-      timerInfo.start_time = startTime;
-    }
     return timerInfo;
   } else {
     const existingSubjectIndex = result.daily.data.findIndex(item => item.title === subject);
@@ -121,6 +120,7 @@ exports.updateStopWatch = async (data, userId) => {
           user_id: userId,
           'daily.date': today,
         },
+        { $set: { start_time: new Date(startTime) } },
         {
           $push: {
             'daily.data': {
@@ -131,10 +131,8 @@ exports.updateStopWatch = async (data, userId) => {
           $inc: { total_time: time },
         }
       );
-      const timerInfo = await Timer.findOne({ user_id: userId, 'daily.data.title': subject, 'daily.date': today });
-      if (startTime) {
-        timerInfo.start_time = startTime;
-      }
+      console.log('^^^^', updatedTimer);
+      const timerInfo = await Timer.findOne({ user_id: userId, 'daily.date': today });
       console.log('Timer Updated:', timerInfo);
       return timerInfo;
     } else {
@@ -149,7 +147,7 @@ exports.updateStopWatch = async (data, userId) => {
         },
         {
           $set: {
-            start_time: startTime,
+            start_time: startTime ? new Date(startTime) : new Date(), // Use current time as default
             'daily.data.$.timer': time,
             is_running,
           },
@@ -159,13 +157,12 @@ exports.updateStopWatch = async (data, userId) => {
 
       console.log('Timer Updated:', updatedTimer);
       const timerInfo = await Timer.findOne({ user_id: userId, 'daily.data.title': subject, 'daily.date': today });
-      if (startTime) {
-        timerInfo.start_time = startTime;
-      }
+      console.log(timerInfo, 'timerInfotimerInfo');
       return timerInfo;
     }
   }
 };
+
 exports.getUserTimer = async userId => {
   try {
     const timer = await getTimerInfo(userId, today);
@@ -210,4 +207,23 @@ exports.getGroupTimer = async groupId => {
     console.error('Error fetching user timers:', error);
     throw error;
   }
+};
+exports.nickObjsUpdateTimer = async (newNickObjs, userId) => {
+  newNickObjs.map(user => {
+    if (user.userId === userId) {
+      Timer.updateOne(
+        {
+          user_id: userId,
+          'daily.data': today,
+        },
+        {
+          $set: {
+            start_time: user.startTime,
+            total_time: user.totalTime,
+            is_running: user.isRunning,
+          },
+        }
+      );
+    }
+  });
 };
