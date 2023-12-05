@@ -80,7 +80,8 @@ module.exports = function (socket, userId, groupId, nickObjs, groupSpace) {
         return user;
       });
       nickObjs[groupId] = newNickObjs;
-
+      //db에 저장하는 작업
+      await timerController.nickObjsUpdateTimer(newNickObjs, userId);
       groupSpace.to(groupId).emit('updateUser', nickObjs[groupId]);
     } catch (err) {
       console.log(err);
