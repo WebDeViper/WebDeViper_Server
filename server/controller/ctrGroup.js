@@ -36,8 +36,8 @@ exports.getGroups = async (req, res) => {
       isEnd = true;
     } else {
       isEnd = false;
+      allGroups.pop();
     }
-    allGroups.pop();
     const combinedResult = await Promise.all(
       allGroups.map(async group => {
         // leader_id 수정
