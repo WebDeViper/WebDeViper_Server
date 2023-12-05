@@ -163,7 +163,7 @@ exports.saveChat = async (rid, receiver, message, user) => {
 exports.getChatLog = async rid => {
   try {
     const chats = await Chat.find({ room_id: rid });
-    console.log('이전 채팅 기록 ->', chats);
+    // console.log('이전 채팅 기록 ->', chats);
 
     // const msg = {
     //   chat: chats.chat,
