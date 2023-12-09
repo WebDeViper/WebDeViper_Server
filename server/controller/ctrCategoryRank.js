@@ -170,7 +170,7 @@ async function getCachedGroupRanking(userCategory, date) {
 
   const sortedGroupRankingData = (await groupRankingDataPromise).sort((a, b) => b.averageTime - a.averageTime);
 
-  rankingCache.set(cacheKey, sortedGroupRankingData, 21600); // 6시간 동안 유효
+  rankingCache.set(cacheKey, sortedGroupRankingData, 3600); // 6시간 동안 유효
 
   return sortedGroupRankingData.slice(0, 10);
 }
@@ -188,7 +188,7 @@ async function getCachedUserRanking(userCategory, date) {
   const [sameCategoryUsers, rankingData] = await Promise.all([sameCategoryUsersPromise, rankingDataPromise]);
   const result = rankingData;
 
-  rankingCache.set(cacheKey, result, 21600);
+  rankingCache.set(cacheKey, result, 3600);
 
   return result;
 }
