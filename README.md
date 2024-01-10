@@ -1,235 +1,73 @@
-# 열줌쉬어
+# 열줌쉬어란?
 
-### 학습자를 위한 웹 서비스로 스탑워치/타이머 기능을 통해 실시간으로 공부시간을 기록하고, 가입한 그룹 내에 공부량을 시각화하여 보여주는 웹사이트 구현 프로젝트 (10/19 - 11/10)
+학습자를 위한 웹 서비스로 스탑워치 / 타이머 기능을 통해 실시간으로 공부시간을 기록하고, 가입한 그룹 내에 공부량을 시각화하여 보여주는 웹사이트
 
-&nbsp;
-## 시작 가이드
+## 웹사이트 주소
 
-### Requirements
+<a href="http://ten-zoom.site/">http://ten-zoom.site/</a>
 
-- [Node.js 20.7.0](https://www.npmjs.com/package/node/v/20.7.0)
-- [Npm 10.2.0](https://www.npmjs.com/package/npm/v/10.2.0)
+## 기술 스택
 
-### Installation
+### Frontend
 
-#### Front-End
+<img src="https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=TypeScript&logoColor=white"/></a>
+<img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=white"/></a>
+<img src="https://img.shields.io/badge/Tailwindcss-rgb(56%2C%20189%2C%20248)?style=flat-square&logo=tailwindcss&logoColor=white"/></a>
+<img src="https://img.shields.io/badge/Vite-B73BFE?style=flat-square&logo=vite&logoColor=FFD62E" /></a>
+<img src="https://img.shields.io/badge/Redux-593D88?style=flat-square&logo=redux&logoColor=white" /></a>
+<img src="https://img.shields.io/badge/Socket.io--Clinet-010101?&style=flat-square&logo=Socket.io&logoColor=white" /></a>
 
-```bash
-$ git clone https://github.com/WebDeViper/WebDeViper_Client.git
-```
+### Backend
 
-```
-$ npm i
-$ npm run build
-$ npm run dev
-```
+<img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white"/></a>
+<img src="https://img.shields.io/badge/Express-404D59?style=flat-square&logo=express&logoColor=white"/></a>
+<img src="https://img.shields.io/badge/Sequelize-52B0E7?style=flat-square&logo=Sequelize&logoColor=white" /></a>
+<img src="https://img.shields.io/badge/Socket.io-010101?&style=flat-square&logo=Socket.io&logoColor=white" /></a>
 
-#### Back-End
+### Database
 
-```bash
-$ git clone https://github.com/WebDeViper/WebDeViper_Server.git
-```
+<img src="https://img.shields.io/badge/mysql-005C84?style=flat-square&logo=mysql&logoColor=white" /></a>
+<img src="https://img.shields.io/badge/MongoDB-4EA94B?style=flat-square&logo=mongodb&logoColor=white" /></a>
 
-```
-$ npm i
-$ node app
-```
+### Server
+
+<img src="https://img.shields.io/badge/nginx-%23009639.svg?style=flat-square&logo=nginx&logoColor=white" /></a>
+<img src="https://img.shields.io/badge/AWS-%23FF9900.svg?style=flat-square&logo=amazon-aws&logoColor=white" /></a>
 
 ## 팀 소개
 
-### 🧑‍🤝‍🧑 팀 구성
+### 팀 구성
 
-| 프론트 개발                                                                | 프론트 개발                                                                | 백엔드 개발                                                                | 백엔드 개발                                                                | 백엔드 개발                                                                |
-| -------------------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| <img src="./readme/img/gi.jpeg" width="100px" height="100px" alt="문석민"> | <img src="./readme/img/ku.jpeg" width="100px" height="100px" alt="김태훈"> | <img src="./readme/img/ke.jpeg" width="100px" height="100px" alt="홍민영"> | <img src="./readme/img/do.jpeg" width="100px" height="100px" alt="김세은"> | <img src="./readme/img/ta.jpeg" width="100px" height="100px" alt="김태균"> |
-| [@seokmin](https://github.com/msm0748)                                     | [@taehoon](https://github.com/hoonsdev)                                    | [@minyeong](https://github.com/HongMinYeong)                               | [@seeun](https://github.com/seeun0210)                                     | [@taegyun](https://github.com/hotdog7778)                                  |
-| 문석민                                                                     | 김태훈                                                                     | 홍민영                                                                     | 김세은                                                                     | 김태균                                                                     |
+| 프론트 개발                                                                                                             | 프론트 개발                                                                                                              | 백엔드 개발                                                                                                                  | 백엔드 개발                                                                                                               | 백엔드 개발                                                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| [![문석민](https://github.com/WebDeViper/WebDeViper_Server/raw/develop/readme/img/gi.jpeg)](https://github.com/msm0748) | [![김태훈](https://github.com/WebDeViper/WebDeViper_Server/raw/develop/readme/img/ku.jpeg)](https://github.com/hoonsdev) | [![홍민영](https://github.com/WebDeViper/WebDeViper_Server/raw/develop/readme/img/ke.jpeg)](https://github.com/HongMinYeong) | [![김세은](https://github.com/WebDeViper/WebDeViper_Server/raw/develop/readme/img/do.jpeg)](https://github.com/seeun0210) | [![김태균](https://github.com/WebDeViper/WebDeViper_Server/raw/develop/readme/img/ta.jpeg)](https://github.com/hotdog7778) |
+| [@seokmin](https://github.com/msm0748)                                                                                  | [@taehoon](https://github.com/hoonsdev)                                                                                  | [@minyeong](https://github.com/HongMinYeong)                                                                                 | [@seeun](https://github.com/seeun0210)                                                                                    | [@taegyun](https://github.com/hotdog7778)                                                                                  |
+| 문석민                                                                                                                  | 김태훈                                                                                                                   | 홍민영                                                                                                                       | 김세은                                                                                                                    | 김태균                                                                                                                     |
 
-&nbsp;
-|팀원명 💁‍♂️💁‍♂️|역할(파일명 기준)|
-|:--:|:--|
-[김태훈 ](https://github.com/hoonsdev)| Front) ChatPage, CreateGroupPage, DetailGroupPage, MainPage, NoticePage, StudyPage, 와이어프레임설계, 발표|
-|[문석민 ](https://github.com/msm0748)| Front) AlarmPage, CreateNoticePage, DetailNoticePage, RankingPage, SignupPage, 와이어프레임설계 |
-|[김세은 ](https://github.com/seeun0210)| Back) CategoryRank(카테고리별/개인별 랭크 기능), Notice(공지사항 CRUD), Notification(알림 기능), Timer(타이머 기능), Todo(todo CRUD), models, schemas, DB설계, ppt, 발표|
-|[김태균 ](https://github.com/hotdog7778)| Back) Auth(토큰 기반 인증 기능), User(소셜 로그인 기능), models, schemas, 배포, DB설계, ppt, 발표 |
-|[홍민영 ](https://github.com/HongMinYeong)| Back) Chat(그룹별 채팅 기능), Group(Group 관련 CRUD), models, schemas, DB설계, ppt |
+### 담당역할
 
+| 팀원명        | 역할                                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------------------ |
+| 김태훈(Front) | 채팅 구현, 그룹 생성 페이지, 그룹 상세페이지, 메인 페이지, 공지사항 페이지, 랭킹 페이지, 마이페이지    |
+| 문석민(Front) | 타이머 구현, TODO 캘린더 페이지, 공지사항 생성 및 수정 페이지, 회원가입 페이지, 로그인 모달, 알림 기능 |
+| 김세은(Back)  | 알림 기능, 타이머 기능, TODO API, 공지사항 API, 랭킹 API, DB 설계                                      |
+| 김태균(Back)  | JWT 토큰 기반 인증 기능, 소셜 로그인, DB 설계, 배포                                                    |
+| 홍민영(Back)  | 채팅 기능, 그룹 API, DB 설계, 배포                                                                     |
 
-### 팀원별 역할
-&nbsp;
-사진으로 넣을 예정
+## 기능 리스트
 
-&nbsp;
-### ⚙️ 개발 환경
-&nbsp;
-**[FE]**
-![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![React](https://img.shields.io/badge/react-%6333AFB.svg?style=for-the-badge&logo=react&logoColor=%#61DAFB) ![Tailwind CSS](https://img.shields.io/badge/tailwindcss-06B6D4.svg?style=for-the-badge&logo=tailwindcss&logoColor=white)
+<img src="https://github.com/WebDeViper/WebDeViper_Client/assets/78075709/54345155-c78a-4ad3-a521-8fdd514d2a14" /></a>
 
-**[BE]** ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+## 화면 구성
 
-**[DB]** ![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?style=for-the-badge&logo=mysql&logoColor=white) ![Sequelize](https://img.shields.io/badge/Sequelize-52B0E7?style=for-the-badge&logo=Sequelize&logoColor=white)
-![MongoDB](https://img.shields.io/badge/mongodb-47A248.svg?style=for-the-badge&logo=mysql&logoColor=white)
-![Mongoose](https://img.shields.io/badge/mongoose-880000.svg?style=for-the-badge&logo=mysql&logoColor=white)
+|                                                   스터디 페이지                                                    |                                                     알림 기능                                                      |
+| :----------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------: |
+| <img src="https://github.com/WebDeViper/WebDeViper_Client/assets/78075709/829d48e6-f662-46b8-8ad2-80be21461550" /> | <img src="https://github.com/WebDeViper/WebDeViper_Client/assets/78075709/80cbc9c0-e9c6-4c28-aed2-afb9c6557cff" /> |
 
-**[SERVER]**
-![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
+|                                                   캘린더 페이지                                                    |                                                  공지사항 페이지                                                   |
+| :----------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------: |
+| <img src="https://github.com/WebDeViper/WebDeViper_Client/assets/78075709/87def7e7-8b34-4547-adcd-f3cb3ed911d3" /> | <img src="https://github.com/WebDeViper/WebDeViper_Client/assets/78075709/7eedd630-0344-4d42-8c91-dde69f293374" /> |
 
-**[COMMUNITY]**
-![SLACK](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)
-![NOTION](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white)
-&nbsp;
-
-## ERD
-
-&nbsp;
-<img src="./readme/img/ERD.jpeg" width="600px" height="600px">
-&nbsp;
-## 와이어 프레임
-
-&nbsp;
-<img src="./readme/img/와이어프레임.jpeg" width="600px" height="600px">
-
-&nbsp;
-
-
-
-## 디렉토리 구조
-&nbsp;
-```bash
-├── README.md
-├── api.http
-├── app.js
-├── config
-│   ├── config.json
-│   └── email.js
-├── controller
-│   ├── Canswer.js
-│   ├── Cboard.js
-│   ├── Ccomment.js
-│   ├── Cmain.js
-│   ├── Cprofile.js
-│   ├── Cquestion.js
-│   ├── Cupload.js
-│   └── Cuser.js
-├── middlewares
-│   ├── badWordsFilter
-│   │   └── badWordsFilter.js
-│   ├── multer
-│   │   └── multerConfig.js
-│   ├── needToLogin.js
-│   ├── session
-│   │   └── session.js
-│   └── swagger
-│       ├── swagger.js
-│       └── swaggerDefinition.json
-├── models
-│   ├── Answer.js
-│   ├── Board.js
-│   ├── Comment.js
-│   ├── Like.js
-│   ├── Question.js
-│   ├── User.js
-│   └── index.js
-├── routes
-│   ├── boardRouter.js
-│   ├── index.js
-│   ├── profileRouterToBeDelete.js
-│   ├── questionRouter.js
-│   ├── uploadRouter.js
-│   └── usersRouter.js
-├── static
-│   ├── editor
-│   │   ├── ckeditor.js
-│   │   └── editorStyle.css
-│   ├── editorImg
-│   ├── img
-│   ├── js
-│   │   ├── boardDetail.js
-│   │   ├── edit.js
-│   │   ├── index.js
-│   │   ├── listMain.js
-│   │   ├── main.js
-│   │   ├── post.js
-│   │   ├── profile.js
-│   │   └── questionDetail.js
-│   ├── profileImg
-│   └── svg
-└── views
-    ├── 404.ejs
-    ├── community
-    │   ├── boardDetail.ejs
-    │   ├── edit.ejs
-    │   ├── listMain.ejs
-    │   ├── post.ejs
-    │   └── questionDetail.ejs
-    ├── components
-    │   ├── carousel.ejs
-    │   ├── cdn.ejs
-    │   ├── footer.ejs
-    │   ├── freeBoardCard.ejs
-    │   ├── header.ejs
-    │   └── questionBoardCard.ejs
-    ├── main.ejs
-    ├── styles
-    │   ├── boardDetail.css
-    │   ├── editProfile.css
-    │   ├── email.css
-    │   ├── findId.css
-    │   ├── findPw.css
-    │   ├── globalstyle.css
-    │   ├── index.css
-    │   ├── listMain.css
-    │   ├── login.css
-    │   ├── post.css
-    │   ├── profile.css
-    │   └── register.css
-    └── user
-        ├── editprofile.ejs
-        ├── email.ejs
-        ├── findId.ejs
-        ├── findPw.ejs
-        ├── join.ejs
-        ├── login.ejs
-        └── profile.ejs
-
-```
-&nbsp;
-## DEMO 💻
-&nbsp;
-- [열줌쉬어 페이지 바로가기](https://team-c.store/)
-
-&nbsp;
-## 📌 주요 기능
-
-|                                                                           |                                                                           |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| 로그인                                                                    | 회원가입                                                                  |
-| <img src="./readme/img/로그인.jpeg" width="300px" height="300px">         | <img src="./readme/img/회원가입.jpeg" width="300px" height="300px">       |
-| 스터디 만들기                                                             | 스터디 참여하기                                                           |
-| <img src="./readme/img/스터디만들기.jpeg" width="300px" height="300px">   | <img src="./readme/img/스터디참여하기.jpeg" width="300px" height="300px"> |
-| 스터디 채팅하기                                                           | 스터디 탈퇴하기                                                           |
-| <img src="./readme/img/스터디채팅하기.jpeg" width="300px" height="300px"> | <img src="./readme/img/스터디탈퇴하기.jpeg" width="300px" height="300px"> |
-| 타이머                                                                    | 랭킹 조회                                                                 |
-| <img src="./readme/img/타이머.jpeg" width="300px" height="300px">         | <img src="./readme/img/랭킹조회.jpeg" width="300px" height="300px">       |
-
-&nbsp;
-
-|                                                                                          메인페이지                                                                                           |
-| :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| \* 웹 사이트 소개글 </br>\* 회원정보 수정 기능</br>\* (공지사항 등록시/ 그룹요청시/ 유저가 요청한 그룹 수락/거절시/ 내가 속한 그룹이 삭제되었을 시) 알람 기능 </br>\* 로그인 / 회원가입 기능</br> |
-
-|                                                                                                                                                                         공부하기 페이지                                                                                                                                                                          |
-| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| \* (비로그인시) 모든 스터디 그룹 조회 '더보기'로 구현 </br>\* (로그인시) 내가 속한 그룹 조회 </br>\* 그룹 상세 정보 확인</br> \* 그룹 생성 기능</br> \* (내가 만든 그룹이 아닐 경우) 그룹 신청 기능 </br> \* (그룹의 멤버일 때 && 그룹장이 아닐 때) 그룹 탈퇴 기능 </br>\* (그룹의 멤버일 때 && 그룹장이 일때) 그룹 삭제 기능 </br>\* (그룹의 멤버일 때) 채팅 기능 </br> |
-
-|         캘린더 페이지         |
-| :---------------------------: |
-| \* 날짜별 일정 추가 기능</br> |
-
-|                                                랭킹 페이지                                                |
-| :-------------------------------------------------------------------------------------------------------: |
-| \* (카테고리별) 타이머'total time'순 개인유저 랭킹 </br>\* (카테고리별) 타이머'total time'순 그룹 랭킹</br> |
-
-|                                                                          공지사항 페이지                                                                           |
-| :----------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| \* (관리자유저일 때) 공지사항 글 생성 기능 </br>\* (관리자유저일 때) 공지사항 글 수정 기능</br>\* (관리자유저일 때) 공지사항 글 삭제 기능</br>\* 공지사항 글 조회 기능 |
+|                                                    그룹 페이지                                                     |                                                    랭킹 페이지                                                     |
+| :----------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------: |
+| <img src="https://github.com/WebDeViper/WebDeViper_Client/assets/78075709/97ffba83-98d1-4779-ae09-117a322acc49" /> | <img src="https://github.com/WebDeViper/WebDeViper_Client/assets/78075709/daa4d532-b192-46fb-8f20-c42d1fb3c09d" /> |
